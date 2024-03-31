@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Info, Trash } from 'lucide-react';
 
-import { Item } from '@/database/dapps-list';
+import { Item } from '@/database/dapps-repository';
 import IframeComponent from '@/components/IframeComponent';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CardContent } from '@/components/ui/card';
@@ -56,7 +56,7 @@ export default function AppItem({ item, onDeleteClick, onPreviewClick, ...props 
           </header>
 
           <div className="flex flex-col gap-3">
-            <div className="h-full w-full truncate font-bold" title={item?.name}>
+            <div className="line-clamp-1 h-full w-full font-bold" title={item?.name}>
               {item?.name}
             </div>
             <p className="-mt-1 mb-0 line-clamp-4 text-sm text-muted-foreground">

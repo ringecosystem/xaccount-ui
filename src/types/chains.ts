@@ -1,11 +1,11 @@
 import type { Chain } from '@rainbow-me/rainbowkit';
+import { ethereum, arbitrum } from '@/config/chains';
 /**
  * Chain types.
  */
 export enum ChainId {
-  CRAB = 44,
-  DARWINIA = 46,
-  PANGOLIN = 43
+  ETHEREUM = ethereum.id,
+  ARBITRUM = arbitrum.id
 }
 
 interface NativeToken {

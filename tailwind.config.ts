@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Config } from 'tailwindcss';
 
 const config = {
@@ -52,6 +53,18 @@ const config = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
+        },
+        blue: {
+          DEFAULT: 'hsl(var(--blue))',
+          foreground: 'hsl(var(--blue-foreground))'
+        },
+        green: {
+          DEFAULT: 'hsl(var(--green))',
+          foreground: 'hsl(var(--green-foreground))'
+        },
+        skeleton: {
+          DEFAULT: 'hsl(var(--skeleton))',
+          foreground: 'hsl(var(--skeleton-foreground))'
         }
       },
       borderRadius: {

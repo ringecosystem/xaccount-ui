@@ -1,16 +1,17 @@
-import { darwinia, crab, pangolin } from '@/config/chains';
-import { ChainConfig, ChainId } from '@/types/chains';
+import type { Chain } from '@rainbow-me/rainbowkit';
+
+import { ethereum, arbitrum } from '@/config/chains';
+import { ChainId } from '@/types/chains';
 
 // Map object to return a specific chain configuration
 // Using Record<ChainId, ChainConfig> to ensure type safety
-const chainConfigMap: Record<ChainId, ChainConfig> = {
-  [ChainId.DARWINIA]: darwinia,
-  [ChainId.CRAB]: crab,
-  [ChainId.PANGOLIN]: pangolin
+const chainConfigMap: Record<number, Chain> = {
+  [ethereum.id]: ethereum,
+  [arbitrum.id]: arbitrum
 };
 
 // Helper function to filter testnets in production
-function filterTestnetsInProduction(chains: Record<ChainId, ChainConfig>): ChainConfig[] {
+function filterTestnetsInProduction(chains: Record<ChainId, Chain>): Chain[] {
   const chainConfigs = Object.values(chainConfigMap).sort((a, b) => {
     return b.id - a.id;
   });
@@ -21,23 +22,23 @@ function filterTestnetsInProduction(chains: Record<ChainId, ChainConfig>): Chain
 }
 
 // Returns an array of all chain configurations, filtering out testnets in production
-export function getChains(): [ChainConfig, ...ChainConfig[]] {
+export function getChains(): [Chain, ...Chain[]] {
   const chainConfigs = filterTestnetsInProduction(chainConfigMap);
   if (chainConfigs.length === 0) {
     throw new Error('No chain configurations are available.');
   }
-  return [chainConfigs[0], ...chainConfigs.slice(1)] as [ChainConfig, ...ChainConfig[]];
+  return [chainConfigs[0], ...chainConfigs.slice(1)] as [Chain, ...Chain[]];
 }
 
 // Returns the chain by its id
-export function getChainById(id: ChainId): ChainConfig | undefined {
+export function getChainById(id: ChainId): Chain | undefined {
   const chainConfig = chainConfigMap[id];
   return chainConfig;
 }
 
 // Returns the default chain configuration
-export function getDefaultChain(): ChainConfig {
-  return chainConfigMap[ChainId.DARWINIA];
+export function getDefaultChain(): Chain {
+  return chainConfigMap[ChainId.ETHEREUM];
 }
 
 // Returns the default chain id

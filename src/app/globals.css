@@ -20,6 +20,12 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --blue: 221.2 83.2% 53.3%;
+    --blue-foreground: 210 40% 98%;
+    --green: 142.1 76.2% 36.3%;
+    --green-foreground: 355.7 100% 97.3%;
+    --skeleton: 240 5.9% 10%;
+    --skeleton-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 346.8 77.2% 49.8%;
@@ -43,9 +49,16 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
+    --blue: 221.2 83.2% 53.3%;
+    --blue-foreground: 210 40% 98%;
+    --green: 142.1 76.2% 36.3%;
+    --green-foreground: 355.7 100% 97.3%;
+    --skeleton: 0 0% 98%;
+    --skeleton-foreground: 240 5.9% 10%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 329 100% 20%;
+
     --radius: 0.5rem;
   }
 }
@@ -54,7 +67,66 @@
   * {
     @apply border-border;
   }
+  *,
+  *::before,
+  *::after {
+    @apply box-border;
+  }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.account-button {
+  display: flex;
+  flex-direction: row;
+  -webkit-box-align: center;
+  align-items: center;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--radius);
+  /* border: 2px solid transparent; */
+  border-width: 2px;
+  transition: border var(--cow-animation-duration) ease-in-out;
+  pointer-events: auto;
+  width: auto;
+}
+.account-button-network {
+  padding: 0px 8px 0px 12px;
+}
+.account-button-address {
+  color: inherit;
+  height: 36px;
+  display: flex;
+  padding: 0px;
+  margin: 0px;
+  -webkit-box-pack: center;
+  justify-content: center;
+  border-radius: var(--radius);
+
+  border: 1px solid transparent;
+  color: hsl(var(--primary-foreground));
+
+  padding: 6px 12px;
+}
+@keyframes rotate-pause-rotate {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  25% {
+    transform: rotateZ(180deg);
+  }
+  50% {
+    transform: rotateZ(180deg);
+  }
+  75% {
+    transform: rotateZ(360deg);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+.animate-rotate-pause-rotate {
+  animation: rotate-pause-rotate 4s infinite;
 }

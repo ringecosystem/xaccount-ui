@@ -18,6 +18,7 @@ import { getChains } from '@/utils/chain';
 import { Provider as RainbowKitProvider } from './rainbowkit-provider';
 import { ThemeProvider } from 'next-themes';
 import { ShadcnProvider } from './shadcn-provider';
+import { arbitrum, celo, goerli, mainnet } from 'wagmi/chains';
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
@@ -35,7 +36,7 @@ export const config = getDefaultConfig({
       wallets: [talismanWallet, okxWallet, imTokenWallet, trustWallet, safeWallet]
     }
   ],
-  chains: getChains(),
+  chains: [mainnet, arbitrum, goerli, celo],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage

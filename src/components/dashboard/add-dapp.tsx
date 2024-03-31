@@ -1,5 +1,5 @@
 'use client';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import { useDebounce } from 'react-use';
 import { useMutation } from '@tanstack/react-query';
 
 import { generateIconUrl } from '@/utils';
+import { searchItemByUrl } from '@/database/dapps-repository';
 import { getWebMetadata } from '@/server/getWebMetadata';
 import {
   Dialog,
@@ -17,9 +18,18 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
 import IframeComponent from '@/components/IframeComponent';
 import Loading from '@/components/loading';
+
+type HttpsUrl = `https://${string}`;
 
 const formSchema = z.object({
   name: z
@@ -33,9 +43,12 @@ const formSchema = z.object({
     .max(255, {
       message: 'Name must be at most 255 characters'
     }),
-  url: z.string().url({
-    message: 'Invalid URL'
-  }),
+  url: z
+    .string()
+    .url({ message: 'Invalid URL' })
+    .refine((url): url is HttpsUrl => url.startsWith('https://'), {
+      message: 'URL must start with https://'
+    }),
   icon: z.string().optional(),
   description: z.string().optional()
 });
@@ -51,12 +64,12 @@ interface AddDappProps {
 
 const AddDapp = forwardRef(
   ({ open, confirmLoading, onOpenChange, onFinish }: AddDappProps, ref) => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const [appIsExist, setAppIsExist] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
         name: '',
-        url: '',
+        url: 'https://',
         icon: '',
         description: ''
       }
@@ -72,41 +85,64 @@ const AddDapp = forwardRef(
       mutationFn: getWebMetadata
     });
 
-    const [, cancel] = useDebounce(
-      () => {
-        console.log('watchedUrl', watchedUrl);
+    const setFormValues = useCallback(
+      (data: any, url: string) => {
+        form.setValue('name', data.title || '');
+        form.setValue('description', data.description || '');
+        if (data.icon) {
+          form.setValue(
+            'icon',
+            z.string().url().safeParse(data.icon).success
+              ? data.icon
+              : generateIconUrl(url, data.icon)
+          );
+        }
+      },
+      [form]
+    );
 
-        // 定义URL验证模式
-        const urlSchema = z.string().url();
-
-        // 使用safeParse代替check
-        const parseResult = urlSchema.safeParse(watchedUrl);
+    useDebounce(
+      async () => {
+        const parseResult = formSchema.shape.url.safeParse(watchedUrl);
 
         if (parseResult.success) {
-          // 如果URL验证成功
+          const searchData = await searchItemByUrl(watchedUrl);
+
+          if (searchData?.length) {
+            setAppIsExist(true);
+            setFormValues(
+              {
+                ...searchData[0],
+                title: searchData[0].name
+              },
+              watchedUrl
+            );
+            return;
+          }
+          setAppIsExist(false);
           mutateAsync(watchedUrl)?.then((data) => {
             if (data) {
-              form.setValue('name', data.title || '');
-              form.setValue('description', data.description || '');
-              if (data.icon) {
-                form.setValue(
-                  'icon',
-                  z.string().url().safeParse(data.icon).success
-                    ? data.icon
-                    : generateIconUrl(watchedUrl, data.icon)
-                );
-              }
+              setFormValues(data, watchedUrl);
             }
           });
         } else {
-          setLoading(false);
           form.resetField('name');
           form.resetField('description');
           form.resetField('icon');
         }
       },
-      1000,
+      500,
       [watchedUrl, form]
+    );
+
+    const handleOpenChange = useCallback(
+      (open: boolean) => {
+        onOpenChange(open);
+        if (!open) {
+          form.reset();
+        }
+      },
+      [form, onOpenChange]
     );
 
     const handleFormSubmit = useCallback(
@@ -119,7 +155,7 @@ const AddDapp = forwardRef(
     useImperativeHandle(ref, () => form);
 
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Dapp</DialogTitle>
@@ -136,6 +172,7 @@ const AddDapp = forwardRef(
                       <FormControl>
                         <Input placeholder="https://..." autoComplete="off" {...field} />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -152,6 +189,7 @@ const AddDapp = forwardRef(
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -168,6 +206,10 @@ const AddDapp = forwardRef(
                     {!!watchedDescription && (
                       <span className="text-sm text-muted-foreground">{watchedDescription}</span>
                     )}
+
+                    {appIsExist ? (
+                      <p className="text-sm text-red-500"> This app already exists in your list.</p>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -175,7 +217,7 @@ const AddDapp = forwardRef(
                   type="submit"
                   className="w-full"
                   isLoading={confirmLoading}
-                  disabled={isPending}
+                  disabled={isPending || appIsExist}
                 >
                   Add
                 </Button>

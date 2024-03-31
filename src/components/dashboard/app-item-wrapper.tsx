@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 type AppItemWrapperType = React.PropsWithChildren<unknown> & React.HTMLAttributes<HTMLDivElement>;
 

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
-import { Item } from '@/database/dapps-list';
+import { Item } from '@/database/dapps-repository';
 import IframeComponent from '@/components/IframeComponent';
 import { Card, CardContent } from '@/components/ui/card';
 

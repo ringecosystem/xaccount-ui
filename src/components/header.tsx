@@ -1,12 +1,17 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { History } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import ConnectButton from '@/components/connect-button';
 import { ModeToggle } from '@/components/mode-toggle';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
+  const router = useRouter();
   return (
-    <header className="mb-10 h-14 w-full ">
+    <header className="h-12 w-full ">
       <div className="mx-auto  flex h-full w-full items-center justify-between px-8">
         <Link href="/" title="darwinia" className="hidden mix-blend-exclusion md:inline-flex">
           <Image
@@ -18,9 +23,21 @@ const Header = () => {
             className="h-[18px] w-[154px] shrink-0"
           />
         </Link>
-        <div className="flex  items-center gap-2">
+        <div className="flex  w-full items-center justify-between gap-2 md:w-auto">
           <ConnectButton />
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            <Button
+              className=" flex-shrink-0"
+              variant="secondary"
+              size="icon"
+              onClick={() => {
+                router.push('/history');
+              }}
+            >
+              <History className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+            <ModeToggle />
+          </div>
         </div>
       </div>
     </header>
