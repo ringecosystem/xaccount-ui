@@ -1,6 +1,8 @@
 import type { Chain } from '@rainbow-me/rainbowkit';
 
 import { ethereum, arbitrum } from '@/config/chains';
+
+import * as chains from '@/config/chains';
 import { ChainId } from '@/types/chains';
 
 // Map object to return a specific chain configuration
@@ -23,11 +25,18 @@ function filterTestnetsInProduction(chains: Record<ChainId, Chain>): Chain[] {
 
 // Returns an array of all chain configurations, filtering out testnets in production
 export function getChains(): [Chain, ...Chain[]] {
-  const chainConfigs = filterTestnetsInProduction(chainConfigMap);
-  if (chainConfigs.length === 0) {
+  const filteredChains: Chain[] = Object.values(chains).filter((chain): chain is Chain => {
+    // 根据实际情况调整判断逻辑
+    return 'id' in chain && 'name' in chain;
+  });
+
+  // 确保过滤后的数组至少有一个元素
+  if (filteredChains.length === 0) {
     throw new Error('No chain configurations are available.');
   }
-  return [chainConfigs[0], ...chainConfigs.slice(1)] as [Chain, ...Chain[]];
+
+  // 使用类型断言确保返回类型为 [Chain, ...Chain[]]
+  return filteredChains as [Chain, ...Chain[]];
 }
 
 // Returns the chain by its id

@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import TransactionCard from './components/history-item';
 import { useInView } from 'react-intersection-observer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Package2 } from 'lucide-react';
 
 const fetchData = (
   currentLength: number
@@ -82,12 +84,27 @@ const Page = () => {
           ))}
         </div>
       ) : (
-        <ScrollArea className="-mr-4 h-[calc(100%-2rem)] pr-4">
-          <div className=" w-full space-y-4 ">
-            {list.map((item, index) => (
-              <TransactionCard key={index} {...item} />
-            ))}
-          </div>
+        <ScrollArea className="scroll-fade-bottom -mr-4 h-[calc(100%-2rem)] pr-4">
+          {list?.length ? (
+            <div className="w-full space-y-4 ">
+              {list.map((item, index) => (
+                <TransactionCard key={index} {...item} />
+              ))}
+            </div>
+          ) : (
+            <Card className="w-full space-y-4">
+              <CardContent className="flex items-center justify-center gap-4 !py-6 text-center">
+                <Package2
+                  strokeWidth={1}
+                  width={32}
+                  height={32}
+                  color="hsl(var(--muted-foreground))"
+                />
+                <span>No data</span>
+              </CardContent>
+            </Card>
+          )}
+
           {isRefetching && (
             <div className="mx-auto flex h-10 w-full items-center justify-center gap-2 ">
               <Spin className=" text-muted-foreground"></Spin>

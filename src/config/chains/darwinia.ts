@@ -1,6 +1,7 @@
-import { ChainId, ChainConfig } from '@/types/chains';
+import { ChainId } from '@/types/chains';
+import type { Chain } from '@rainbow-me/rainbowkit';
 
-export const darwinia: ChainConfig = {
+export const darwinia: Chain = {
   id: ChainId.DARWINIA,
   name: 'Darwinia',
   nativeCurrency: {
@@ -34,21 +35,5 @@ export const darwinia: ChainConfig = {
   /**
    * rainbowkit iconUrl
    */
-  iconUrl: '/images/chains/darwinia.png',
-
-  /**
-   * Token info
-   */
-  nativeToken: {
-    symbol: 'RING',
-    decimals: 18,
-    logoPath: '/images/token/ring.svg'
-  },
-  ktonToken: {
-    address: '0x0000000000000000000000000000000000000402',
-    symbol: 'KTON',
-    decimals: 18,
-    logoPath: '/images/token/kton.svg'
-  },
-  stakingContractAddress: '0x000000000419683a1a03abc21fc9da25fd2b4dd7'
-} as const satisfies ChainConfig;
+  iconUrl: '/images/chains/darwinia.png'
+} as const satisfies Chain;

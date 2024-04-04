@@ -8,6 +8,8 @@ import { getDefaultChain } from '@/utils/chain';
 
 import '@rainbow-me/rainbowkit/styles.css';
 import { useTheme } from 'next-themes';
+import useMounted from '@/hooks/useMounted';
+import Spin from '@/components/ui/spin';
 
 export const dark = darkTheme({
   borderRadius: 'medium',
@@ -23,9 +25,10 @@ const initialChain = getDefaultChain();
 
 export const Provider = ({ children }: React.PropsWithChildren<unknown>) => {
   const { theme } = useTheme();
-
+  const isMounted = useMounted();
   const rainbowKitTheme = theme === 'dark' ? dark : light;
-  return (
+
+  return isMounted ? (
     <RainbowKitProvider
       locale="en-US"
       theme={rainbowKitTheme}
@@ -36,5 +39,9 @@ export const Provider = ({ children }: React.PropsWithChildren<unknown>) => {
     >
       {children}
     </RainbowKitProvider>
+  ) : (
+    <div className="flex h-screen w-screen items-center justify-center">
+      <Spin />
+    </div>
   );
 };

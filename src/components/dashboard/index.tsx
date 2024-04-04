@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { initDB, getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+import CrossChainExecutor from '../cross-chain-executor';
+
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
 import { AppDeleteConfirm } from './app-delete-confirm';
@@ -19,6 +21,7 @@ export default function Home() {
   const isDBInitialized = useRef(false);
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
+  const [executeDappOpen, setExecuteDappOpen] = useState(false);
   const [deleteDappOpen, setDeleteDappOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -33,6 +36,8 @@ export default function Home() {
     queryFn: getAllItems,
     enabled: isDBInitialized.current
   });
+
+  console.log('isrefetching', isRefetching);
 
   const { mutateAsync: mutateAddItem, isPending: addLoading } = useMutation({
     mutationFn: addItem,
@@ -87,10 +92,11 @@ export default function Home() {
       <h2 className="mb-4 font-bold uppercase">ALL DAPPS</h2>
       <ScrollArea
         style={{
-          height: 'calc(100% - 5rem)'
+          height: 'calc(100% - 2rem)'
         }}
+        className="scroll-fade-bottom"
       >
-        <div className="grid-col-1 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 4xl:grid-cols-7 ">
+        <div className="dapps-grid gap-6">
           {isPending ? (
             Array.from({ length: 10 }).map((_, index) => (
               <AppItemWrapper key={index}>
@@ -129,11 +135,6 @@ export default function Home() {
         </div>
       </ScrollArea>
 
-      {isRefetching && (
-        <div className="absolute inset-0 left-0 top-0 flex items-center justify-center bg-white/20">
-          <Spin className="h-12 w-12" />
-        </div>
-      )}
       <AddDapp
         ref={formRef}
         open={addDappOpen}
@@ -154,6 +155,8 @@ export default function Home() {
         onConfirm={handleConfirmDelete}
       />
       <AppItemDetail item={selectedItem} open={previewOpen} onOpenChange={setPreviewOpen} />
+
+      <CrossChainExecutor open={executeDappOpen} onOpenChange={setExecuteDappOpen} />
     </div>
   );
 }

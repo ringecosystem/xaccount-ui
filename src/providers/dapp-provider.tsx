@@ -1,47 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { WagmiProvider, cookieStorage, createStorage } from 'wagmi';
+import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getDefaultWallets, getDefaultConfig } from '@rainbow-me/rainbowkit';
-import {
-  talismanWallet,
-  okxWallet,
-  imTokenWallet,
-  trustWallet,
-  safeWallet
-} from '@rainbow-me/rainbowkit/wallets';
 
-import { APP_NAME } from '@/config/site';
-import { getChains } from '@/utils/chain';
+import { ThemeProvider } from 'next-themes';
+
+import { config } from '@/config/wagmi';
 
 import { Provider as RainbowKitProvider } from './rainbowkit-provider';
-import { ThemeProvider } from 'next-themes';
-import { ShadcnProvider } from './shadcn-provider';
-import { arbitrum, celo, goerli, mainnet } from 'wagmi/chains';
-
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-
-if (!projectId) throw new Error('Project ID is not defined');
-
-const { wallets } = getDefaultWallets();
-
-export const config = getDefaultConfig({
-  appName: APP_NAME,
-  projectId,
-  wallets: [
-    ...wallets,
-    {
-      groupName: 'More',
-      wallets: [talismanWallet, okxWallet, imTokenWallet, trustWallet, safeWallet]
-    }
-  ],
-  chains: [mainnet, arbitrum, goerli, celo],
-  ssr: true,
-  storage: createStorage({
-    storage: cookieStorage
-  })
-});
+import { Web3Provider } from './web3-provider';
+import { UIComponentsProvider } from './ui-components-provider';
 
 const queryClient = new QueryClient();
 
@@ -51,7 +20,9 @@ export function DAppProvider({ children }: React.PropsWithChildren<unknown>) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <RainbowKitProvider>
-            <ShadcnProvider>{children}</ShadcnProvider>
+            <Web3Provider>
+              <UIComponentsProvider>{children}</UIComponentsProvider>
+            </Web3Provider>
           </RainbowKitProvider>
         </ThemeProvider>
       </QueryClientProvider>

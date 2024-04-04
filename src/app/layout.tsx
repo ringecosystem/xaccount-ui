@@ -1,4 +1,4 @@
-import { Inter as FontSans, JetBrains_Mono } from 'next/font/google';
+import { Inter as FontSans } from 'next/font/google';
 
 import { DAppProvider } from '@/providers/dapp-provider';
 import Header from '@/components/header';
@@ -13,8 +13,6 @@ export const metadata: Metadata = {
   title: 'darwinia xAccount',
   description: 'xAccount'
 };
-
-// const fontJetBrainsMono = JetBrains_Mono({ subsets: ['latin', 'latin-ext'] });
 
 const fontSans = FontSans({
   subsets: ['latin'],

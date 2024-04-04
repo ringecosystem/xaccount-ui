@@ -29,6 +29,10 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 346.8 77.2% 49.8%;
+    --scroll-fade-color: rgba(255, 255, 255, 1);
+
+    /* size or other */
+    --min-column-width: 250px;
     --radius: 0.5rem;
   }
 
@@ -58,8 +62,7 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 329 100% 20%;
-
-    --radius: 0.5rem;
+    --scroll-fade-color: rgba(0, 0, 0, 1);
   }
 }
 
@@ -74,6 +77,18 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .dapps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--min-column-width), 1fr));
+  }
+  .scroll-fade-bottom::after {
+    @apply absolute bottom-0 inline-block h-32 w-full;
+    content: '';
+    background: linear-gradient(0deg, hsl(var(--background) / 0.8) 34%, transparent 98%);
   }
 }
 

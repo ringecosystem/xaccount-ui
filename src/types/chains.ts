@@ -5,7 +5,14 @@ import { ethereum, arbitrum } from '@/config/chains';
  */
 export enum ChainId {
   ETHEREUM = ethereum.id,
-  ARBITRUM = arbitrum.id
+  ETHEREUM_SEPOLIA = 11155111,
+  ARBITRUM = arbitrum.id,
+  ARBITRUM_SEPOLIA = 421614,
+  DARWINIA = 46,
+  CRAB = 44,
+  PANGOLIN = 43,
+  POLYGON = 137,
+  BLAST = 81457
 }
 
 interface NativeToken {

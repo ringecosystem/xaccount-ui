@@ -193,8 +193,6 @@ const AddDapp = forwardRef(
                     </FormItem>
                   )}
                 />
-                <input type="hidden" {...register('icon')} />
-                <input type="hidden" {...register('description')} />
 
                 {isPending ? (
                   <div className="flex justify-center">
@@ -212,6 +210,8 @@ const AddDapp = forwardRef(
                     ) : null}
                   </div>
                 ) : null}
+                <input type="hidden" {...register('icon')} />
+                <input type="hidden" {...register('description')} />
 
                 <Button
                   type="submit"
