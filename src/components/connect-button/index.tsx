@@ -15,10 +15,10 @@ const ConnectButton = ({ className }: ConnectButtonProps) => {
   const { isConnected, address, chainId } = useAccount();
   const supportChainId = useChainId();
 
-  console.log('isConnected', isConnected);
-  console.log('address', address);
-  console.log('chainId', chainId);
-  console.log('supportChainId', supportChainId);
+  // console.log('isConnected', isConnected);
+  // console.log('address', address);
+  // console.log('chainId', chainId);
+  // console.log('supportChainId', supportChainId);
 
   const isSupportedChain = chainId && supportChainId && chainId === supportChainId;
 

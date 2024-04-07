@@ -41,7 +41,7 @@ export const Provider = ({ children }: React.PropsWithChildren<unknown>) => {
     </RainbowKitProvider>
   ) : (
     <div className="flex h-screen w-screen items-center justify-center">
-      <Spin />
+      <Spin className=" text-muted-foreground" />
     </div>
   );
 };

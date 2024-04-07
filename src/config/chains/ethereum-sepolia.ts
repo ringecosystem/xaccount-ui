@@ -1,9 +1,11 @@
 // ethereum-sepolia
 
 import { sepolia } from 'wagmi/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const ethereumSepolia: Chain = {
+export const ethereumSepolia: ChainConfig = {
   ...sepolia,
-  iconUrl: '/images/chains/ethereum.svg'
-} as Chain;
+  iconUrl: '/images/chains/ethereum.svg',
+  shortName: 'sep',
+  infuraUrl: 'https://sepolia.infura.io/v3/'
+} as const satisfies ChainConfig;

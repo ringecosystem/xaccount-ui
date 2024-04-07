@@ -35,6 +35,7 @@ export default function RootLayout({
           <div className="flex h-dvh w-screen flex-col overflow-hidden lg:h-screen">
             <Header />
             <main className="h-[calc(100vh-6rem)]">{children}</main>
+
             <Footer />
           </div>
         </DAppProvider>

@@ -15,22 +15,11 @@ export enum ChainId {
   BLAST = 81457
 }
 
-interface NativeToken {
-  symbol: string;
-  decimals: number;
-  logoPath: string;
-}
-
-interface KtonToken extends NativeToken {
-  address: `0x${string}`;
-}
-
 /**
  * Chain config.
  */
 export interface ChainConfig extends Chain {
-  id: ChainId;
-  nativeToken: NativeToken;
-  ktonToken: KtonToken;
-  stakingContractAddress: `0x${string}`;
+  id: number;
+  shortName?: string;
+  infuraUrl?: string;
 }

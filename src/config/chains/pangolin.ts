@@ -1,7 +1,7 @@
 import { ChainId } from '@/types/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const pangolin: Chain = {
+export const pangolin: ChainConfig = {
   /**
    * Chain
    */
@@ -32,5 +32,7 @@ export const pangolin: Chain = {
   /**
    * rainbowkit iconUrl
    */
-  iconUrl: '/images/chains/pangolin.png'
-} as const satisfies Chain;
+  iconUrl: '/images/chains/pangolin.png',
+
+  shortName: 'pangolin'
+} as const satisfies ChainConfig;

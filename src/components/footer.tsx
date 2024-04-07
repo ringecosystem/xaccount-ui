@@ -4,7 +4,12 @@ const currentYear = new Date().getUTCFullYear();
 
 const Footer = () => {
   return (
-    <footer className="flex h-12 items-center">
+    <footer
+      className="flex h-12 items-center"
+      style={{
+        zIndex: -1
+      }}
+    >
       <div className="max-auto flex w-full items-center justify-center px-8 md:justify-between">
         <span className="text-sm font-light capitalize text-muted-foreground">
           &copy; {currentYear} Darwinia Network

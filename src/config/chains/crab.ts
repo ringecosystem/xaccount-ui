@@ -1,7 +1,7 @@
 import { ChainId } from '@/types/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const crab: Chain = {
+export const crab: ChainConfig = {
   id: ChainId.CRAB,
   name: 'Crab',
   nativeCurrency: { name: 'CRAB', symbol: 'CRAB', decimals: 18 },
@@ -30,5 +30,6 @@ export const crab: Chain = {
   /**
    * rainbowkit iconUrl
    */
-  iconUrl: '/images/chains/crab.svg'
-} as const satisfies Chain;
+  iconUrl: '/images/chains/crab.svg',
+  shortName: 'crab'
+} as const satisfies ChainConfig;

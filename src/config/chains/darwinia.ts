@@ -1,7 +1,7 @@
 import { ChainId } from '@/types/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const darwinia: Chain = {
+export const darwinia: ChainConfig = {
   id: ChainId.DARWINIA,
   name: 'Darwinia',
   nativeCurrency: {
@@ -32,8 +32,6 @@ export const darwinia: Chain = {
     }
   },
 
-  /**
-   * rainbowkit iconUrl
-   */
-  iconUrl: '/images/chains/darwinia.png'
-} as const satisfies Chain;
+  iconUrl: '/images/chains/darwinia.png',
+  shortName: 'darwinia'
+} as const satisfies ChainConfig;

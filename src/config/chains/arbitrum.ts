@@ -1,7 +1,9 @@
 import { arbitrum as arbitrumChain } from 'wagmi/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const arbitrum: Chain = {
+export const arbitrum: ChainConfig = {
   ...arbitrumChain,
-  iconUrl: '/images/chains/arbitrum.svg'
-} as Chain;
+  iconUrl: '/images/chains/arbitrum.svg',
+  shortName: 'arb1',
+  infuraUrl: 'https://arbitrum-mainnet.infura.io/v3/'
+} as const satisfies ChainConfig;

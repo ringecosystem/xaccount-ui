@@ -1,7 +1,9 @@
 import { mainnet } from 'wagmi/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const ethereum: Chain = {
+export const ethereum: ChainConfig = {
   ...mainnet,
-  iconUrl: '/images/chains/ethereum.svg'
-} as Chain;
+  iconUrl: '/images/chains/ethereum.svg',
+  shortName: 'eth',
+  infuraUrl: 'https://mainnet.infura.io/v3/'
+} as const satisfies ChainConfig;

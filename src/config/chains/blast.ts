@@ -1,7 +1,7 @@
 import { ChainId } from '@/types/chains';
-import type { Chain } from '@rainbow-me/rainbowkit';
+import type { ChainConfig } from '@/types/chains';
 
-export const blast: Chain = {
+export const blast: ChainConfig = {
   id: ChainId.BLAST,
   name: 'Blast',
   nativeCurrency: {
@@ -26,8 +26,7 @@ export const blast: Chain = {
     }
   },
 
-  /**
-   * rainbowkit iconUrl
-   */
-  iconUrl: '/images/chains/blast.svg'
-} as const satisfies Chain;
+  iconUrl: '/images/chains/blast.svg',
+  shortName: 'blastmainnet',
+  infuraUrl: 'https://blast-mainnet.infura.io/v3/'
+} as const satisfies ChainConfig;

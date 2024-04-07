@@ -20,7 +20,7 @@ const initialChainState: Chain = getDefaultChain();
 
 const useChainStore = create<State & Action>((set) => ({
   localChain: initialChainState,
-  remoteChain: undefined,
+  remoteChain: { ...initialChainState, address: '0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5' },
   setLocalChain: (chain) => set({ localChain: chain }),
   setRemoteChain: (chain) => set({ remoteChain: chain })
 }));

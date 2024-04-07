@@ -2,14 +2,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AiOutlinePlus } from 'react-icons/ai';
+import { useRouter } from 'next/navigation';
 
 import { CardContent } from '@/components/ui/card';
-import Spin from '@/components/ui/spin';
 import { Skeleton } from '@/components/ui/skeleton';
 import { initDB, getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-import CrossChainExecutor from '../cross-chain-executor';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
@@ -17,11 +15,12 @@ import { AppDeleteConfirm } from './app-delete-confirm';
 import AppItemWrapper from './app-item-wrapper';
 import AppItemDetail from './app-item-detail';
 
+// appUrl
 export default function Home() {
   const isDBInitialized = useRef(false);
+  const router = useRouter();
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
-  const [executeDappOpen, setExecuteDappOpen] = useState(false);
   const [deleteDappOpen, setDeleteDappOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -84,7 +83,7 @@ export default function Home() {
 
   return (
     <div
-      className="container relative py-6"
+      className="container relative px-16 py-6"
       style={{
         height: 'calc(100vh - 6rem)'
       }}
@@ -120,6 +119,9 @@ export default function Home() {
                 <AppItem
                   key={item.id}
                   item={item}
+                  onClick={() => {
+                    router.push(`/dapp?appUrl=${item.url}`);
+                  }}
                   onPreviewClick={() => {
                     setSelectedItem(item);
                     setPreviewOpen(true);
@@ -155,8 +157,6 @@ export default function Home() {
         onConfirm={handleConfirmDelete}
       />
       <AppItemDetail item={selectedItem} open={previewOpen} onOpenChange={setPreviewOpen} />
-
-      <CrossChainExecutor open={executeDappOpen} onOpenChange={setExecuteDappOpen} />
     </div>
   );
 }
