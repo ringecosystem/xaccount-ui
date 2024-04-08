@@ -78,9 +78,9 @@ export function TransactionStatusDialog({
             <AlertDialogTitle>{getTitle()}</AlertDialogTitle>
           </div>
 
-          <AlertDialogDescription>
-            <p>{getDescription()}</p>
-            <p>
+          <AlertDialogDescription className="flex flex-col">
+            <span>{getDescription()}</span>
+            <span>
               <a
                 target="_blank"
                 rel="noopener"
@@ -89,7 +89,7 @@ export function TransactionStatusDialog({
               >
                 View on {chain?.blockExplorers?.default?.name}
               </a>
-            </p>
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

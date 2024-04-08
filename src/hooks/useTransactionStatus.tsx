@@ -37,6 +37,11 @@ export function useTransactionStatus({
 
   useEffect(() => {
     if ((isSuccess || isError) && data) {
+      if (isSuccess) {
+        onSuccessLatest?.(data);
+      } else {
+        onErrorLatest?.(data);
+      }
       const chain = getChainById(data.chainId);
       const statusMessage = isSuccess ? 'The transaction was successful' : 'The transaction failed';
       const toastClassName = isSuccess
@@ -62,12 +67,6 @@ export function useTransactionStatus({
           ),
           classNames: toastClassName
         });
-      }
-
-      if (isSuccess) {
-        onSuccessLatest?.(data);
-      } else {
-        onErrorLatest?.(data);
       }
     }
 
