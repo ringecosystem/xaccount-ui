@@ -1,15 +1,33 @@
 import type { Chain } from '@rainbow-me/rainbowkit';
 
-import { ethereum, arbitrum } from '@/config/chains';
+import {
+  ethereum,
+  arbitrum,
+  darwinia,
+  crab,
+  pangolin,
+  polygon,
+  blast,
+  ethereumSepolia,
+  arbitrumSepolia
+} from '@/config/chains';
 
 import * as chains from '@/config/chains';
 import { ChainId } from '@/types/chains';
 
 // Map object to return a specific chain configuration
 // Using Record<ChainId, ChainConfig> to ensure type safety
+
 const chainConfigMap: Record<number, Chain> = {
-  [ethereum.id]: ethereum,
-  [arbitrum.id]: arbitrum
+  [ChainId.ETHEREUM]: ethereum,
+  [ChainId.ARBITRUM]: arbitrum,
+  [ChainId.DARWINIA]: darwinia,
+  [ChainId.CRAB]: crab,
+  [ChainId.PANGOLIN]: pangolin,
+  [ChainId.POLYGON]: polygon,
+  [ChainId.BLAST]: blast,
+  [ChainId.ETHEREUM_SEPOLIA]: ethereumSepolia,
+  [ChainId.ARBITRUM_SEPOLIA]: arbitrumSepolia
 };
 
 // Helper function to filter testnets in production
@@ -26,16 +44,13 @@ function filterTestnetsInProduction(chains: Record<ChainId, Chain>): Chain[] {
 // Returns an array of all chain configurations, filtering out testnets in production
 export function getChains(): [Chain, ...Chain[]] {
   const filteredChains: Chain[] = Object.values(chains).filter((chain): chain is Chain => {
-    // 根据实际情况调整判断逻辑
     return 'id' in chain && 'name' in chain;
   });
 
-  // 确保过滤后的数组至少有一个元素
   if (filteredChains.length === 0) {
     throw new Error('No chain configurations are available.');
   }
 
-  // 使用类型断言确保返回类型为 [Chain, ...Chain[]]
   return filteredChains as [Chain, ...Chain[]];
 }
 

@@ -8,6 +8,7 @@ import { toShortAddress } from '@/utils';
 import { Item } from '@/database/dapps-repository';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 interface ActionContentProps {
   remoteChain: State['remoteChain'];
@@ -38,12 +39,14 @@ const ActionContent: React.FC<ActionContentProps> = ({
               {remoteChain?.name}:{remoteChain?.address} ({dappItem?.name})
             </div>
           </div>
+          <Separator />
           <div className="space-y-1">
             <h4 className="font-bold uppercase">data</h4>
             <ScrollArea className="max-h-80 break-all text-muted-foreground">
               {transactionInfo?.data}
             </ScrollArea>
           </div>
+          <Separator />
 
           <div className="space-y-1">
             <h4
@@ -88,7 +91,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           isLoading={confirmLoading}
           size="lg"
         >
-          execute
+          EXECUTE
         </Button>
         <p className="text-sm text-muted-foreground">
           this transaction will execute the remote call on {remoteChain?.name}

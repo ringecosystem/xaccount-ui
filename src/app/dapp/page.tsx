@@ -20,6 +20,7 @@ import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
+import { TransactionStatusDialog } from '@/components/TransactionStatusDialog';
 
 const Page = () => {
   const params = useSearchParams();
@@ -29,10 +30,11 @@ const Page = () => {
   const [dappItem, setDappItem] = useState<Item | undefined>();
   const [transactionInfo, setTransactionInfo] = useState<BaseTransaction | undefined>();
   const { chainId, address, isConnected } = useAccount();
-
   const chain = getChainById(chainId as number);
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
+
+  const [transactionResponse, setTransactionResponse] = useState<string>('pending');
 
   const { signMessageAsync } = useSignMessage();
 
@@ -40,8 +42,15 @@ const Page = () => {
 
   const { data: hash, sendTransactionAsync, isPending } = useSendTransaction();
 
-  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
-    hash
+  const { isLoading: isClaimTransactionConfirming, data } = useTransactionStatus({
+    customToast: true,
+    hash,
+    onSuccess: () => {
+      setTransactionResponse('success');
+    },
+    onError: () => {
+      setTransactionResponse('failure');
+    }
   });
 
   const communicator = useAppCommunicator(iframeRef, chain, {
@@ -156,8 +165,20 @@ const Page = () => {
         onSubmit={() => {
           sendTransactionAsync(transactionInfo as BaseTransaction)?.then((hash) => {
             communicator?.send({ safeTxHash: hash }, currentRequestId as string);
+            setTransactionOpen(false);
+            setCurrentRequestId(undefined);
           });
         }}
+      />
+      <TransactionStatusDialog
+        open={transactionResponse !== 'pending'}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTransactionResponse('pending');
+          }
+        }}
+        transactionStatus={transactionResponse as any}
+        data={data}
       />
     </>
   );

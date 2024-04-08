@@ -9,14 +9,20 @@ import { getChainById } from '@/utils';
 import { useLatestCallback } from './useLatestCallback';
 
 export type SuccessType = (data: WaitForTransactionReceiptData<Config, ChainId>) => void;
-export type ErrorType = () => void | null;
+export type ErrorType = (data: WaitForTransactionReceiptData<Config, ChainId>) => void | null;
 export interface UseTransactionStatusProps {
   hash: `0x${string}` | undefined;
   onSuccess?: SuccessType;
   onError?: ErrorType;
+  customToast?: boolean;
 }
 
-export function useTransactionStatus({ hash, onSuccess, onError }: UseTransactionStatusProps) {
+export function useTransactionStatus({
+  hash,
+  onSuccess,
+  onError,
+  customToast = false
+}: UseTransactionStatusProps) {
   const { chainId } = useAccount();
 
   const { data, isLoading, isSuccess, isError } = useWaitForTransactionReceipt({
@@ -42,25 +48,26 @@ export function useTransactionStatus({ hash, onSuccess, onError }: UseTransactio
             toast: 'group-[.toaster]:border-red-500',
             closeButton: 'group-[.toast]:bg-red-500 group-[.toast]:border-red-500'
           };
-
-      toastRef.current = toast(statusMessage, {
-        description: (
-          <a
-            target="_blank"
-            rel="noopener"
-            className="break-all text-primary hover:underline"
-            href={`${chain?.blockExplorers?.default?.url}tx/${data.transactionHash}`}
-          >
-            {data.transactionHash}
-          </a>
-        ),
-        classNames: toastClassName
-      });
+      if (!customToast) {
+        toastRef.current = toast(statusMessage, {
+          description: (
+            <a
+              target="_blank"
+              rel="noopener"
+              className="break-all text-primary hover:underline"
+              href={`${chain?.blockExplorers?.default?.url}tx/${data.transactionHash}`}
+            >
+              {data.transactionHash}
+            </a>
+          ),
+          classNames: toastClassName
+        });
+      }
 
       if (isSuccess) {
         onSuccessLatest?.(data);
       } else {
-        onErrorLatest?.();
+        onErrorLatest?.(data);
       }
     }
 
@@ -69,7 +76,7 @@ export function useTransactionStatus({ hash, onSuccess, onError }: UseTransactio
         toast.dismiss(toastRef.current);
       }
     };
-  }, [isSuccess, isError, data, onSuccessLatest, onErrorLatest]);
+  }, [isSuccess, isError, data, onSuccessLatest, onErrorLatest, customToast]);
 
   return { isSuccess, isError, isLoading, data };
 }

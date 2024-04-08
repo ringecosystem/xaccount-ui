@@ -58,7 +58,6 @@ class AppCommunicator {
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
     if (!msg.data) return false;
-    // 验证消息是否来自 iframe 内部的 Safe 应用。
     if (msg.data.hasOwnProperty('isCookieEnabled')) {
       return true;
     }

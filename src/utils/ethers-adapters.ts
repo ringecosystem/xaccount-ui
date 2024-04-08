@@ -4,8 +4,6 @@ import { useMemo } from 'react';
 import type { Client, Transport } from 'viem';
 import { type Config, useClient } from 'wagmi';
 
-const infuraToken = process.env.NEXT_PUBLIC_INFURA_TOKEN;
-
 export function clientToProvider(client: Client<Transport, ChainConfig>) {
   const { chain, transport } = client;
   const network = {
@@ -21,9 +19,6 @@ export function clientToProvider(client: Client<Transport, ChainConfig>) {
     return new FallbackProvider(providers);
   }
 
-  if (infuraToken && chain?.infuraUrl) {
-    return new JsonRpcProvider(`${chain.infuraUrl}${infuraToken}`, network);
-  }
   return new JsonRpcProvider(transport.url, network);
 }
 
@@ -32,8 +27,3 @@ export function useEthersProvider({ chainId }: { chainId?: number } = {}) {
   const client = useClient<Config>({ chainId });
   return useMemo(() => client && clientToProvider(client), [client]);
 }
-
-// //   return new JsonRpcProvider(
-//     'https://sepolia.infura.io/v3/4fbdb5a15cfc44598124d569bd31549d',
-//     network
-//   );

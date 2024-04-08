@@ -20,8 +20,9 @@ type AccountProps = {
 };
 
 const RemoteAccount = ({ onCopy }: AccountProps) => {
-  const { remoteChain, setRemoteChain } = useChainStore(
+  const { localChain, remoteChain, setRemoteChain } = useChainStore(
     useShallow((state) => ({
+      localChain: state.localChain,
       remoteChain: state.remoteChain,
       setRemoteChain: state.setRemoteChain
     }))
@@ -50,9 +51,11 @@ const RemoteAccount = ({ onCopy }: AccountProps) => {
           </>
         ) : null}
 
-        {chains?.map((chain) => {
-          return <MenubarItem key={chain.id}>Create on {chain.name}</MenubarItem>;
-        })}
+        {chains
+          ?.filter((v) => v.id !== localChain?.id)
+          ?.map((chain) => {
+            return <MenubarItem key={chain.id}>Create on {chain.name}</MenubarItem>;
+          })}
       </MenubarContent>
     </MenubarMenu>
   );
