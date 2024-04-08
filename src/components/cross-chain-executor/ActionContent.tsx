@@ -42,7 +42,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           <Separator />
           <div className="space-y-1">
             <h4 className="font-bold uppercase">data</h4>
-            <ScrollArea className="max-h-80 break-all text-muted-foreground">
+            <ScrollArea className="max-h-60 break-all text-muted-foreground">
               {transactionInfo?.data}
             </ScrollArea>
           </div>
