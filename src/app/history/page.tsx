@@ -7,6 +7,7 @@ import { useInView } from 'react-intersection-observer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const fetchData = (
   currentLength: number
@@ -84,7 +85,9 @@ const Page = () => {
           ))}
         </div>
       ) : (
-        <ScrollArea className="scroll-fade-bottom -mr-4 h-[calc(100%-2rem)] pr-4">
+        <ScrollArea
+          className={cn('-mr-4 h-[calc(100%-1rem)] pr-4', !isRefetching && 'scroll-fade-bottom ')}
+        >
           {list?.length ? (
             <div className="w-full space-y-4 ">
               {list.map((item, index) => (

@@ -85,13 +85,13 @@ export default function Home() {
     <div
       className="container relative px-16 py-6"
       style={{
-        height: 'calc(100vh - 6rem)'
+        height: 'calc(100vh - var(--header) - var(--footer)'
       }}
     >
       <h2 className="mb-4 font-bold uppercase">ALL DAPPS</h2>
       <ScrollArea
         style={{
-          height: 'calc(100% - 2rem)'
+          height: 'calc(100% - 1rem)'
         }}
         className="scroll-fade-bottom"
       >

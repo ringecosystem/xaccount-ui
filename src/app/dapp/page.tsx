@@ -25,6 +25,7 @@ import Spin from '@/components/ui/spin';
 import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
+import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 
 const Page = () => {
   const params = useSearchParams();
@@ -49,8 +50,20 @@ const Page = () => {
 
   const { data: hash, sendTransaction, isPending } = useSendTransaction();
 
-  const result = useWaitForTransactionReceipt({
+  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
     hash: hash
+    // onSuccess: (data) => {
+    //   updateOperationStatus('claim', 0);
+    //   if (data) {
+    //     reset();
+    //     onSuccessLatest?.(data);
+    //   }
+    // },
+    // onError() {
+    //   reset();
+    //   updateOperationStatus('claim', 0);
+    //   onErrorLatest?.();
+    // }
   });
 
   const communicator = useAppCommunicator(iframeRef, chain, {
@@ -188,7 +201,7 @@ const Page = () => {
         requestId={currentRequestId}
         transactionInfo={transactionInfo}
         dappItem={dappItem}
-        confirmLoading={isPending}
+        confirmLoading={isPending || isClaimTransactionConfirming}
         onSubmit={() => {
           sendTransaction(transactionInfo as BaseTransaction);
         }}

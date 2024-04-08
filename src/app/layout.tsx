@@ -34,7 +34,13 @@ export default function RootLayout({
         <DAppProvider>
           <div className="flex h-dvh w-screen flex-col overflow-hidden lg:h-screen">
             <Header />
-            <main className="h-[calc(100vh-6rem)]">{children}</main>
+            <main
+              style={{
+                height: 'calc(100vh - var(--header) - var(--footer))'
+              }}
+            >
+              {children}
+            </main>
 
             <Footer />
           </div>

@@ -5,7 +5,7 @@ const currentYear = new Date().getUTCFullYear();
 const Footer = () => {
   return (
     <footer
-      className="flex h-12 items-center"
+      className="flex h-[var(--footer)] items-center"
       style={{
         zIndex: -1
       }}
