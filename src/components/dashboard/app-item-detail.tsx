@@ -1,3 +1,5 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Item } from '@/database/dapps-repository';
@@ -11,6 +13,11 @@ interface AppItemDetailProps {
 }
 
 const AppItemDetail = ({ item, open, onOpenChange }: AppItemDetailProps) => {
+  const router = useRouter();
+  const handleClick = () => {
+    router.push(`/dapp?appUrl=${item?.url}`);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -23,7 +30,7 @@ const AppItemDetail = ({ item, open, onOpenChange }: AppItemDetailProps) => {
           </CardContent>
         </Card>
         <DialogFooter>
-          <Button type="button" className="w-full truncate">
+          <Button type="button" className="w-full truncate" onClick={handleClick}>
             Open this app
           </Button>
         </DialogFooter>
