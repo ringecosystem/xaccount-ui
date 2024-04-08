@@ -1,5 +1,6 @@
 import { ChainId } from '@/types/chains';
 import type { ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const darwinia: ChainConfig = {
   id: ChainId.DARWINIA,
@@ -11,12 +12,7 @@ export const darwinia: ChainConfig = {
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.darwinia.network'],
-      webSocket: ['wss://rpc.darwinia.network']
-    },
-    public: {
-      http: ['https://rpc.darwinia.network'],
-      webSocket: ['wss://rpc.darwinia.network']
+      http: [getRpcUrl(ChainId.DARWINIA)]
     }
   },
   blockExplorers: {

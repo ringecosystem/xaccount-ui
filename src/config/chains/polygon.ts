@@ -1,9 +1,14 @@
 import { polygon as polygonBase } from 'wagmi/chains';
-import type { ChainConfig } from '@/types/chains';
+import { ChainId, type ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const polygon: ChainConfig = {
   ...polygonBase,
   iconUrl: '/images/chains/polygon.svg',
   shortName: 'matic',
-  infuraUrl: 'https://polygon-mainnet.infura.io/v3/'
+  rpcUrls: {
+    default: {
+      http: [getRpcUrl(ChainId.POLYGON)]
+    }
+  }
 } as const satisfies ChainConfig;

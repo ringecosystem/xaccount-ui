@@ -1,5 +1,6 @@
 import { ChainId } from '@/types/chains';
 import type { ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const blast: ChainConfig = {
   id: ChainId.BLAST,
@@ -11,12 +12,7 @@ export const blast: ChainConfig = {
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.blast.io'],
-      webSocket: ['wss://rpc.blast.io']
-    },
-    public: {
-      http: ['https://rpc.blast.io'],
-      webSocket: ['wss://rpc.blast.io']
+      http: [getRpcUrl(ChainId.BLAST)]
     }
   },
   blockExplorers: {
@@ -27,6 +23,5 @@ export const blast: ChainConfig = {
   },
 
   iconUrl: '/images/chains/blast.svg',
-  shortName: 'blastmainnet',
-  infuraUrl: 'https://blast-mainnet.infura.io/v3/'
+  shortName: 'blastmainnet'
 } as const satisfies ChainConfig;

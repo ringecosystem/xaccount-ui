@@ -24,8 +24,6 @@ export function useTransactionStatus({ hash, onSuccess, onError }: UseTransactio
     chainId: chainId
   });
 
-  console.log('chainId', chainId, hash, data, isLoading, isSuccess, isError);
-
   const toastRef = useRef<string | number | null>(null);
 
   const onSuccessLatest = useLatestCallback<SuccessType>(onSuccess);

@@ -12,13 +12,7 @@ import {
   SendTransactionRequestParams
 } from '@safe-global/safe-apps-sdk';
 
-import {
-  useAccount,
-  useSendTransaction,
-  useSignMessage,
-  useSignTypedData,
-  useWaitForTransactionReceipt
-} from 'wagmi';
+import { useAccount, useSendTransaction, useSignMessage, useSignTypedData } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
 import useGetSafeInfo from '@/hooks/useGetSafeInfo';
 import Spin from '@/components/ui/spin';
@@ -30,40 +24,24 @@ import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 const Page = () => {
   const params = useSearchParams();
   const appUrl = params.get('appUrl') as string | undefined;
-  const [message, setMessage] = useState<`0x${string}` | EIP712TypedData | undefined>();
-  const [transactionOpen, setTransactionOpen] = useState(false);
   const safeInfo = useGetSafeInfo();
-
+  const [transactionOpen, setTransactionOpen] = useState(false);
   const [dappItem, setDappItem] = useState<Item | undefined>();
-
   const [transactionInfo, setTransactionInfo] = useState<BaseTransaction | undefined>();
-
   const { chainId, address, isConnected } = useAccount();
 
   const chain = getChainById(chainId as number);
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
 
-  const { signMessage, data: signature } = useSignMessage();
+  const { signMessageAsync } = useSignMessage();
 
-  const { signTypedData, data: signatureTyped } = useSignTypedData();
+  const { signTypedDataAsync } = useSignTypedData();
 
-  const { data: hash, sendTransaction, isPending } = useSendTransaction();
+  const { data: hash, sendTransactionAsync, isPending } = useSendTransaction();
 
   const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
-    hash: hash
-    // onSuccess: (data) => {
-    //   updateOperationStatus('claim', 0);
-    //   if (data) {
-    //     reset();
-    //     onSuccessLatest?.(data);
-    //   }
-    // },
-    // onError() {
-    //   reset();
-    //   updateOperationStatus('claim', 0);
-    //   onErrorLatest?.();
-    // }
+    hash
   });
 
   const communicator = useAppCommunicator(iframeRef, chain, {
@@ -72,22 +50,9 @@ const Page = () => {
       requestId: RequestId,
       params?: SendTransactionRequestParams
     ) => {
-      console.log('onConfirmTransactions', txs, requestId, params);
       setCurrentRequestId(requestId);
-
-      console.log('txs', txs);
       setTransactionInfo(txs?.[0]);
       setTransactionOpen(true);
-      // sendTransaction(txs?.[0]);
-      //   const data = {
-      //     app: safeAppFromManifest,
-      //     appId: remoteApp ? String(remoteApp.id) : undefined,
-      //     requestId,
-      //     txs,
-      //     params
-      //   };
-
-      //   setTxFlow(<SafeAppsTxFlow data={data} />, onTxFlowClose);
     },
     onSignMessage: (
       message: `0x${string}` | EIP712TypedData,
@@ -97,12 +62,14 @@ const Page = () => {
     ) => {
       setCurrentRequestId(requestId);
       if (method === Methods.signTypedMessage) {
-        signTypedData(message as any);
-        setMessage(message);
+        signTypedDataAsync(message as any)?.then((signature) => {
+          communicator?.send({ messageHash: message, signature: signature }, requestId);
+        });
       } else if (method === Methods.signMessage) {
-        setMessage(message);
-        signMessage({
+        signMessageAsync({
           message: { raw: message as `0x${string}` }
+        })?.then((signature) => {
+          communicator?.send({ messageHash: message, signature }, requestId);
         });
       }
     },
@@ -110,7 +77,10 @@ const Page = () => {
     onGetEnvironmentInfo: () => ({
       origin: document.location.origin
     }),
-    onGetSafeInfo: () => safeInfo
+    onGetSafeInfo: () => safeInfo,
+    onGetTxBySafeTxHash: (safeTxHash: string) => {
+      return safeTxHash;
+    }
   });
 
   const handleOpenChange = (open: boolean) => {
@@ -126,29 +96,10 @@ const Page = () => {
   };
 
   useEffect(() => {
-    if (signature && message && currentRequestId) {
-      communicator?.send({ messageHash: message, signature }, currentRequestId);
-    }
-  }, [signature, message, currentRequestId, communicator]);
-
-  useEffect(() => {
-    if (signatureTyped && message && currentRequestId) {
-      communicator?.send({ messageHash: message, signature: signatureTyped }, currentRequestId);
-    }
-  }, [signatureTyped, message, currentRequestId, communicator]);
-
-  useEffect(() => {
     if (iframeRef?.current?.contentWindow) {
       iframeRef.current.contentWindow.location.href = appUrl as string;
     }
   }, [chainId, address, isConnected, iframeRef, appUrl, setAppIsLoading]);
-
-  useEffect(() => {
-    if (!communicator || !hash || !currentRequestId) {
-      return;
-    }
-    communicator?.send({ safeTxHash: hash }, currentRequestId);
-  }, [communicator, hash, currentRequestId]);
 
   const onIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
@@ -203,7 +154,9 @@ const Page = () => {
         dappItem={dappItem}
         confirmLoading={isPending || isClaimTransactionConfirming}
         onSubmit={() => {
-          sendTransaction(transactionInfo as BaseTransaction);
+          sendTransactionAsync(transactionInfo as BaseTransaction)?.then((hash) => {
+            communicator?.send({ safeTxHash: hash }, currentRequestId as string);
+          });
         }}
       />
     </>

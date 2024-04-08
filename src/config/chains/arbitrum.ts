@@ -1,9 +1,14 @@
 import { arbitrum as arbitrumChain } from 'wagmi/chains';
-import type { ChainConfig } from '@/types/chains';
+import { ChainId, type ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const arbitrum: ChainConfig = {
   ...arbitrumChain,
   iconUrl: '/images/chains/arbitrum.svg',
   shortName: 'arb1',
-  infuraUrl: 'https://arbitrum-mainnet.infura.io/v3/'
+  rpcUrls: {
+    default: {
+      http: [getRpcUrl(ChainId.ARBITRUM)]
+    }
+  }
 } as const satisfies ChainConfig;

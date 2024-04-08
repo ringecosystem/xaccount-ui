@@ -1,5 +1,6 @@
 import { ChainId } from '@/types/chains';
 import type { ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const crab: ChainConfig = {
   id: ChainId.CRAB,
@@ -7,12 +8,7 @@ export const crab: ChainConfig = {
   nativeCurrency: { name: 'CRAB', symbol: 'CRAB', decimals: 18 },
   rpcUrls: {
     default: {
-      http: ['https://crab-rpc.darwinia.network'],
-      webSocket: ['wss://crab-rpc.darwinia.network']
-    },
-    public: {
-      http: ['https://crab-rpc.darwinia.network'],
-      webSocket: ['wss://crab-rpc.darwinia.network']
+      http: [getRpcUrl(ChainId.CRAB)]
     }
   },
   blockExplorers: {
@@ -27,9 +23,7 @@ export const crab: ChainConfig = {
       blockCreated: 599936
     }
   },
-  /**
-   * rainbowkit iconUrl
-   */
+
   iconUrl: '/images/chains/crab.svg',
   shortName: 'crab'
 } as const satisfies ChainConfig;

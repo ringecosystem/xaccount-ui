@@ -1,5 +1,6 @@
 import { ChainId } from '@/types/chains';
 import type { ChainConfig } from '@/types/chains';
+import { getRpcUrl } from '../rpc-url';
 
 export const pangolin: ChainConfig = {
   /**
@@ -14,12 +15,7 @@ export const pangolin: ChainConfig = {
   },
   rpcUrls: {
     default: {
-      http: ['https://pangolin-rpc.darwinia.network'],
-      webSocket: ['wss://pangolin-rpc.darwinia.network']
-    },
-    public: {
-      http: ['https://pangolin-rpc.darwinia.network'],
-      webSocket: ['wss://pangolin-rpc.darwinia.network']
+      http: [getRpcUrl(ChainId.PANGOLIN)]
     }
   },
   blockExplorers: {
@@ -33,6 +29,5 @@ export const pangolin: ChainConfig = {
    * rainbowkit iconUrl
    */
   iconUrl: '/images/chains/pangolin.png',
-
   shortName: 'pangolin'
 } as const satisfies ChainConfig;

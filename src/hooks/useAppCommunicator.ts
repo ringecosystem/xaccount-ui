@@ -50,6 +50,7 @@ export type UseAppCommunicatorHandlers = {
   ) => void;
   onGetEnvironmentInfo: () => EnvironmentInfo;
   onGetSafeInfo: () => SafeInfo;
+  onGetTxBySafeTxHash: (safeTxHash: string) => string;
 };
 
 const useAppCommunicator = (
@@ -90,8 +91,7 @@ const useAppCommunicator = (
   useEffect(() => {
     communicator?.on(Methods.getTxBySafeTxHash, (msg) => {
       const { safeTxHash } = msg.data.params as GetTxBySafeTxHashParams;
-      return safeTxHash;
-      // return handlers.onGetTxBySafeTxHash(safeTxHash);
+      return handlers.onGetTxBySafeTxHash(safeTxHash);
     });
     communicator?.on(Methods.getEnvironmentInfo, handlers.onGetEnvironmentInfo);
 
