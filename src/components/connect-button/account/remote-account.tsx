@@ -53,7 +53,7 @@ const RemoteAccount = ({ onCopy }: AccountProps) => {
         functionName: 'xAccountOf',
         args: [localChain?.id, address, xAccountFactoryAddress]
       };
-    })
+    }) as any
   });
 
   console.log(result);
