@@ -2,21 +2,21 @@ import { create } from 'zustand';
 
 import { getDefaultChain } from '@/utils';
 
-import type { Chain } from '@rainbow-me/rainbowkit';
+import { ChainConfig } from '@/types/chains';
 
-export type RemoteChain = Chain & { address: `0x${string}` };
+export type RemoteChain = ChainConfig & { address: `0x${string}` };
 
 export type State = {
-  localChain: Chain;
+  localChain: ChainConfig;
   remoteChain?: RemoteChain;
 };
 
 export type Action = {
-  setLocalChain: (chain: Chain) => void;
+  setLocalChain: (chain: ChainConfig) => void;
   setRemoteChain: (chain: RemoteChain) => void;
 };
 
-const initialChainState: Chain = getDefaultChain();
+const initialChainState: ChainConfig = getDefaultChain();
 
 const useChainStore = create<State & Action>((set) => ({
   localChain: initialChainState,

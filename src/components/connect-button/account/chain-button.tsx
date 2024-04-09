@@ -2,7 +2,6 @@ import { Plus } from 'lucide-react';
 import Image from 'next/image';
 import { Chain } from '@rainbow-me/rainbowkit';
 
-import { Button } from '@/components/ui/button';
 import { toShortAddress } from '@/utils';
 import { RemoteChain } from '@/store/chain';
 import { MenubarTrigger } from '@/components/ui/menubar';

@@ -8,6 +8,7 @@ import useChainStore from '@/store/chain';
 import ActionContent from './ActionContent';
 
 import type { BaseTransaction } from '@/types/transaction';
+import { useShallow } from 'zustand/react/shallow';
 
 interface CrossChainExecutorProps {
   confirmLoading?: boolean;
@@ -26,7 +27,12 @@ const CrossChainExecutor = ({
   onOpenChange,
   onSubmit
 }: CrossChainExecutorProps) => {
-  const remoteChain = useChainStore((state) => state.remoteChain);
+  const { localChain, remoteChain } = useChainStore(
+    useShallow((state) => ({
+      localChain: state.localChain,
+      remoteChain: state.remoteChain
+    }))
+  );
   const [localValue, setLocalValue] = useState<string>('0.0');
 
   useEffect(() => {
@@ -42,6 +48,7 @@ const CrossChainExecutor = ({
           <DialogTitle className="text-xl uppercase">Execute transaction</DialogTitle>
         </DialogHeader>
         <ActionContent
+          localChain={localChain}
           remoteChain={remoteChain}
           transactionInfo={transactionInfo}
           dappItem={dappItem}
