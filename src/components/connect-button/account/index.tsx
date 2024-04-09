@@ -7,6 +7,7 @@ import { Menubar } from '@/components/ui/menubar';
 
 import LocalAccount from './local-account';
 import RemoteAccount from './remote-account';
+import { useChains } from 'wagmi';
 
 type AccountProps = {
   localAddress?: `0x${string}`;
@@ -25,6 +26,8 @@ const Account = ({ localAddress }: AccountProps) => {
     },
     [copyToClipboard]
   );
+
+  const chains = useChains();
 
   return (
     <Menubar className="h-[40px] gap-2 border-none p-0">
