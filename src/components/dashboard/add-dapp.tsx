@@ -224,7 +224,6 @@ const AddDapp = forwardRef(
               </form>
             </Form>
           </div>
-          <DialogFooter></DialogFooter>
         </DialogContent>
       </Dialog>
     );
