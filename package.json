@@ -25,6 +25,8 @@
     "@rainbow-me/rainbowkit": "^2.0.2",
     "@safe-global/safe-apps-sdk": "^9.0.0",
     "@tanstack/react-query": "^5.28.6",
+    "@wagmi/core": "^2.6.16",
+    "axios": "^1.6.8",
     "cheerio": "1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
