@@ -13,7 +13,7 @@ import {
 } from '@/config/chains';
 
 import * as chains from '@/config/chains';
-import { ChainId } from '@/types/chains';
+import { ChainConfig, ChainId } from '@/types/chains';
 
 // Map object to return a specific chain configuration
 // Using Record<ChainId, ChainConfig> to ensure type safety
@@ -42,7 +42,7 @@ function filterTestnetsInProduction(chains: Record<ChainId, Chain>): Chain[] {
 }
 
 // Returns an array of all chain configurations, filtering out testnets in production
-export function getChains(): [Chain, ...Chain[]] {
+export function getChains(): [ChainConfig, ...ChainConfig[]] {
   const filteredChains: Chain[] = Object.values(chains).filter((chain): chain is Chain => {
     return 'id' in chain && 'name' in chain;
   });
