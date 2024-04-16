@@ -14,7 +14,7 @@ export const crab: ChainConfig = {
   blockExplorers: {
     default: {
       name: 'Subscan',
-      url: 'https://crab.subscan.io/'
+      url: 'https://crab.subscan.io'
     }
   },
   contracts: {

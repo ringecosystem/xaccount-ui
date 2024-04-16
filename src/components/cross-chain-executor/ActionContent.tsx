@@ -8,9 +8,14 @@ import { toShortAddress } from '@/utils';
 import { Item } from '@/database/dapps-repository';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface ActionContentProps {
   localChain: State['localChain'];
@@ -38,7 +43,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           <div className="space-y-1">
             <h4 className=" font-bold uppercase">interact with</h4>
             <div className="text-sm text-muted-foreground">
-              {remoteChain?.name} : {remoteChain?.address} ({dappItem?.name})
+              {remoteChain?.name} : {remoteChain?.safeAddress} ({dappItem?.name})
             </div>
           </div>
           <div className="space-y-1">
@@ -58,17 +63,11 @@ const ActionContent: React.FC<ActionContentProps> = ({
               <AccordionContent className="mt-1 flex flex-col gap-2">
                 <div className="flex items-center gap-4">
                   <Label>value:</Label>
-                  <Input
-                    className="w-48"
-                    type="number"
-                    placeholder="0.0"
-                    value={localValue}
-                    // onChange={(e) => setLocalValue(e.target.value)}
-                  />
+                  <Input className="w-48" type="number" placeholder="0.0" value={localValue} />
                 </div>
                 <p className=" text-sm text-muted-foreground">
                   The native token amount you want to transfer from {localChain?.shortName}:
-                  {toShortAddress(remoteChain?.address || '')} to {remoteChain?.shortName}:
+                  {toShortAddress(remoteChain?.moduleAddress || '')} to {remoteChain?.shortName}:
                   {toShortAddress(transactionInfo?.to || '')}({dappItem?.name})
                 </p>
               </AccordionContent>

@@ -21,7 +21,7 @@ export const pangolin: ChainConfig = {
   blockExplorers: {
     default: {
       name: 'Subscan',
-      url: 'https://pangolin.subscan.io/'
+      url: 'https://pangolin.subscan.io'
     }
   },
   testnet: true,

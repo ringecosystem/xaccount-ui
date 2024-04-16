@@ -62,7 +62,7 @@ export function getChainById(id: ChainId): Chain | undefined {
 
 // Returns the default chain configuration
 export function getDefaultChain(): Chain {
-  return chainConfigMap[ChainId.ETHEREUM];
+  return chainConfigMap[ChainId.ETHEREUM_SEPOLIA];
 }
 
 // Returns the default chain id

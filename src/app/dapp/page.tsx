@@ -21,6 +21,9 @@ import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import { TransactionStatusDialog } from '@/components/TransactionStatusDialog';
+import useChainStore from '@/store/chain';
+import { useShallow } from 'zustand/react/shallow';
+import SelectChainDialog from '@/components/SelectChainDialog';
 
 const Page = () => {
   const params = useSearchParams();
@@ -30,6 +33,14 @@ const Page = () => {
   const [dappItem, setDappItem] = useState<Item | undefined>();
   const [transactionInfo, setTransactionInfo] = useState<BaseTransaction | undefined>();
   const { chainId, address, isConnected } = useAccount();
+  const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
+
+  const { remoteChain } = useChainStore(
+    useShallow((state) => ({
+      remoteChain: state.remoteChain
+    }))
+  );
+
   const chain = getChainById(chainId as number);
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
@@ -148,13 +159,9 @@ const Page = () => {
           display: appIsLoading ? 'none' : 'block'
         }}
       >
-        <SafeAppIframe
-          appUrl={appUrl as string}
-          iframeRef={iframeRef}
-          onLoad={onIframeLoad}
-          title={'11'}
-        />
+        <SafeAppIframe appUrl={appUrl as string} iframeRef={iframeRef} onLoad={onIframeLoad} />
       </div>
+      <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={setRemoteChainAlertOpen} />
       <CrossChainExecutor
         open={transactionOpen}
         onOpenChange={handleOpenChange}
@@ -163,6 +170,10 @@ const Page = () => {
         dappItem={dappItem}
         confirmLoading={isPending || isClaimTransactionConfirming}
         onSubmit={() => {
+          if (!remoteChain) {
+            setRemoteChainAlertOpen(true);
+            return;
+          }
           sendTransactionAsync(transactionInfo as BaseTransaction)?.then((hash) => {
             communicator?.send({ safeTxHash: hash }, currentRequestId as string);
             setTransactionOpen(false);

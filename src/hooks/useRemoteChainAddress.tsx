@@ -16,17 +16,19 @@ import { getChainById } from '@/utils';
 async function isSafeAddressExist(
   safeAddress: string,
   provider: JsonRpcProvider,
-  retry: number = 0
+  retry: number = 1
 ): Promise<boolean> {
   let exist = false;
   let attempts = 0;
 
-  while (!exist && attempts < retry) {
+  while (attempts < retry) {
     try {
       const code = await provider.getCode(safeAddress);
+      console.log(`Attempt ${attempts + 1}: code fetched`, code);
       exist = code !== '0x';
+      if (exist) break; // 如果找到代码，提前退出循环
     } catch (error) {
-      console.error(`Failed to check safe address: ${error}`);
+      console.error(`Failed to check safe address on attempt ${attempts + 1}: ${error}`);
     }
     attempts++;
   }
