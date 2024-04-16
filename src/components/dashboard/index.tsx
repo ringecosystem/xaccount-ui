@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { initDB, getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
+import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import AddDapp, { FormReturn } from './add-dapp';
@@ -17,7 +17,6 @@ import AppItemDetail from './app-item-detail';
 
 // appUrl
 export default function Home() {
-  const isDBInitialized = useRef(false);
   const router = useRouter();
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
@@ -28,15 +27,11 @@ export default function Home() {
   const {
     data: dapps,
     refetch,
-    isPending,
-    isRefetching
+    isPending
   } = useQuery({
     queryKey: ['dapps'],
-    queryFn: getAllItems,
-    enabled: isDBInitialized.current
+    queryFn: getAllItems
   });
-
-  console.log('isrefetching', isRefetching);
 
   const { mutateAsync: mutateAddItem, isPending: addLoading } = useMutation({
     mutationFn: addItem,
@@ -70,15 +65,7 @@ export default function Home() {
   }, [selectedItem, mutateDeleteItem, refetch]);
 
   useEffect(() => {
-    if (!isDBInitialized.current) {
-      initDB()
-        ?.then(() => {
-          refetch();
-        })
-        ?.finally(() => {
-          isDBInitialized.current = true;
-        });
-    }
+    refetch();
   }, [refetch]);
 
   return (

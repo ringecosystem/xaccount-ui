@@ -18,7 +18,7 @@ export const darwinia: ChainConfig = {
   blockExplorers: {
     default: {
       name: 'Subscan',
-      url: 'https://darwinia.subscan.io/'
+      url: 'https://darwinia.subscan.io'
     }
   },
   contracts: {

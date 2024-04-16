@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react';
 import Image from 'next/image';
 import { Chain } from '@rainbow-me/rainbowkit';
 
@@ -32,7 +31,9 @@ const ChainButton = ({ label, chain, address }: ChainButtonProps) => {
             {address && toShortAddress(address)}
           </span>
         ) : (
-          <Plus className="hidden h-6 w-6 md:inline" strokeWidth={1} />
+          <div className=" hidden text-muted-foreground md:flex md:items-center md:gap-2">
+            <span>Select Chain</span>
+          </div>
         )}
         <span className="md:hidden">{label}</span>
       </div>

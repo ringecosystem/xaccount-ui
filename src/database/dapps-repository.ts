@@ -1,3 +1,4 @@
+'use client';
 import { openDB } from 'idb';
 
 export interface Item {
@@ -15,7 +16,7 @@ export interface UpdateData {
 }
 export const DAPPS_DB_NAME = 'xAccount_dapps_list';
 
-export async function initDB() {
+export async function initDappsRepositoryDB() {
   const db = await openDB(DAPPS_DB_NAME, 1, {
     upgrade(db, oldVersion, newVersion, transaction) {
       let store;
