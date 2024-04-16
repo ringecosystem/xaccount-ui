@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 
 import { State } from '@/store/chain';
@@ -54,7 +54,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           </div>
           <Accordion type="single" collapsible className="w-full" defaultValue="advanced">
             <AccordionItem value="advanced" className="border-none">
-              <AccordionTrigger className="font-bold uppercase">
+              <AccordionTrigger className="font-bold uppercase focus-visible:outline-none">
                 <h4 className="flex items-center gap-1">
                   <Plus width={18} height={18} />
                   Advanced
@@ -63,7 +63,13 @@ const ActionContent: React.FC<ActionContentProps> = ({
               <AccordionContent className="mt-1 flex flex-col gap-2">
                 <div className="flex items-center gap-4">
                   <Label>value:</Label>
-                  <Input className="w-48" type="number" placeholder="0.0" value={localValue} />
+                  <Input
+                    className="w-48"
+                    type="number"
+                    placeholder="0.0"
+                    value={localValue}
+                    autoFocus={false}
+                  />
                 </div>
                 <p className=" text-sm text-muted-foreground">
                   The native token amount you want to transfer from {localChain?.shortName}:

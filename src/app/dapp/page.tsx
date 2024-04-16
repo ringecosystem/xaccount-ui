@@ -72,6 +72,10 @@ const Page = () => {
     ) => {
       setCurrentRequestId(requestId);
       setTransactionInfo(txs?.[0]);
+      if (!remoteChain) {
+        setRemoteChainAlertOpen(true);
+        return;
+      }
       setTransactionOpen(true);
     },
     onSignMessage: (
@@ -102,6 +106,18 @@ const Page = () => {
       return safeTxHash;
     }
   });
+
+  const handleSelectChainOpenChange = (open: boolean) => {
+    setRemoteChainAlertOpen(open);
+    if (!open) {
+      setCurrentRequestId((prevId) => {
+        if (prevId) {
+          communicator?.send(CommunicatorMessages.REJECT_TRANSACTION_MESSAGE, prevId, true);
+        }
+        return undefined;
+      });
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     setTransactionOpen(open);
@@ -161,7 +177,7 @@ const Page = () => {
       >
         <SafeAppIframe appUrl={appUrl as string} iframeRef={iframeRef} onLoad={onIframeLoad} />
       </div>
-      <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={setRemoteChainAlertOpen} />
+      <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={handleSelectChainOpenChange} />
       <CrossChainExecutor
         open={transactionOpen}
         onOpenChange={handleOpenChange}
