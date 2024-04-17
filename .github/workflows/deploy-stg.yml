@@ -34,5 +34,5 @@ jobs:
           alias_domain: "xaccount-stg"
           enable_cache: true
           enable_notify_slack: true
-          slack_channel: darwinia-apps
+          slack_channel: public-darwinia-websites-apps
           slack_webhook: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
