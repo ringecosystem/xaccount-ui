@@ -27,7 +27,6 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           vercel_group: itering
           preview_output: true
-          dist_path: .next
           script_run: false
           dist_path: .
           project_name: xaccount-ui
