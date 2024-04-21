@@ -1,4 +1,4 @@
-import { SuccessType, useTransactionStatusByChainId } from '@/hooks/useTransactionStatusByChainId';
+import { useTransactionStatusByChainId } from '@/hooks/useTransactionStatusByChainId';
 import { useTransactionStore } from '@/store/transaction';
 
 interface TransactionStatusProps {
