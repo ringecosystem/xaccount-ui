@@ -90,9 +90,6 @@ export function useRemoteChainAddress({
   toChainId,
   fromAddress
 }: UseRemoteChainAddressType) {
-  console.log('fromChainId:', fromChainId);
-  console.log('toChainId:', toChainId);
-
   const fetchAddressCalled = useRef(false);
   const [state, dispatch] = useReducer(reducer, initialState);
 

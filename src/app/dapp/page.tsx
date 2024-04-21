@@ -20,7 +20,6 @@ import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { TransactionStatusDialog } from '@/components/TransactionStatusDialog';
 import useChainStore from '@/store/chain';
 import { useShallow } from 'zustand/react/shallow';
 import SelectChainDialog from '@/components/SelectChainDialog';
@@ -46,13 +45,11 @@ const Page = () => {
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
 
-  const [transactionResponse, setTransactionResponse] = useState<string>('pending');
-
   const { signMessageAsync } = useSignMessage();
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const { execute, hash, isPending, isLoading } = useExecute({
+  const { execute, hash, isPending } = useExecute({
     transactionInfo,
     fromChainId: chainId as number,
     toChainId: remoteChain?.id as number,
@@ -60,15 +57,8 @@ const Page = () => {
     toModuleAddress: remoteChain?.moduleAddress as `0x${string}`
   });
 
-  const { isLoading: isClaimTransactionConfirming, data } = useTransactionStatus({
-    customToast: true,
-    hash,
-    onSuccess: () => {
-      setTransactionResponse('success');
-    },
-    onError: () => {
-      setTransactionResponse('failure');
-    }
+  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
+    hash
   });
 
   const communicator = useAppCommunicator(iframeRef, chain, {
@@ -198,21 +188,12 @@ const Page = () => {
             return;
           }
           execute()?.then((hash) => {
+            // 此时给的hash是错误的，是本地区别的hash,但是对于目标的address来说无法捕获此hash事件
             communicator?.send({ safeTxHash: hash }, currentRequestId as string);
             setTransactionOpen(false);
             setCurrentRequestId(undefined);
           });
         }}
-      />
-      <TransactionStatusDialog
-        open={transactionResponse !== 'pending'}
-        onOpenChange={(open) => {
-          if (!open) {
-            setTransactionResponse('pending');
-          }
-        }}
-        transactionStatus={transactionResponse as any}
-        data={data}
       />
     </>
   );

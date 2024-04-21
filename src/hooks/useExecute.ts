@@ -2,13 +2,13 @@ import { Interface } from 'ethers';
 
 import { abi as safeMsgportModuleAbi } from '@/config/abi/SafeMsgportModule';
 import { abi as MultiPortAbi } from '@/config/abi/MultiPort';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCrossChainFee } from '@/server/gaslimit';
-import { Config, readContract } from '@wagmi/core';
-import { config } from '@/config/wagmi';
 import { useWriteContract } from 'wagmi';
 import { BaseTransaction } from '@/types/transaction';
+import usePortAddress from './usePortAddress';
+import { useTransactionStore } from '@/store/transaction';
 
 const iface = new Interface(safeMsgportModuleAbi);
 const functionFragment = iface.getFunction('xExecute');
@@ -27,7 +27,8 @@ const useExecute = ({
   fromAddress,
   toModuleAddress
 }: UseExecuteProps) => {
-  const [srcPortAddress, setSrcPortAddress] = useState<`0x${string}`>('0x');
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
+  const srcPortAddress = usePortAddress({ toModuleAddress, toChainId, fromChainId });
 
   const payload = useMemo<`0x${string}`>(() => {
     return functionFragment && transactionInfo?.to
@@ -40,15 +41,30 @@ const useExecute = ({
       : '0x';
   }, [transactionInfo]);
 
-  const { data: crossChainFeeData, isLoading } = useQuery({
-    queryKey: ['xExecuteCrossChainFee'],
-    enabled:
+  const { queryKey, isEnabled } = useMemo(() => {
+    const isValid =
       !!transactionInfo?.to &&
       !!fromChainId &&
       !!toChainId &&
       !!fromAddress &&
       !!toModuleAddress &&
-      payload !== '0x',
+      payload !== '0x';
+
+    const key = [
+      'xExecuteCrossChainFee',
+      fromChainId,
+      toChainId,
+      fromAddress,
+      toModuleAddress,
+      payload
+    ];
+
+    return { queryKey: key, isEnabled: isValid };
+  }, [transactionInfo, fromChainId, toChainId, fromAddress, toModuleAddress, payload]);
+
+  const { data: crossChainFeeData, isLoading } = useQuery({
+    queryKey,
+    enabled: isEnabled,
     queryFn: () =>
       getCrossChainFee({
         fromChainId,
@@ -59,32 +75,6 @@ const useExecute = ({
         refundAddress: fromAddress
       })
   });
-
-  useEffect(() => {
-    const fetchPortAddress = async () => {
-      if (!toModuleAddress || !toChainId || !fromChainId) {
-        return;
-      }
-      const portResult = await readContract(config as unknown as Config, {
-        abi: safeMsgportModuleAbi,
-        address: toModuleAddress,
-        chainId: toChainId,
-        functionName: 'port'
-      });
-
-      const portLookupResult = await readContract(config as unknown as Config, {
-        abi: MultiPortAbi,
-        address: portResult,
-        chainId: toChainId,
-        functionName: 'fromPortLookup',
-        args: [BigInt(fromChainId)]
-      });
-
-      setSrcPortAddress(portLookupResult);
-    };
-
-    fetchPortAddress();
-  }, [toChainId, toModuleAddress, fromChainId]);
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();
 
@@ -110,8 +100,24 @@ const useExecute = ({
         payload,
         crossChainFeeData?.data?.params
       ]
+    })?.then((hash) => {
+      addTransaction({
+        hash,
+        chainId: fromChainId as number
+      });
+
+      return hash;
     });
-  }, [writeContractAsync, srcPortAddress, crossChainFeeData, toChainId, toModuleAddress, payload]);
+  }, [
+    writeContractAsync,
+    srcPortAddress,
+    crossChainFeeData,
+    toChainId,
+    toModuleAddress,
+    payload,
+    addTransaction,
+    fromChainId
+  ]);
 
   return {
     isLoading,
