@@ -1,7 +1,7 @@
 import { Interface } from 'ethers';
 
 import { abi as safeMsgportModuleAbi } from '@/config/abi/SafeMsgportModule';
-import { abi as MutisigModuleAbi } from '@/config/abi/MultiPort';
+import { abi as MultiPortAbi } from '@/config/abi/MultiPort';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCrossChainFee } from '@/server/gaslimit';
@@ -73,7 +73,7 @@ const useExecute = ({
       });
 
       const portLookupResult = await readContract(config as unknown as Config, {
-        abi: MutisigModuleAbi,
+        abi: MultiPortAbi,
         address: portResult,
         chainId: toChainId,
         functionName: 'fromPortLookup',
@@ -100,7 +100,7 @@ const useExecute = ({
       return;
     }
     return writeContractAsync({
-      abi: MutisigModuleAbi,
+      abi: MultiPortAbi,
       address: srcPortAddress,
       functionName: 'send',
       value: BigInt(crossChainFeeData?.data?.fee),
@@ -108,7 +108,7 @@ const useExecute = ({
         toChainId ? BigInt(toChainId) : 0n,
         toModuleAddress,
         payload,
-        crossChainFeeData?.data?.params as any
+        crossChainFeeData?.data?.params
       ]
     });
   }, [writeContractAsync, srcPortAddress, crossChainFeeData, toChainId, toModuleAddress, payload]);

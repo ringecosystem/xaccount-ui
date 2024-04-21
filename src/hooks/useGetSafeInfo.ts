@@ -1,4 +1,3 @@
-import { RemoteChain } from './../store/chain';
 import { useMemo } from 'react';
 import useChainStore from '@/store/chain';
 
