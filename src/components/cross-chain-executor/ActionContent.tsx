@@ -16,9 +16,10 @@ import {
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { ChainConfig } from '@/types/chains';
 
 interface ActionContentProps {
-  localChain: State['localChain'];
+  localChain?: ChainConfig;
   remoteChain: State['remoteChain'];
   transactionInfo?: BaseTransaction;
   dappItem?: Item;

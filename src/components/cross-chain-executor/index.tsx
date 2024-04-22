@@ -8,7 +8,8 @@ import useChainStore from '@/store/chain';
 import ActionContent from './ActionContent';
 
 import type { BaseTransaction } from '@/types/transaction';
-import { useShallow } from 'zustand/react/shallow';
+import { useAccount } from 'wagmi';
+import { getChainById } from '@/utils';
 
 interface CrossChainExecutorProps {
   confirmLoading?: boolean;
@@ -27,12 +28,10 @@ const CrossChainExecutor = ({
   onOpenChange,
   onSubmit
 }: CrossChainExecutorProps) => {
-  const { localChain, remoteChain } = useChainStore(
-    useShallow((state) => ({
-      localChain: state.localChain,
-      remoteChain: state.remoteChain
-    }))
-  );
+  const { chainId } = useAccount();
+  const localChain = getChainById(chainId);
+  const remoteChain = useChainStore((state) => state.remoteChain);
+
   const [localValue, setLocalValue] = useState<string>('0.0');
 
   useEffect(() => {
