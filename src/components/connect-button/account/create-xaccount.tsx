@@ -174,7 +174,6 @@ export function CreateXAccount({
           ],
           value: crossChainFeeData?.data?.fee ? BigInt(crossChainFeeData?.data?.fee) : 0n
         })?.then((hash) => {
-          // add store
           addTransaction({
             hash: hash,
             chainId: fromChainId as number
@@ -291,7 +290,7 @@ export function CreateXAccount({
             <Button
               size="lg"
               type="submit"
-              className="w-full"
+              className="w-full rounded-3xl"
               isLoading={isPending || isClaimTransactionConfirming}
             >
               Create

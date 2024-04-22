@@ -42,9 +42,9 @@ const CrossChainExecutor = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[600px]">
+      <DialogContent className="w-full sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-xl uppercase">Execute transaction</DialogTitle>
+          <DialogTitle className="text-xl ">Execute Transaction</DialogTitle>
         </DialogHeader>
         <ActionContent
           localChain={localChain}

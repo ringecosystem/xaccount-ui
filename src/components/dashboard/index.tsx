@@ -70,7 +70,7 @@ export default function Home() {
 
   return (
     <div
-      className="container relative px-16 py-6"
+      className="container relative px-8 py-6"
       style={{
         height: 'calc(100vh - var(--header) - var(--footer)'
       }}
@@ -80,7 +80,7 @@ export default function Home() {
         style={{
           height: 'calc(100% - 1rem)'
         }}
-        className="scroll-fade-bottom"
+        className="scroll-fade-bottom px-4"
       >
         <div className="dapps-grid gap-6">
           {isPending ? (

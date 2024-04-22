@@ -42,20 +42,20 @@ const ActionContent: React.FC<ActionContentProps> = ({
       <div className="grid gap-4 py-4">
         <div className="space-y-6">
           <div className="space-y-1">
-            <h4 className=" font-bold uppercase">interact with</h4>
+            <h4 className=" font-bold capitalize">interact with</h4>
             <div className="text-sm text-muted-foreground">
               {remoteChain?.name} : {remoteChain?.safeAddress} ({dappItem?.name})
             </div>
           </div>
           <div className="space-y-1">
-            <h4 className="font-bold uppercase">data</h4>
+            <h4 className="font-bold capitalize">data</h4>
             <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground">
               {transactionInfo?.data}
             </ScrollArea>
           </div>
           <Accordion type="single" collapsible className="w-full" defaultValue="advanced">
             <AccordionItem value="advanced" className="border-none">
-              <AccordionTrigger className="font-bold uppercase focus-visible:outline-none">
+              <AccordionTrigger className="font-bold capitalize focus-visible:outline-none">
                 <h4 className="flex items-center gap-1">
                   <Plus width={18} height={18} />
                   Advanced
@@ -85,7 +85,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
       <DialogFooter className="flex !flex-col items-center justify-center gap-2">
         <Button
           type="submit"
-          className="w-full"
+          className="w-full rounded-3xl"
           onClick={onSubmit}
           isLoading={confirmLoading}
           size="lg"
