@@ -1,0 +1,38 @@
+name: Deploy production
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/checkout@v2
+        with:
+          repository: darwinia-network/devops
+          path: .github
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - uses: ./.github/actions/smart-vercel
+        name: Deploy to Vercel
+        id: smart-vercel
+        with:
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_group: itering
+          preview_output: true
+          script_run: false
+          dist_path: .
+          project_name: xaccount-ui
+          prod_mode: true
+          enable_cache: true
+          enable_notify_slack: true
+          slack_channel: public-darwinia-websites-apps
+          slack_webhook: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
