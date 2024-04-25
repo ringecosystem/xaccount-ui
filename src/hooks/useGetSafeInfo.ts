@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
-import { useAccount } from 'wagmi';
-import { getDefaultChainId } from '@/utils';
-
-//  TODO now for simulate useSafeInfo
+import useChainStore from '@/store/chain';
 
 export type SafeInfo = {
   safeAddress?: `0x${string}`;
@@ -14,18 +11,18 @@ export type SafeInfo = {
 };
 
 const useGetSafeInfo = () => {
-  const { address, chainId } = useAccount();
+  const remoteChain = useChainStore((state) => state.remoteChain);
 
   return useMemo<SafeInfo>(
     () => ({
-      safeAddress: address,
-      chainId,
+      safeAddress: remoteChain?.safeAddress,
+      chainId: remoteChain?.id,
       owners: [],
       threshold: 1,
       isReadOnly: false,
-      network: chainId
+      network: remoteChain?.id
     }),
-    [address, chainId]
+    [remoteChain?.safeAddress, remoteChain?.id]
   );
 };
 

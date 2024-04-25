@@ -85,7 +85,7 @@ export function TransactionStatusDialog({
                 target="_blank"
                 rel="noopener"
                 className="break-all text-primary hover:underline"
-                href={`${chain?.blockExplorers?.default?.url}tx/${data?.transactionHash}`}
+                href={`${chain?.blockExplorers?.default?.url}/tx/${data?.transactionHash}`}
               >
                 View on {chain?.blockExplorers?.default?.name}
               </a>

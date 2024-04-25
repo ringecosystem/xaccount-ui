@@ -15,11 +15,6 @@ const ConnectButton = ({ className }: ConnectButtonProps) => {
   const { isConnected, address, chainId } = useAccount();
   const supportChainId = useChainId();
 
-  // console.log('isConnected', isConnected);
-  // console.log('address', address);
-  // console.log('chainId', chainId);
-  // console.log('supportChainId', supportChainId);
-
   const isSupportedChain = chainId && supportChainId && chainId === supportChainId;
 
   return (
@@ -32,7 +27,9 @@ const ConnectButton = ({ className }: ConnectButtonProps) => {
       {!isConnected && openConnectModal ? (
         <Button onClick={openConnectModal}>Connect Wallet</Button>
       ) : null}
-      {isConnected && address && isSupportedChain ? <Account localAddress={address} /> : null}
+      {isConnected && address && isSupportedChain ? (
+        <Account localAddress={address} chainId={chainId} />
+      ) : null}
       {isConnected && !isSupportedChain ? <ErrorChain /> : null}
     </div>
   );

@@ -5,7 +5,6 @@ import { History } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import ConnectButton from '@/components/connect-button';
-// import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 

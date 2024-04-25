@@ -5,7 +5,7 @@ interface FeeApiResponse {
   code: number;
   data: {
     fee: string;
-    params: string;
+    params: `0x${string}`;
     gas: {
       gasForMessagingLayer: number;
       gasForMsgport: number;

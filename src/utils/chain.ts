@@ -55,9 +55,8 @@ export function getChains(): [ChainConfig, ...ChainConfig[]] {
 }
 
 // Returns the chain by its id
-export function getChainById(id: ChainId): Chain | undefined {
-  const chainConfig = chainConfigMap[id];
-  return chainConfig;
+export function getChainById(id?: ChainId): Chain | undefined {
+  return id ? chainConfigMap[id] : undefined;
 }
 
 // Returns the default chain configuration

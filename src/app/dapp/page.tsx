@@ -12,7 +12,7 @@ import {
   SendTransactionRequestParams
 } from '@safe-global/safe-apps-sdk';
 
-import { useAccount, useSendTransaction, useSignMessage, useSignTypedData } from 'wagmi';
+import { useAccount, useSignMessage, useSignTypedData } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
 import useGetSafeInfo from '@/hooks/useGetSafeInfo';
 import Spin from '@/components/ui/spin';
@@ -20,10 +20,10 @@ import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { TransactionStatusDialog } from '@/components/TransactionStatusDialog';
 import useChainStore from '@/store/chain';
 import { useShallow } from 'zustand/react/shallow';
 import SelectChainDialog from '@/components/SelectChainDialog';
+import useExecute from '@/hooks/useExecute';
 
 const Page = () => {
   const params = useSearchParams();
@@ -45,23 +45,20 @@ const Page = () => {
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
 
-  const [transactionResponse, setTransactionResponse] = useState<string>('pending');
-
   const { signMessageAsync } = useSignMessage();
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const { data: hash, sendTransactionAsync, isPending } = useSendTransaction();
+  const { execute, hash, isPending } = useExecute({
+    transactionInfo,
+    fromChainId: chainId as number,
+    toChainId: remoteChain?.id as number,
+    fromAddress: address as `0x${string}`,
+    toModuleAddress: remoteChain?.moduleAddress as `0x${string}`
+  });
 
-  const { isLoading: isClaimTransactionConfirming, data } = useTransactionStatus({
-    customToast: true,
-    hash,
-    onSuccess: () => {
-      setTransactionResponse('success');
-    },
-    onError: () => {
-      setTransactionResponse('failure');
-    }
+  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
+    hash
   });
 
   const communicator = useAppCommunicator(iframeRef, chain, {
@@ -135,7 +132,7 @@ const Page = () => {
     if (iframeRef?.current?.contentWindow) {
       iframeRef.current.contentWindow.location.href = appUrl as string;
     }
-  }, [chainId, address, isConnected, iframeRef, appUrl, setAppIsLoading]);
+  }, [remoteChain?.id, remoteChain?.safeAddress, isConnected, iframeRef, appUrl, setAppIsLoading]);
 
   const onIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
@@ -190,22 +187,13 @@ const Page = () => {
             setRemoteChainAlertOpen(true);
             return;
           }
-          sendTransactionAsync(transactionInfo as BaseTransaction)?.then((hash) => {
+          execute()?.then((hash) => {
+            // 此时给的hash是错误的，是本地区别的hash,但是对于目标的address来说无法捕获此hash事件
             communicator?.send({ safeTxHash: hash }, currentRequestId as string);
             setTransactionOpen(false);
             setCurrentRequestId(undefined);
           });
         }}
-      />
-      <TransactionStatusDialog
-        open={transactionResponse !== 'pending'}
-        onOpenChange={(open) => {
-          if (!open) {
-            setTransactionResponse('pending');
-          }
-        }}
-        transactionStatus={transactionResponse as any}
-        data={data}
       />
     </>
   );

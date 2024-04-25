@@ -38,7 +38,7 @@ import { useCallback } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { getCrossChainFee } from '@/server/gaslimit';
 import { useQuery } from '@tanstack/react-query';
-import useChainStore, { RemoteChain } from '@/store/chain';
+import { RemoteChain } from '@/store/chain';
 import {
   abi as xAccountFactoryAbi,
   address as xAccountFactoryAddress
@@ -46,6 +46,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import { updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress } from '@/database/xaccounts';
+import { useTransactionStore } from '@/store/transaction';
 
 const iface = new Interface(xAccountFactoryAbi);
 
@@ -95,7 +96,8 @@ export function CreateXAccount({
   onOpenChange,
   onFinish
 }: Props) {
-  const setRemoteChain = useChainStore((state) => state.setRemoteChain);
+  // const setRemoteChain = useChainStore((state) => state.setRemoteChain);
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -171,7 +173,12 @@ export function CreateXAccount({
             (data?.recoveryAccount || fromAddress) as `0x${string}`
           ],
           value: crossChainFeeData?.data?.fee ? BigInt(crossChainFeeData?.data?.fee) : 0n
-        })?.then(() => {
+        })?.then((hash) => {
+          addTransaction({
+            hash: hash,
+            chainId: fromChainId as number
+          });
+
           fromChainId &&
             updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
               fromChainId: fromChainId,
@@ -181,7 +188,7 @@ export function CreateXAccount({
             });
         });
     },
-    [toChain, crossChainFeeData?.data, fromChainId, fromAddress, writeContractAsync]
+    [toChain, crossChainFeeData?.data, fromChainId, fromAddress, addTransaction, writeContractAsync]
   );
 
   return (
@@ -283,7 +290,7 @@ export function CreateXAccount({
             <Button
               size="lg"
               type="submit"
-              className="w-full"
+              className="w-full rounded-3xl"
               isLoading={isPending || isClaimTransactionConfirming}
             >
               Create
