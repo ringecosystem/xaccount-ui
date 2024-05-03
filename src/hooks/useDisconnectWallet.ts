@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
 import { useDisconnect } from 'wagmi';
+import useReturnDashboard from './useReturnDashboard';
 
 export const useDisconnectWallet = () => {
   const { disconnect } = useDisconnect();
+  const returnDashboard = useReturnDashboard();
 
   const disconnectWallet = useCallback(
     async (address: `0x${string}`) => {
@@ -19,8 +21,9 @@ export const useDisconnectWallet = () => {
       }
 
       disconnect();
+      returnDashboard();
     },
-    [disconnect]
+    [disconnect, returnDashboard]
   );
   return { disconnectWallet };
 };

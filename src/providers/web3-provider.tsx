@@ -6,6 +6,7 @@ import { initXAccountsDB } from '@/database/xaccounts';
 import { initDappsRepositoryDB } from '@/database/dapps-repository';
 import TransactionManager from '@/components/transaction-manager';
 import { usePrevious } from 'react-use';
+import useReturnDashboard from '@/hooks/useReturnDashboard';
 
 type Web3ProviderProps = {
   children: ReactNode;
@@ -21,20 +22,24 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
 
   const removeRemoteChain = useChainStore((state) => state.removeRemoteChain);
 
+  const returnDashboard = useReturnDashboard();
+
   const previousChainId = usePrevious(chainId);
   const previousAddress = usePrevious(address);
 
   useEffect(() => {
     if (previousChainId && chainId !== previousChainId) {
       removeRemoteChain();
+      returnDashboard();
     }
-  }, [chainId, previousChainId, removeRemoteChain]);
+  }, [chainId, previousChainId, removeRemoteChain, returnDashboard]);
 
   useEffect(() => {
     if (previousAddress && address !== previousAddress) {
       removeRemoteChain();
+      returnDashboard();
     }
-  }, [address, previousAddress, removeRemoteChain]);
+  }, [address, previousAddress, removeRemoteChain, returnDashboard]);
 
   return (
     <>
