@@ -8,6 +8,8 @@ import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import useChainStore from '@/store/chain';
+import SelectChainDialog from '@/components/SelectChainDialog';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
@@ -20,9 +22,12 @@ export default function Home() {
   const router = useRouter();
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
+  const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
   const [deleteDappOpen, setDeleteDappOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  const remoteChain = useChainStore((state) => state.remoteChain);
 
   const {
     data: dapps,
@@ -56,6 +61,10 @@ export default function Home() {
     },
     [mutateAddItem, refetch]
   );
+
+  const handleSelectChainOpenChange = useCallback((open: boolean) => {
+    setRemoteChainAlertOpen(open);
+  }, []);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!selectedItem?.id) return;
@@ -107,6 +116,10 @@ export default function Home() {
                   key={item.id}
                   item={item}
                   onClick={() => {
+                    if (!remoteChain?.id) {
+                      setRemoteChainAlertOpen(true);
+                      return;
+                    }
                     router.push(`/dapp?appUrl=${item.url}`);
                   }}
                   onPreviewClick={() => {
@@ -144,6 +157,7 @@ export default function Home() {
         onConfirm={handleConfirmDelete}
       />
       <AppItemDetail item={selectedItem} open={previewOpen} onOpenChange={setPreviewOpen} />
+      <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={handleSelectChainOpenChange} />
     </div>
   );
 }
