@@ -41,7 +41,6 @@ const Page = () => {
     }))
   );
 
-  const chain = getChainById(chainId as number);
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
 
@@ -61,7 +60,7 @@ const Page = () => {
     hash
   });
 
-  const communicator = useAppCommunicator(iframeRef, chain, {
+  const communicator = useAppCommunicator(iframeRef, remoteChain, {
     onConfirmTransactions: (
       txs: BaseTransaction[],
       requestId: RequestId,

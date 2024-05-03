@@ -59,7 +59,9 @@ const useAppCommunicator = (
   handlers: UseAppCommunicatorHandlers
 ): AppCommunicator | undefined => {
   const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined);
-  const provider = useEthersProvider();
+  const provider = useEthersProvider({
+    chainId: chain?.id
+  });
 
   useEffect(() => {
     let communicatorInstance: AppCommunicator;
