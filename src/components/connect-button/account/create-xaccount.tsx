@@ -291,9 +291,10 @@ export function CreateXAccount({
               size="lg"
               type="submit"
               className="w-full rounded-3xl"
+              disabled={isLoading}
               isLoading={isPending || isClaimTransactionConfirming}
             >
-              Create
+              {isLoading ? <span className=" animate-pulse">Create</span> : 'Create'}
             </Button>
           </form>
         </Form>
