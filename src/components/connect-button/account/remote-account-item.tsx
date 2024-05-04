@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import Image from 'next/image';
+import { Copy, Power, ExternalLink } from 'lucide-react';
 
 import { useRemoteChainAddress } from '@/hooks/useRemoteChainAddress';
 import { ChainConfig } from '@/types/chains';
@@ -24,6 +25,7 @@ interface RemoteAccountItemProps {
     moduleAddress: `0x${string}`;
     chain: ChainConfig;
   }) => void;
+  onCopy?: (address: `0x${string}`) => void;
 }
 
 const RemoteAccountItem = ({
@@ -31,7 +33,8 @@ const RemoteAccountItem = ({
   toChain,
   remoteChain,
   localAddress,
-  onClick
+  onClick,
+  onCopy
 }: RemoteAccountItemProps) => {
   const { loading, safeAddress, moduleAddress, status } = useRemoteChainAddress({
     fromChainId: fromChainId ? BigInt(fromChainId) : undefined,
@@ -42,6 +45,14 @@ const RemoteAccountItem = ({
   const hasAccount = safeAddress !== '0x' && status === 'completed';
   const checked = hasAccount && remoteChain?.id === toChain.id;
   const Component = checked ? MenubarCheckboxItem : MenubarItem;
+
+  const handleCopy: React.MouseEventHandler<SVGSVGElement> = useCallback(
+    (e) => {
+      e.stopPropagation();
+      onCopy?.(safeAddress);
+    },
+    [safeAddress, onCopy]
+  );
 
   const handleClick = useCallback(() => {
     onClick?.({
@@ -73,7 +84,10 @@ const RemoteAccountItem = ({
             <TooltipContent>{toChain?.name}</TooltipContent>
           </Tooltip>
 
-          <div>{toShortAddress(safeAddress)}</div>
+          <div className="flex items-center gap-2">
+            <span>{toShortAddress(safeAddress)}</span>
+            <Copy className="h-4 w-4 hover:opacity-80" strokeWidth={1} onClick={handleCopy} />
+          </div>
         </div>
       ) : (
         <div className="text-muted-foreground">Create on {toChain?.name}</div>

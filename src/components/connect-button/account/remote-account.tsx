@@ -15,9 +15,10 @@ import RemoteAccountItem from './remote-account-item';
 type AccountProps = {
   localChain?: ChainConfig;
   localAddress?: `0x${string}`;
+  onCopy?: (address: `0x${string}`) => void;
 };
 
-const RemoteAccount = ({ localChain, localAddress }: AccountProps) => {
+const RemoteAccount = ({ localChain, localAddress, onCopy }: AccountProps) => {
   const [selectedChain, setSelectedChain] = useState<RemoteChain | null>(null);
 
   const { remoteChain, setRemoteChain } = useChainStore(
@@ -71,6 +72,7 @@ const RemoteAccount = ({ localChain, localAddress }: AccountProps) => {
                     localAddress={localAddress}
                     remoteChain={remoteChain}
                     onClick={handleClick}
+                    onCopy={onCopy}
                   />
                 )
               );

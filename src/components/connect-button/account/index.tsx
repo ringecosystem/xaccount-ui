@@ -33,7 +33,7 @@ const Account = ({ chainId, localAddress }: AccountProps) => {
   return (
     <Menubar className="h-[40px] gap-2 border-none p-0">
       {!!localAddress && <LocalAccount address={localAddress} onCopy={handleCopy} />}
-      {<RemoteAccount localChain={chain} localAddress={localAddress} />}
+      {<RemoteAccount localChain={chain} localAddress={localAddress} onCopy={handleCopy} />}
     </Menubar>
   );
 };
