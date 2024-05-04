@@ -126,6 +126,18 @@ const Page = () => {
       });
     }
   };
+  const handleSubmit = useCallback(() => {
+    if (!remoteChain) {
+      setRemoteChainAlertOpen(true);
+      return;
+    }
+    execute()?.then((hash) => {
+      // 此时给的hash是错误的，是本地区别的hash,但是对于目标的address来说无法捕获此hash事件
+      communicator?.send({ safeTxHash: hash }, currentRequestId as string);
+      setTransactionOpen(false);
+      setCurrentRequestId(undefined);
+    });
+  }, [remoteChain, execute, communicator, currentRequestId]);
 
   useEffect(() => {
     if (iframeRef?.current?.contentWindow) {
@@ -181,18 +193,7 @@ const Page = () => {
         transactionInfo={transactionInfo}
         dappItem={dappItem}
         confirmLoading={isPending || isClaimTransactionConfirming}
-        onSubmit={() => {
-          if (!remoteChain) {
-            setRemoteChainAlertOpen(true);
-            return;
-          }
-          execute()?.then((hash) => {
-            // 此时给的hash是错误的，是本地区别的hash,但是对于目标的address来说无法捕获此hash事件
-            communicator?.send({ safeTxHash: hash }, currentRequestId as string);
-            setTransactionOpen(false);
-            setCurrentRequestId(undefined);
-          });
-        }}
+        onSubmit={handleSubmit}
       />
     </>
   );
