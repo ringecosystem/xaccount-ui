@@ -48,7 +48,7 @@ const Page = () => {
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const { execute, hash, isPending } = useExecute({
+  const { execute, hash, isPending, crossChainFeeData } = useExecute({
     transactionInfo,
     fromChainId: chainId as number,
     toChainId: remoteChain?.id as number,
@@ -189,9 +189,9 @@ const Page = () => {
       <CrossChainExecutor
         open={transactionOpen}
         onOpenChange={handleOpenChange}
-        requestId={currentRequestId}
         transactionInfo={transactionInfo}
         dappItem={dappItem}
+        crossChainFeeData={crossChainFeeData}
         confirmLoading={isPending || isClaimTransactionConfirming}
         onSubmit={handleSubmit}
       />

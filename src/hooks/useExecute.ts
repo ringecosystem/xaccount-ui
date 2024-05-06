@@ -123,6 +123,7 @@ const useExecute = ({
     isLoading,
     isPending,
     execute,
+    crossChainFeeData,
     hash
   };
 };

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 定义返回数据的接口
-interface FeeApiResponse {
+export interface FeeApiResponse {
   code: number;
   data: {
     fee: string;
