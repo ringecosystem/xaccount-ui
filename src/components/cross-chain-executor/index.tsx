@@ -12,6 +12,7 @@ interface CrossChainExecutorProps {
   dappItem?: Item;
   transactionInfo?: BaseTransaction;
   crossChainFeeData?: FeeApiResponse;
+  isLoading?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: () => void;
@@ -21,6 +22,7 @@ const CrossChainExecutor = ({
   dappItem,
   transactionInfo,
   crossChainFeeData,
+  isLoading,
   open,
   onOpenChange,
   onSubmit
@@ -29,15 +31,16 @@ const CrossChainExecutor = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[600px]">
+      <DialogContent className="w-full sm:max-w-[650px]">
         <DialogHeader>
-          <DialogTitle className="text-xl">Cross-chain Call</DialogTitle>
+          <DialogTitle className="text-xl uppercase">Cross-chain Call</DialogTitle>
         </DialogHeader>
         <ActionContent
           remoteChain={remoteChain}
           transactionInfo={transactionInfo}
           dappItem={dappItem}
           crossChainFeeData={crossChainFeeData}
+          isLoading={isLoading}
           confirmLoading={confirmLoading}
           onSubmit={onSubmit}
         />

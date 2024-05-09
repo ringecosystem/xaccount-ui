@@ -14,6 +14,7 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import type { FeeApiResponse } from '@/server/gaslimit';
+import Spin from '@/components/ui/spin';
 
 interface ActionContentProps {
   remoteChain: State['remoteChain'];
@@ -21,6 +22,7 @@ interface ActionContentProps {
   dappItem?: Item;
   crossChainFeeData?: FeeApiResponse;
   confirmLoading?: boolean;
+  isLoading?: boolean;
   onSubmit: () => void;
 }
 
@@ -30,6 +32,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
   dappItem,
   crossChainFeeData,
   confirmLoading,
+  isLoading,
   onSubmit
 }) => {
   return (
@@ -47,26 +50,28 @@ const ActionContent: React.FC<ActionContentProps> = ({
           <div className="space-y-1">
             <h4 className=" font-bold capitalize">Message</h4>
             <div className=" space-y-2">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <h4 className="w-24 text-sm font-bold capitalize">Interact With:</h4>
                 <div className="text-sm text-muted-foreground">
                   {transactionInfo?.to}({dappItem?.name})
                 </div>
               </div>
-              <div className="flex items-center space-x-2 ">
+              <div className="flex items-center space-x-4">
                 <h4 className="w-24 text-sm font-bold capitalize">Value:</h4>
                 <div className="text-sm text-muted-foreground">
                   {transactionInfo?.value?.toString()}
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2 ">
-                <h4 className="w-24 text-sm  font-bold capitalize">data:</h4>
-                <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground">
-                  {transactionInfo?.data}
-                </ScrollArea>
+              <div className="flex items-center space-x-4">
+                <h4 className="w-24 flex-shrink-0  text-sm font-bold capitalize">data:</h4>
+                <div className=" flex-1">
+                  <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground ">
+                    {transactionInfo?.data}
+                  </ScrollArea>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 ">
+              <div className="flex items-center space-x-4">
                 <h4 className="w-24 text-sm font-bold capitalize">Operation:</h4>
                 <div className="text-sm text-muted-foreground">call</div>
               </div>
@@ -75,7 +80,11 @@ const ActionContent: React.FC<ActionContentProps> = ({
           <div className="space-y-1">
             <h4 className=" font-bold capitalize">fee</h4>
             <div className="text-sm text-muted-foreground">
-              {crossChainFeeData?.data?.fee || '0'}
+              {isLoading ? (
+                <Spin className="mr-2 size-3"></Spin>
+              ) : (
+                crossChainFeeData?.data?.fee || '0'
+              )}
             </div>
           </div>
           <Accordion type="single" collapsible className="!mt-0 w-full" defaultValue="">
@@ -90,7 +99,11 @@ const ActionContent: React.FC<ActionContentProps> = ({
                 <div className="space-y-1 pl-4">
                   <h4 className=" font-bold capitalize">params</h4>
                   <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground">
-                    {crossChainFeeData?.data?.params || '0x'}
+                    {isLoading ? (
+                      <Spin className="mr-2 size-3"></Spin>
+                    ) : (
+                      crossChainFeeData?.data?.params || '0x'
+                    )}
                   </ScrollArea>
                 </div>
               </AccordionContent>
@@ -104,9 +117,10 @@ const ActionContent: React.FC<ActionContentProps> = ({
           className="w-full rounded-3xl"
           onClick={onSubmit}
           isLoading={confirmLoading}
+          disabled={isLoading}
           size="lg"
         >
-          EXECUTE
+          {isLoading ? <span className=" animate-pulse">EXECUTE</span> : 'EXECUTE'}
         </Button>
         <p className="text-sm text-muted-foreground">
           this transaction will execute the remote call on {remoteChain?.name}
