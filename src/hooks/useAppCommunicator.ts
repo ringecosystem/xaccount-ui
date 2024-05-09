@@ -22,6 +22,9 @@ import { BaseTransaction } from '@/types/transaction';
 import type { SafeInfo } from './useGetSafeInfo';
 import { JsonRpcProvider } from 'ethers';
 
+// 200,000
+const DEFAULT_GAS_LIMIT = '0x30d40';
+
 interface TransactionsParams extends Omit<SendTransactionsParams, 'txs'> {
   txs: BaseTransaction[];
 }
@@ -103,9 +106,16 @@ const useAppCommunicator = (
       const params = msg.data.params as RPCPayload;
 
       try {
-        console.log(params);
         return await (provider as JsonRpcProvider)?.send(params.call, params.params);
       } catch (err) {
+        // extra logic for eth_estimateGas
+        switch (params?.call) {
+          case 'eth_estimateGas':
+            return Promise.resolve(DEFAULT_GAS_LIMIT);
+          default:
+            break;
+        }
+
         throw new Error((err as JsonRpcResponse).error);
       }
     });
@@ -116,7 +126,6 @@ const useAppCommunicator = (
       const transactions = txs.map(({ to, value, data }) => {
         return {
           to,
-          // value: value ? BigInt(value).toString() : '0',
           value: value ? BigInt(value) : 0n,
           data: data || '0x'
         };
