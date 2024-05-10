@@ -7,6 +7,7 @@ import { BaseTransaction } from '@/types/transaction';
 import { Item } from '@/database/dapps-repository';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import LoadingText from '@/components/loading-text';
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +15,6 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import type { FeeApiResponse } from '@/server/gaslimit';
-import Spin from '@/components/ui/spin';
 
 interface ActionContentProps {
   remoteChain: State['remoteChain'];
@@ -80,11 +80,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           <div className="space-y-1">
             <h4 className=" font-bold capitalize">fee</h4>
             <div className="text-sm text-muted-foreground">
-              {isLoading ? (
-                <Spin className="mr-2 size-3"></Spin>
-              ) : (
-                crossChainFeeData?.data?.fee || '0'
-              )}
+              <LoadingText isLoading={isLoading} text={crossChainFeeData?.data?.fee || '0'} />
             </div>
           </div>
           <Accordion type="single" collapsible className="!mt-0 w-full" defaultValue="">
@@ -99,11 +95,10 @@ const ActionContent: React.FC<ActionContentProps> = ({
                 <div className="space-y-1 pl-4">
                   <h4 className=" font-bold capitalize">params</h4>
                   <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground">
-                    {isLoading ? (
-                      <Spin className="mr-2 size-3"></Spin>
-                    ) : (
-                      crossChainFeeData?.data?.params || '0x'
-                    )}
+                    <LoadingText
+                      isLoading={isLoading}
+                      text={crossChainFeeData?.data?.params || '0x'}
+                    />
                   </ScrollArea>
                 </div>
               </AccordionContent>
