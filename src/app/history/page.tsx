@@ -110,7 +110,7 @@ const Page = () => {
 
           {isRefetching && (
             <div className="mx-auto flex h-10 w-full items-center justify-center gap-2 ">
-              <Spin className=" text-muted-foreground"></Spin>
+              <Spin className="text-muted-foreground"></Spin>
               <span>Loading more...</span>
             </div>
           )}
