@@ -1,6 +1,6 @@
 'use client';
 
-import { getChainById, isSameUrl } from '@/utils';
+import { isSameUrl } from '@/utils';
 import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
 import useAppIsLoading from './useAppIsLoading';
 import SafeAppIframe from './SafeAppIframe';
@@ -148,9 +148,9 @@ const Page = () => {
   const onIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
     if (!iframe || !isSameUrl(iframe.src, appUrl as string)) {
+      setAppIsLoading(false);
       return;
     }
-
     setAppIsLoading(false);
   }, [appUrl, iframeRef, setAppIsLoading]);
 
