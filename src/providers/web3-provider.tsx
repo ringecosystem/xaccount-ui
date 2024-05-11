@@ -11,12 +11,10 @@ type Web3ProviderProps = {
   children: ReactNode;
 };
 
-const initDatabases = () => {
-  if (typeof window !== 'undefined') {
-    initDappsRepositoryDB();
-    initXAccountsDB();
-  }
-};
+if (typeof window !== 'undefined') {
+  initDappsRepositoryDB();
+  initXAccountsDB();
+}
 export const Web3Provider = ({ children }: Web3ProviderProps) => {
   const { address } = useAccount();
 
@@ -44,10 +42,6 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     }
     previousAddress.current = address;
   }, [address, removeRemoteChain, returnDashboard]);
-
-  useEffect(() => {
-    initDatabases();
-  }, []);
 
   return (
     <>
