@@ -2,13 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AiOutlinePlus } from 'react-icons/ai';
-import { useRouter } from 'next/navigation';
 
 import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import useChainStore from '@/store/chain';
 import SelectChainDialog from '@/components/SelectChainDialog';
 
 import AddDapp, { FormReturn } from './add-dapp';
@@ -16,10 +14,10 @@ import AppItem from './app-item';
 import { AppDeleteConfirm } from './app-delete-confirm';
 import AppItemWrapper from './app-item-wrapper';
 import AppItemDetail from './app-item-detail';
+import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
 // appUrl
 export default function Home() {
-  const router = useRouter();
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
   const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
@@ -27,8 +25,7 @@ export default function Home() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  const remoteChain = useChainStore((state) => state.remoteChain);
-
+  const navigateToDapp = useNavigateToDapp();
   const {
     data: dapps,
     refetch,
@@ -116,11 +113,9 @@ export default function Home() {
                   key={item.id}
                   item={item}
                   onClick={() => {
-                    if (!remoteChain?.id) {
-                      setRemoteChainAlertOpen(true);
-                      return;
-                    }
-                    router.push(`/dapp?appUrl=${item.url}`);
+                    navigateToDapp(item).catch(() => {
+                      handleSelectChainOpenChange(true);
+                    });
                   }}
                   onPreviewClick={() => {
                     setSelectedItem(item);
@@ -156,7 +151,14 @@ export default function Home() {
         }}
         onConfirm={handleConfirmDelete}
       />
-      <AppItemDetail item={selectedItem} open={previewOpen} onOpenChange={setPreviewOpen} />
+      <AppItemDetail
+        item={selectedItem}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onOpenAlertChange={() => {
+          handleSelectChainOpenChange(true);
+        }}
+      />
       <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={handleSelectChainOpenChange} />
     </div>
   );

@@ -1,21 +1,25 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Item } from '@/database/dapps-repository';
 import IframeComponent from '@/components/IframeComponent';
 import { Card, CardContent } from '@/components/ui/card';
+import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
 interface AppItemDetailProps {
   item: Item | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenAlertChange?: () => void;
 }
 
-const AppItemDetail = ({ item, open, onOpenChange }: AppItemDetailProps) => {
-  const router = useRouter();
+const AppItemDetail = ({ item, open, onOpenChange, onOpenAlertChange }: AppItemDetailProps) => {
+  const navigateToDapp = useNavigateToDapp();
+
   const handleClick = () => {
-    router.push(`/dapp?appUrl=${item?.url}`);
+    navigateToDapp(item as Item)?.catch(() => {
+      onOpenAlertChange?.();
+    });
   };
 
   return (

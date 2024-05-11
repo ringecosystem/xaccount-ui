@@ -15,58 +15,44 @@ const IFRAME_SANDBOX_ALLOWED_FEATURES =
   'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-downloads allow-orientation-lock';
 
 const SafeAppIframe = ({ appUrl, iframeRef, onLoad, title }: SafeAppIFrameProps): ReactElement => {
+  const decodedAppUrl = decodeURIComponent(appUrl);
+  const { data: dapps } = useQuery({
+    queryKey: ['dapps'],
+    queryFn: getAllItems
+  });
+  const allowUrls = useMemo(() => dapps?.map((dapp) => dapp.url) || [], [dapps]);
+
+  useEffect(() => {
+    if (!allowUrls.includes(decodedAppUrl)) {
+      onLoad?.();
+    }
+  }, [allowUrls, decodedAppUrl, onLoad]);
+
+  if (allowUrls.includes(decodedAppUrl)) {
+    return (
+      <iframe
+        className=" block h-full w-full overflow-auto border-none"
+        id={`iframe-${appUrl}`}
+        ref={iframeRef}
+        src={appUrl}
+        title={title}
+        onLoad={onLoad}
+        sandbox={IFRAME_SANDBOX_ALLOWED_FEATURES}
+      />
+    );
+  }
   return (
-    <iframe
-      className=" block h-full w-full overflow-auto border-none"
-      id={`iframe-${appUrl}`}
-      ref={iframeRef}
-      src={appUrl}
-      title={title}
-      onLoad={onLoad}
-      sandbox={IFRAME_SANDBOX_ALLOWED_FEATURES}
-    />
+    <div className=" flex h-screen w-full items-center justify-center px-4 md:px-0">
+      <Alert className="-mt-[var(--header)] w-full md:max-w-[600px]">
+        <AlertCircle className="size-5" />
+        <AlertTitle>Oops!</AlertTitle>
+        <AlertDescription>
+          It looks like this app isn&apos;t on your Safe&apos;s approved list. To start using it,
+          please add it to your list of trusted apps.
+        </AlertDescription>
+      </Alert>
+    </div>
   );
-  // const decodedAppUrl = decodeURIComponent(appUrl);
-  // const { data: dapps } = useQuery({
-  //   queryKey: ['dapps'],
-  //   queryFn: getAllItems
-  // });
-  // const allowUrls = useMemo(() => dapps?.map((dapp) => dapp.url) || [], [dapps]);
-
-  // console.log('allowUrls', allowUrls);
-  // console.log('decodedAppUrl', decodedAppUrl);
-
-  // useEffect(() => {
-  //   if (!allowUrls.includes(decodedAppUrl)) {
-  //     onLoad?.();
-  //   }
-  // }, [allowUrls, decodedAppUrl, onLoad]);
-
-  // if (allowUrls.includes(decodedAppUrl)) {
-  //   return (
-  //     <iframe
-  //       className=" block h-full w-full overflow-auto border-none"
-  //       id={`iframe-${appUrl}`}
-  //       ref={iframeRef}
-  //       src={appUrl}
-  //       title={title}
-  //       onLoad={onLoad}
-  //       sandbox={IFRAME_SANDBOX_ALLOWED_FEATURES}
-  //     />
-  //   );
-  // }
-  // return (
-  //   <div className=" flex h-screen w-full items-center justify-center px-4 md:px-0">
-  //     <Alert className="-mt-[var(--header)] w-full md:max-w-[600px]">
-  //       <AlertCircle className="size-5" />
-  //       <AlertTitle>Oops!</AlertTitle>
-  //       <AlertDescription>
-  //         It looks like this app isn&apos;t on your Safe&apos;s approved list. To start using it,
-  //         please add it to your list of trusted apps.
-  //       </AlertDescription>
-  //     </Alert>
-  //   </div>
-  // );
 };
 
 export default SafeAppIframe;
