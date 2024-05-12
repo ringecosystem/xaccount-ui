@@ -26,7 +26,7 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import IframeComponent from '@/components/IframeComponent';
+import IframeComponent from '@/components/frame-component';
 import Loading from '@/components/loading';
 
 type HttpsUrl = `https://${string}`;

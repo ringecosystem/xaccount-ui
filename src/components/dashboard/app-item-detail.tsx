@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Item } from '@/database/dapps-repository';
-import IframeComponent from '@/components/IframeComponent';
+import IframeComponent from '@/components/frame-component';
 import { Card, CardContent } from '@/components/ui/card';
 import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
