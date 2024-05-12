@@ -70,15 +70,7 @@ const useAppCommunicator = (
     let communicatorInstance: AppCommunicator;
 
     const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement>) => {
-      communicatorInstance = new AppCommunicator(iframeRef, {
-        onMessage: (msg) => {
-          if (!msg.data) return;
-          console.log('app-communicator-message', msg?.data);
-        },
-        onError: (error) => {
-          console.log('app-communicator-error', error);
-        }
-      });
+      communicatorInstance = new AppCommunicator(iframeRef);
 
       setCommunicator(communicatorInstance);
     };

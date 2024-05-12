@@ -78,17 +78,10 @@ class AppCommunicator {
     const msg = error
       ? MessageFormatter.makeErrorResponse(requestId, data as string, sdkVersion)
       : MessageFormatter.makeResponse(requestId, data, sdkVersion);
-
-    console.log('msg', msg);
-
     this.iframeRef.current?.contentWindow?.postMessage(msg, '*');
   };
 
   handleIncomingMessage = async (msg: SDKMessageEvent): Promise<void> => {
-    if (msg?.data?.method) {
-      console.log('handleIncomingMessage', msg?.data?.method);
-    }
-
     const validMessage = this.isValidMessage(msg);
     const hasHandler = this.canHandleMessage(msg);
 
