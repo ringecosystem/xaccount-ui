@@ -49,10 +49,8 @@ import { useTransactionStore } from '@/store/transaction';
 
 const iface = new Interface(xAccountFactoryAbi);
 
-// 尝试获取函数定义
 const functionFragment = iface.getFunction('xDeploy');
 
-// 定义Zod验证模式
 const formSchema = z.object({
   recoveryAccount: z
     .string()
@@ -95,7 +93,6 @@ export function CreateXAccount({
   onOpenChange,
   onFinish
 }: Props) {
-  // const setRemoteChain = useChainStore((state) => state.setRemoteChain);
   const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -253,7 +250,7 @@ export function CreateXAccount({
                         <div className="flex items-center gap-2 pr-1">
                           <FormLabel className="w-20">refund</FormLabel>
                           <FormControl>
-                            <Input placeholder="0x..." {...field} />
+                            <Input placeholder="0x..." {...field} autoComplete="off" />
                           </FormControl>
                         </div>
                         <FormMessage />
@@ -290,7 +287,7 @@ export function CreateXAccount({
             <Button
               size="lg"
               type="submit"
-              className="w-full rounded-3xl"
+              className="w-full rounded-xl"
               disabled={
                 isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params
               }

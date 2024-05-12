@@ -1,9 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, type MutableRefObject, type ReactElement } from 'react';
+import { useEffect, type MutableRefObject, type ReactElement } from 'react';
 import { AlertCircle } from 'lucide-react';
 
-import { getAllItems } from '@/database/dapps-repository';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAllowedHost } from '@/hooks/useAllowedHost';
 type SafeAppIFrameProps = {
   appUrl: string;
   title?: string;
@@ -15,20 +14,15 @@ const IFRAME_SANDBOX_ALLOWED_FEATURES =
   'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-downloads allow-orientation-lock';
 
 const SafeAppIframe = ({ appUrl, iframeRef, onLoad, title }: SafeAppIFrameProps): ReactElement => {
-  const decodedAppUrl = decodeURIComponent(appUrl);
-  const { data: dapps } = useQuery({
-    queryKey: ['dapps'],
-    queryFn: getAllItems
-  });
-  const allowUrls = useMemo(() => dapps?.map((dapp) => dapp.url) || [], [dapps]);
+  const { isAllowed } = useAllowedHost(appUrl);
 
   useEffect(() => {
-    if (!allowUrls.includes(decodedAppUrl)) {
+    if (!isAllowed) {
       onLoad?.();
     }
-  }, [allowUrls, decodedAppUrl, onLoad]);
+  }, [isAllowed, onLoad]);
 
-  if (allowUrls.includes(decodedAppUrl)) {
+  if (isAllowed) {
     return (
       <iframe
         className=" block h-full w-full overflow-auto border-none"

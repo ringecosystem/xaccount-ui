@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Plus } from 'lucide-react';
 
 import { State } from '@/store/chain';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BaseTransaction } from '@/types/transaction';
 import { Item } from '@/database/dapps-repository';
-import { DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import LoadingText from '@/components/loading-text';
 import {
   Accordion,
@@ -22,9 +20,7 @@ interface ActionContentProps {
   transactionInfo?: BaseTransaction;
   dappItem?: Item;
   crossChainFeeData?: FeeApiResponse;
-  confirmLoading?: boolean;
   isLoading?: boolean;
-  onSubmit: () => void;
 }
 
 const ActionContent: React.FC<ActionContentProps> = ({
@@ -32,53 +28,63 @@ const ActionContent: React.FC<ActionContentProps> = ({
   transactionInfo,
   dappItem,
   crossChainFeeData,
-  confirmLoading,
-  isLoading,
-  onSubmit
+  isLoading
 }) => {
+  const messageInfoList = useMemo(() => {
+    if (!transactionInfo) return [];
+    return [
+      {
+        key: 'Interact With',
+        value: transactionInfo.to,
+        extra: dappItem?.name
+      },
+      {
+        key: 'Value',
+        value: transactionInfo.value?.toString()
+      },
+      {
+        key: 'Data',
+        value: transactionInfo.data
+      },
+      {
+        key: 'Operation',
+        value: 'call'
+      }
+    ];
+  }, [transactionInfo, dappItem?.name]);
+
   return (
     <div>
       <div className="grid gap-4 py-4">
         <div className="space-y-6">
-          <div className="space-y-1">
-            <h4 className=" font-bold capitalize">To Chain</h4>
+          <div className="space-y-2">
+            <h4 className="font-bold capitalize">To Chain</h4>
             <div className="text-sm uppercase text-muted-foreground">{remoteChain?.name}</div>
           </div>
-          <div className="space-y-1">
-            <h4 className=" font-bold capitalize">To xAccount</h4>
+          <div className="space-y-2">
+            <h4 className="font-bold capitalize">To xAccount</h4>
             <div className="text-sm text-muted-foreground">{remoteChain?.moduleAddress}</div>
           </div>
-          <div className="space-y-1">
-            <h4 className=" font-bold capitalize">Message</h4>
-            <div className=" space-y-2">
-              <div className="flex items-center space-x-4">
-                <h4 className="w-24 text-sm font-bold capitalize">Interact With:</h4>
-                <div className="text-sm text-muted-foreground">
-                  {transactionInfo?.to}({dappItem?.name})
+          <div className="space-y-2">
+            <h4 className="font-bold capitalize">Message</h4>
+            <div className="space-y-2 pl-0 md:pl-4">
+              {messageInfoList.map((messageInfo) => (
+                <div
+                  key={messageInfo.key}
+                  className="flex flex-col items-start space-x-0 space-y-2 md:flex-row md:items-center md:space-x-4 md:space-y-0"
+                >
+                  <h4 className="w-24 text-sm font-bold capitalize">{messageInfo.key}</h4>
+                  <div className="text-sm text-muted-foreground">
+                    <span>{messageInfo.value}</span>
+                    {messageInfo.extra && (
+                      <span className="hidden md:inline">({messageInfo.extra})</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <h4 className="w-24 text-sm font-bold capitalize">Value:</h4>
-                <div className="text-sm text-muted-foreground">
-                  {transactionInfo?.value?.toString()}
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <h4 className="w-24 flex-shrink-0  text-sm font-bold capitalize">data:</h4>
-                <div className=" flex-1">
-                  <ScrollArea className="max-h-60 break-all text-sm text-muted-foreground ">
-                    {transactionInfo?.data}
-                  </ScrollArea>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <h4 className="w-24 text-sm font-bold capitalize">Operation:</h4>
-                <div className="text-sm text-muted-foreground">call</div>
-              </div>
+              ))}
             </div>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <h4 className=" font-bold capitalize">fee</h4>
             <div className="text-sm text-muted-foreground">
               <LoadingText isLoading={isLoading} text={crossChainFeeData?.data?.fee || '0'} />
@@ -107,21 +113,6 @@ const ActionContent: React.FC<ActionContentProps> = ({
           </Accordion>
         </div>
       </div>
-      <DialogFooter className="flex !flex-col items-center justify-center gap-2">
-        <Button
-          type="submit"
-          className="w-full rounded-3xl"
-          onClick={onSubmit}
-          isLoading={confirmLoading}
-          disabled={isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params}
-          size="lg"
-        >
-          {isLoading ? <span className=" animate-pulse">EXECUTE</span> : 'EXECUTE'}
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          this transaction will execute the remote call on {remoteChain?.name}
-        </p>
-      </DialogFooter>
     </div>
   );
 };

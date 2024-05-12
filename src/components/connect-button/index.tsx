@@ -11,9 +11,9 @@ interface ConnectButtonProps {
   className?: string;
 }
 const ConnectButton = ({ className }: ConnectButtonProps) => {
+  const supportChainId = useChainId();
   const { openConnectModal } = useConnectModal();
   const { isConnected, address, chainId } = useAccount();
-  const supportChainId = useChainId();
 
   const isSupportedChain = chainId && supportChainId && chainId === supportChainId;
 

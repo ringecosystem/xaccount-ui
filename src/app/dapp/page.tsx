@@ -93,14 +93,11 @@ const Page = () => {
         });
       }
     },
-
     onGetEnvironmentInfo: () => ({
       origin: document.location.origin
     }),
     onGetSafeInfo: () => safeInfo,
-    onGetTxBySafeTxHash: (safeTxHash: string) => {
-      return safeTxHash;
-    }
+    onGetTxBySafeTxHash: (safeTxHash: string) => safeTxHash
   });
 
   const handleSelectChainOpenChange = (open: boolean) => {
@@ -179,9 +176,9 @@ const Page = () => {
       )}
       <div
         style={{
-          height: '100%',
           display: appIsLoading ? 'none' : 'block'
         }}
+        className="h-full"
       >
         <SafeAppIframe appUrl={appUrl as string} iframeRef={iframeRef} onLoad={onIframeLoad} />
       </div>

@@ -1,6 +1,13 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Item } from '@/database/dapps-repository';
 import useChainStore from '@/store/chain';
+import { Button } from '@/components/ui/button';
 
 import ActionContent from './ActionContent';
 
@@ -39,11 +46,26 @@ const CrossChainExecutor = ({
           remoteChain={remoteChain}
           transactionInfo={transactionInfo}
           dappItem={dappItem}
-          crossChainFeeData={crossChainFeeData}
           isLoading={isLoading}
-          confirmLoading={confirmLoading}
-          onSubmit={onSubmit}
+          crossChainFeeData={crossChainFeeData}
         />
+        <DialogFooter className="flex !flex-col items-center justify-center gap-2">
+          <Button
+            type="submit"
+            className="w-full rounded-xl"
+            onClick={onSubmit}
+            isLoading={confirmLoading}
+            disabled={
+              isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params
+            }
+            size="lg"
+          >
+            {isLoading ? <span className="animate-pulse">EXECUTE</span> : 'EXECUTE'}
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            this transaction will execute the remote call on {remoteChain?.name}
+          </p>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
