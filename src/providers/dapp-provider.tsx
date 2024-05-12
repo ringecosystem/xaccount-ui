@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
 import { ThemeProvider } from 'next-themes';
 
 import { config } from '@/config/wagmi';

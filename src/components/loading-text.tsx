@@ -1,6 +1,6 @@
 import React from 'react';
-import Spin from '@/components/ui/spin';
 
+import Spin from '@/components/ui/spin';
 import { cn } from '@/lib/utils';
 
 type LoadingTextProps = {

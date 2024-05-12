@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { JsonRpcProvider } from 'ethers';
+import { Config, readContract } from '@wagmi/core';
+
 import {
   getXAccountByFromChainIdAndToChainIdAndFromAddress,
   addXAccount,
   updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress
 } from '@/database/xaccounts';
 import { config } from '@/config/wagmi';
-import { Config, readContract } from '@wagmi/core';
 import {
   abi as xAccountFactoryAbi,
   address as xAccountFactoryAddress

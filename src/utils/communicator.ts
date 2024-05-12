@@ -1,12 +1,16 @@
-import type { MutableRefObject } from 'react';
-import type {
+import {
   SDKMessageEvent,
   MethodToResponse,
   ErrorResponse,
-  RequestId
+  RequestId,
+  getSDKVersion,
+  Methods,
+  MessageFormatter
 } from '@safe-global/safe-apps-sdk';
-import { getSDKVersion, Methods, MessageFormatter } from '@safe-global/safe-apps-sdk';
+
 import { asError } from './as-error';
+
+import type { MutableRefObject } from 'react';
 
 const dec2hex = (dec: number): string => dec.toString(16).padStart(2, '0');
 

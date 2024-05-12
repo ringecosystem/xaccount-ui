@@ -1,8 +1,8 @@
-import { getAllItems } from '@/database/dapps-repository';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, type MutableRefObject, type ReactElement } from 'react';
 import { AlertCircle } from 'lucide-react';
 
+import { getAllItems } from '@/database/dapps-repository';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 type SafeAppIFrameProps = {
   appUrl: string;

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useTransactionStore } from '@/store/transaction';
+
 import TransactionStatus from './transaction-status';
 
 const TransactionManager = () => {

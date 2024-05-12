@@ -1,4 +1,6 @@
 import React from 'react';
+import { CheckCircle, XCircle, Loader } from 'lucide-react';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import { getChainById } from '@/utils';
 
 interface TransactionStatusDialogProps {

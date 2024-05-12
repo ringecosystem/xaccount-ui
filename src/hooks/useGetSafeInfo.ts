@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import useChainStore from '@/store/chain';
 
 export type SafeInfo = {

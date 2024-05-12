@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useDisconnect } from 'wagmi';
+
 import useReturnDashboard from './useReturnDashboard';
 
 export const useDisconnectWallet = () => {

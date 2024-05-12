@@ -1,7 +1,11 @@
-import type { MutableRefObject } from 'react';
 import { useEffect, useState } from 'react';
-
 import { Chain } from '@rainbow-me/rainbowkit';
+import { Methods } from '@safe-global/safe-apps-sdk';
+import { JsonRpcProvider } from 'ethers';
+
+import AppCommunicator from '@/utils/communicator';
+import { useEthersProvider } from '@/utils/ethers-adapters';
+import { BaseTransaction } from '@/types/transaction';
 
 import type {
   EIP712TypedData,
@@ -13,14 +17,8 @@ import type {
   SendTransactionsParams,
   SignTypedMessageParams
 } from '@safe-global/safe-apps-sdk';
-import { Methods } from '@safe-global/safe-apps-sdk';
-
-import AppCommunicator from '@/utils/communicator';
-
-import { useEthersProvider } from '@/utils/ethers-adapters';
-import { BaseTransaction } from '@/types/transaction';
+import type { MutableRefObject } from 'react';
 import type { SafeInfo } from './useGetSafeInfo';
-import { JsonRpcProvider } from 'ethers';
 
 // 200,000
 const DEFAULT_GAS_LIMIT = '0x30d40';

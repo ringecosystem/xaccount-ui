@@ -31,7 +31,7 @@ const CrossChainExecutor = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[650px]">
+      <DialogContent className="w-full md:max-w-[650px]">
         <DialogHeader>
           <DialogTitle className="text-xl uppercase">Cross-chain Call</DialogTitle>
         </DialogHeader>

@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { Copy, Power, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useAccount } from 'wagmi';
 
 import { useDisconnectWallet } from '@/hooks/useDisconnectWallet';
 import { getChainById, toShortAddress } from '@/utils';
@@ -13,7 +14,6 @@ import {
 } from '@/components/ui/menubar';
 
 import ChainButton from './chain-button';
-import { useAccount } from 'wagmi';
 
 type AccountProps = {
   address: `0x${string}`;

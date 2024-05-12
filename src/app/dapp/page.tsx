@@ -1,9 +1,4 @@
 'use client';
-
-import { isSameUrl } from '@/utils';
-import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
-import useAppIsLoading from './useAppIsLoading';
-import SafeAppIframe from './SafeAppIframe';
 import { useCallback, useEffect, useState } from 'react';
 import {
   EIP712TypedData,
@@ -11,9 +6,10 @@ import {
   RequestId,
   SendTransactionRequestParams
 } from '@safe-global/safe-apps-sdk';
-
 import { useAccount, useSignMessage, useSignTypedData } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
+
 import useGetSafeInfo from '@/hooks/useGetSafeInfo';
 import Spin from '@/components/ui/spin';
 import CrossChainExecutor from '@/components/cross-chain-executor';
@@ -21,9 +17,13 @@ import { BaseTransaction } from '@/types/transaction';
 import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import useChainStore from '@/store/chain';
-import { useShallow } from 'zustand/react/shallow';
+import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
+import { isSameUrl } from '@/utils';
 import SelectChainDialog from '@/components/select-chain-dialog';
 import useExecute from '@/hooks/useExecute';
+
+import SafeAppIframe from './SafeAppIframe';
+import useAppIsLoading from './useAppIsLoading';
 
 const Page = () => {
   const params = useSearchParams();

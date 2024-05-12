@@ -1,4 +1,3 @@
-import type { Chain } from '@rainbow-me/rainbowkit';
 
 import {
   ethereum,
@@ -11,9 +10,10 @@ import {
   ethereumSepolia,
   arbitrumSepolia
 } from '@/config/chains';
-
 import * as chains from '@/config/chains';
 import { ChainConfig, ChainId } from '@/types/chains';
+
+import type { Chain } from '@rainbow-me/rainbowkit';
 
 // Map object to return a specific chain configuration
 // Using Record<ChainId, ChainConfig> to ensure type safety

@@ -1,6 +1,13 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useWriteContract } from 'wagmi';
+import { Interface } from 'ethers';
+import { Plus } from 'lucide-react';
+import { isAddress } from 'viem';
+import { useForm } from 'react-hook-form';
+import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,9 +21,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-import { useWriteContract } from 'wagmi';
-import { Interface } from 'ethers';
 import {
   Accordion,
   AccordionContent,
@@ -31,13 +35,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import { isAddress } from 'viem';
-import { useForm } from 'react-hook-form';
-import { useCallback } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { getCrossChainFee } from '@/server/gaslimit';
-import { useQuery } from '@tanstack/react-query';
 import { RemoteChain } from '@/store/chain';
 import {
   abi as xAccountFactoryAbi,
@@ -269,7 +268,7 @@ export function CreateXAccount({
               <div className="flex items-center gap-2">
                 <Label className="w-20 text-sm capitalize text-muted-foreground">gas limit</Label>
                 {isLoading ? (
-                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-8 w-full" />
                 ) : (
                   <Input
                     value={(crossChainFeeData?.data?.gas?.total || 0)?.toLocaleString()}
@@ -279,8 +278,9 @@ export function CreateXAccount({
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-20 text-sm capitalize text-muted-foreground">fee</Label>
+
                 {isLoading ? (
-                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-8 w-full" />
                 ) : (
                   <Input value={(crossChainFeeData?.data?.fee || 0)?.toLocaleString()} disabled />
                 )}

@@ -1,14 +1,13 @@
 'use client';
 
 import * as React from 'react';
+import { useTheme } from 'next-themes';
 import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit';
 
 import { APP_NAME } from '@/config/site';
-
-import '@rainbow-me/rainbowkit/styles.css';
-import { useTheme } from 'next-themes';
 import useMounted from '@/hooks/useMounted';
 import Spin from '@/components/ui/spin';
+import '@rainbow-me/rainbowkit/styles.css';
 
 export const dark = darkTheme({
   borderRadius: 'medium',

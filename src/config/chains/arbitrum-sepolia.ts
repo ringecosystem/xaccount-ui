@@ -1,7 +1,9 @@
 // ethereum-sepolia
 
 import { arbitrumSepolia as arbitrumSepoliaBase } from 'wagmi/chains';
+
 import { ChainId, type ChainConfig } from '@/types/chains';
+
 import { getRpcUrl } from '../rpc-url';
 
 export const arbitrumSepolia: ChainConfig = {

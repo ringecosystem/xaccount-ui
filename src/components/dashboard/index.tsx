@@ -1,20 +1,20 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AiOutlinePlus } from 'react-icons/ai';
+import { Plus } from 'lucide-react';
 
 import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SelectChainDialog from '@/components/select-chain-dialog';
+import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
 import { AppDeleteConfirm } from './app-delete-confirm';
 import AppItemWrapper from './app-item-wrapper';
 import AppItemDetail from './app-item-detail';
-import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
 // appUrl
 export default function Home() {
@@ -103,7 +103,7 @@ export default function Home() {
                     className=" flex h-full w-full flex-col items-center justify-center gap-2"
                     title="Add App"
                   >
-                    <AiOutlinePlus className="text-[50px]" />
+                    <Plus size={48} strokeWidth={2} />
                     <p className="text-sm font-bold text-muted-foreground">Add Dapp</p>
                   </div>
                 </CardContent>

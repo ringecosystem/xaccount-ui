@@ -1,8 +1,10 @@
-import { ChainConfig } from '@/types/chains';
 import { FallbackProvider, JsonRpcProvider } from 'ethers';
 import { useMemo } from 'react';
-import type { Client, Transport } from 'viem';
 import { type Config, useClient } from 'wagmi';
+
+import { ChainConfig } from '@/types/chains';
+
+import type { Client, Transport } from 'viem';
 
 export function clientToProvider(client: Client<Transport, ChainConfig>) {
   const { chain, transport } = client;

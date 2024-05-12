@@ -4,10 +4,10 @@ import { useCopyToClipboard } from 'react-use';
 import { toast } from 'sonner';
 
 import { Menubar } from '@/components/ui/menubar';
+import { getChainById } from '@/utils';
 
 import LocalAccount from './local-account';
 import RemoteAccount from './remote-account';
-import { getChainById } from '@/utils';
 
 type AccountProps = {
   chainId?: number;

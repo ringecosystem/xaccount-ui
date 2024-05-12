@@ -1,7 +1,8 @@
-import { Item } from '@/database/dapps-repository';
-import useChainStore from '@/store/chain';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
+
+import { Item } from '@/database/dapps-repository';
+import useChainStore from '@/store/chain';
 
 const useNavigateToDapp = () => {
   const remoteChain = useChainStore((state) => state.remoteChain);
