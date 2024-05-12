@@ -10,7 +10,7 @@ type LoadingTextProps = {
 };
 
 const LoadingText: React.FC<LoadingTextProps> = ({ isLoading, text, spinClassName }) => {
-  return <>{isLoading ? <Spin className={cn('mr-2 size-3', spinClassName)} /> : text}</>;
+  return <>{isLoading ? <Spin className={cn('mr-2 size-[0.875rem]', spinClassName)} /> : text}</>;
 };
 
 export default LoadingText;
