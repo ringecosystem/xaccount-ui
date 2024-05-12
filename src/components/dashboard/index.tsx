@@ -7,7 +7,7 @@ import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import SelectChainDialog from '@/components/SelectChainDialog';
+import SelectChainDialog from '@/components/select-chain-dialog';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';

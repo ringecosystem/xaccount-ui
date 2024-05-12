@@ -22,7 +22,7 @@ import { Item, searchItemByUrl } from '@/database/dapps-repository';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import useChainStore from '@/store/chain';
 import { useShallow } from 'zustand/react/shallow';
-import SelectChainDialog from '@/components/SelectChainDialog';
+import SelectChainDialog from '@/components/select-chain-dialog';
 import useExecute from '@/hooks/useExecute';
 
 const Page = () => {
