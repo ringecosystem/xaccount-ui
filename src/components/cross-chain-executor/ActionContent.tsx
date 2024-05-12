@@ -112,7 +112,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
           className="w-full rounded-3xl"
           onClick={onSubmit}
           isLoading={confirmLoading}
-          disabled={isLoading}
+          disabled={isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params}
           size="lg"
         >
           {isLoading ? <span className=" animate-pulse">EXECUTE</span> : 'EXECUTE'}
