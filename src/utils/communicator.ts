@@ -1,12 +1,11 @@
 import {
   SDKMessageEvent,
   MethodToResponse,
-  ErrorResponse,
-  RequestId,
   getSDKVersion,
-  Methods,
   MessageFormatter
 } from '@safe-global/safe-apps-sdk';
+
+import { ErrorResponse, Methods, RequestId } from '@/types/communicator';
 
 import { asError } from './as-error';
 

@@ -3,10 +3,18 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { WaitForTransactionReceiptData } from 'wagmi/query';
 
-import { ChainId } from '@/types/chains';
 import { getChainById } from '@/utils';
+import {
+  pendingToastClassName,
+  failedToastClassName,
+  successToastClassName,
+  CrossChainTransactionToast,
+  SingleChainTransactionToast
+} from '@/components/chain-transaction-toast';
 
 import { useLatestCallback } from './useLatestCallback';
+
+import type { ChainId } from '@/types/chains';
 
 export type SuccessType = (data: WaitForTransactionReceiptData<Config, ChainId>) => void;
 export type ErrorType = (data: WaitForTransactionReceiptData<Config, ChainId>) => void | null;
@@ -14,24 +22,23 @@ export type ErrorType = (data: WaitForTransactionReceiptData<Config, ChainId>) =
 export interface UseTransactionStatusByChainIdProps {
   hash?: `0x${string}` | undefined;
   chainId?: number;
+  targetChainId?: number;
   onSuccess?: SuccessType;
   onError?: ErrorType;
-  customToast?: boolean;
 }
 
 export function useTransactionStatusByChainId({
   hash,
   chainId,
+  targetChainId,
   onSuccess,
-  onError,
-  customToast = false
+  onError
 }: UseTransactionStatusByChainIdProps) {
-  const { data, isLoading, isSuccess, isError, ...args } = useWaitForTransactionReceipt({
+  const { data, isLoading, isSuccess, isError } = useWaitForTransactionReceipt({
     hash,
     chainId,
     query: {
-      enabled: !!hash && !!chainId,
-      refetchInterval: 10000
+      enabled: !!hash && !!chainId
     }
   });
 
@@ -47,29 +54,39 @@ export function useTransactionStatusByChainId({
       } else {
         onErrorLatest?.(data);
       }
+
       const chain = getChainById(data.chainId);
-      const statusMessage = isSuccess ? 'The transaction was successful' : 'The transaction failed';
-      const toastClassName = isSuccess
-        ? {
-            toast: 'group-[.toaster]:border-green-500',
-            closeButton: 'group-[.toast]:bg-green-500 group-[.toast]:border-green-500'
-          }
-        : {
-            toast: 'group-[.toaster]:border-red-500',
-            closeButton: 'group-[.toast]:bg-red-500 group-[.toast]:border-red-500'
-          };
-      if (!customToast) {
+
+      if (targetChainId) {
+        const toastClassName = isSuccess ? pendingToastClassName : failedToastClassName;
+
+        const targetChain = getChainById(targetChainId);
+
+        const statusMessage =
+          typeof chain !== 'undefined' && typeof targetChain !== 'undefined' ? (
+            <CrossChainTransactionToast
+              transactionHash={data.transactionHash}
+              status={isSuccess ? 'pending' : 'failed'}
+              chain={chain}
+              targetChain={targetChain}
+            />
+          ) : null;
+
         toastRef.current = toast(statusMessage, {
-          description: (
-            <a
-              target="_blank"
-              rel="noopener"
-              className="break-all text-primary hover:underline"
-              href={`${chain?.blockExplorers?.default?.url}/tx/${data.transactionHash}`}
-            >
-              {data.transactionHash}
-            </a>
-          ),
+          classNames: toastClassName
+        });
+      } else {
+        const toastClassName = isSuccess ? successToastClassName : failedToastClassName;
+
+        const statusMessage = isSuccess
+          ? 'The transaction was successful'
+          : 'The transaction failed';
+
+        toastRef.current = toast(statusMessage, {
+          description:
+            typeof chain !== 'undefined' ? (
+              <SingleChainTransactionToast chain={chain} transactionHash={data.transactionHash} />
+            ) : null,
           classNames: toastClassName
         });
       }
@@ -80,7 +97,7 @@ export function useTransactionStatusByChainId({
         toast.dismiss(toastRef.current);
       }
     };
-  }, [isSuccess, isError, data, onSuccessLatest, onErrorLatest, customToast]);
+  }, [isSuccess, isError, data, onSuccessLatest, onErrorLatest, targetChainId]);
 
   return { isSuccess, isError, isLoading, data };
 }

@@ -35,19 +35,16 @@ export async function getCrossChainFee({
     return Promise.reject('Invalid parameters');
   }
 
-  const response = await axios.get<FeeApiResponse>(
-    `https://msgport-api.darwinia.network/ormp/fee`,
-    {
-      params: {
-        from_chain_id: fromChainId,
-        to_chain_id: toChainId,
-        from_address: fromAddress,
-        to_address: toAddress,
-        payload: payload,
-        refund_address: refundAddress
-      }
+  const response = await axios.get<FeeApiResponse>('https://api.msgport.xyz/ormp/fee', {
+    params: {
+      from_chain_id: fromChainId,
+      to_chain_id: toChainId,
+      from_address: fromAddress,
+      to_address: toAddress,
+      payload: payload,
+      refund_address: refundAddress
     }
-  );
+  });
 
   return response?.data;
 }

@@ -172,7 +172,8 @@ export function CreateXAccount({
         })?.then((hash) => {
           addTransaction({
             hash: hash,
-            chainId: fromChainId as number
+            chainId: fromChainId as number,
+            targetChainId: toChain?.id
           });
 
           fromChainId &&

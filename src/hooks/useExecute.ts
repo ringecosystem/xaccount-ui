@@ -104,7 +104,8 @@ const useExecute = ({
     })?.then((hash) => {
       addTransaction({
         hash,
-        chainId: fromChainId as number
+        chainId: fromChainId as number,
+        targetChainId: toChainId
       });
 
       return hash;

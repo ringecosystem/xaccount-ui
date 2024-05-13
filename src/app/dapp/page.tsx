@@ -1,11 +1,5 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  EIP712TypedData,
-  Methods,
-  RequestId,
-  SendTransactionRequestParams
-} from '@safe-global/safe-apps-sdk';
 import { useAccount, useSignMessage, useSignTypedData } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
@@ -21,6 +15,12 @@ import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunic
 import { isSameUrl } from '@/utils';
 import SelectChainDialog from '@/components/select-chain-dialog';
 import useExecute from '@/hooks/useExecute';
+import {
+  EIP712TypedData,
+  Methods,
+  RequestId,
+  SendTransactionRequestParams
+} from '@/types/communicator';
 
 import SafeAppIframe from './SafeAppIframe';
 import useAppIsLoading from './useAppIsLoading';

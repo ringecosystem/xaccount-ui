@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Chain } from '@rainbow-me/rainbowkit';
-import { Methods } from '@safe-global/safe-apps-sdk';
 import { JsonRpcProvider } from 'ethers';
 
 import AppCommunicator from '@/utils/communicator';
 import { useEthersProvider } from '@/utils/ethers-adapters';
 import { BaseTransaction } from '@/types/transaction';
-
-import type {
+import {
   EIP712TypedData,
   EnvironmentInfo,
   GetTxBySafeTxHashParams,
-  RequestId,
+  Methods,
   RPCPayload,
+  RequestId,
   SendTransactionRequestParams,
   SendTransactionsParams,
   SignTypedMessageParams
-} from '@safe-global/safe-apps-sdk';
+} from '@/types/communicator';
+
 import type { MutableRefObject } from 'react';
 import type { SafeInfo } from './useGetSafeInfo';
 
