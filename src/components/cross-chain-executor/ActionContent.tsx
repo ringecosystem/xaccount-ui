@@ -75,7 +75,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
                 >
                   <h4 className="w-24 text-sm font-bold capitalize">{messageInfo.key}</h4>
                   <div className="text-sm text-muted-foreground">
-                    <span>{messageInfo.value}</span>
+                    <span className=" break-all">{messageInfo.value}</span>
                     {messageInfo.extra && (
                       <span className="hidden md:inline">({messageInfo.extra})</span>
                     )}

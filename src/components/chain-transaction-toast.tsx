@@ -36,7 +36,7 @@ export const CrossChainTransactionToast = ({
 
   const msgScanInfo = {
     url: `https://scan.msgport.xyz/messages/${transactionHash}`,
-    name: 'MsgScan'
+    name: 'Msgport Scan'
   };
   const statusStyles = {
     success: {
