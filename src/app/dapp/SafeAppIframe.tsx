@@ -14,13 +14,17 @@ const IFRAME_SANDBOX_ALLOWED_FEATURES =
   'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-downloads allow-orientation-lock';
 
 const SafeAppIframe = ({ appUrl, iframeRef, onLoad, title }: SafeAppIFrameProps): ReactElement => {
-  const { isAllowed } = useAllowedHost(appUrl);
+  const { isAllowed, isLoading } = useAllowedHost(appUrl);
 
   useEffect(() => {
-    if (!isAllowed) {
+    if (!isLoading && !isAllowed) {
       onLoad?.();
     }
-  }, [isAllowed, onLoad]);
+  }, [isLoading, isAllowed, onLoad]);
+
+  if (isLoading) {
+    return <span>Loading...</span>;
+  }
 
   if (isAllowed) {
     return (
@@ -36,16 +40,18 @@ const SafeAppIframe = ({ appUrl, iframeRef, onLoad, title }: SafeAppIFrameProps)
     );
   }
   return (
-    <div className=" flex h-screen w-full items-center justify-center px-4 md:px-0">
-      <Alert className="-mt-[var(--header)] w-full md:max-w-[600px]">
-        <AlertCircle className="size-5" />
-        <AlertTitle>Oops!</AlertTitle>
-        <AlertDescription>
-          It looks like this app isn&apos;t on your Safe&apos;s approved list. To start using it,
-          please add it to your list of trusted apps.
-        </AlertDescription>
-      </Alert>
-    </div>
+    !isLoading && (
+      <div className=" flex h-screen w-full items-center justify-center px-4 md:px-0">
+        <Alert className="-mt-[var(--header)] w-full md:max-w-[600px]">
+          <AlertCircle className="size-5" />
+          <AlertTitle>Oops!</AlertTitle>
+          <AlertDescription>
+            It looks like this app isn&apos;t on your Safe&apos;s approved list. To start using it,
+            please add it to your list of trusted apps.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
   );
 };
 
