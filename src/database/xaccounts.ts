@@ -1,7 +1,7 @@
 'use client';
 import { IDBPDatabase, openDB } from 'idb';
 
-export type StatusType = 'create' | 'pending' | 'completed';
+export type StatusType = 'created' | 'pending' | 'completed';
 
 export interface XAccountItem {
   id?: number;
@@ -11,10 +11,11 @@ export interface XAccountItem {
   toSafeAddress: `0x${string}`;
   toModuleAddress: `0x${string}`;
   status: StatusType;
+  transactionHash?: `0x${string}`;
 }
 
 export const DAPPS_DB_NAME = 'xAccounts';
-const version = 2;
+const version = 3;
 
 export async function initXAccountsDB() {
   const db = await openDB(DAPPS_DB_NAME, version, {
@@ -48,6 +49,10 @@ export async function initXAccountsDB() {
       }
       if (!xAccountsStore.indexNames.contains('status')) {
         xAccountsStore.createIndex('status', 'status', { unique: false });
+      }
+
+      if (!xAccountsStore.indexNames.contains('transactionHash')) {
+        xAccountsStore.createIndex('transactionHash', 'transactionHash', { unique: false });
       }
 
       if (!xAccountsStore.indexNames.contains('fromChainIdAndToChainIdAndFromAddress')) {
@@ -102,16 +107,16 @@ export async function addXAccount(xAccount: XAccountItem) {
   }
 }
 
-export type UpdateXAccountByFromChainIdAndToChainIdAndFromAddressParams = {
+export type GetXAccountParams = {
   fromChainId: number;
   toChainId: number;
   fromAddress: string;
 };
-export async function getXAccountByFromChainIdAndToChainIdAndFromAddress({
+export async function getXAccount({
   fromChainId,
   toChainId,
   fromAddress
-}: UpdateXAccountByFromChainIdAndToChainIdAndFromAddressParams): Promise<XAccountItem | undefined> {
+}: GetXAccountParams): Promise<XAccountItem | undefined> {
   const db = await getDB();
 
   const transaction = db.transaction('xAccounts', 'readonly');
@@ -134,36 +139,46 @@ export async function getXAccountByFromChainIdAndToChainIdAndFromAddress({
   return xAccountItem;
 }
 
-export type UpdateXAccountStatusByFromChainIdAndToChainIdAndFromAddressParams = {
+export type UpdatableXAccountFields = {
+  toSafeAddress?: `0x${string}`;
+  toModuleAddress?: `0x${string}`;
+  status?: StatusType;
+  transactionHash?: string;
+};
+
+export type UpdateXAccountParams = {
   fromChainId: number;
   toChainId: number;
-  fromAddress: string;
-  status: StatusType;
+  fromAddress: `0x${string}`;
+  updates: Partial<
+    Pick<XAccountItem, 'toSafeAddress' | 'toModuleAddress' | 'status' | 'transactionHash'>
+  >;
 };
-export async function updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
+export async function updateXAccount({
   fromChainId,
   toChainId,
   fromAddress,
-  status
-}: UpdateXAccountStatusByFromChainIdAndToChainIdAndFromAddressParams) {
+  updates
+}: UpdateXAccountParams) {
   try {
     const db = await getDB();
     const tx = db.transaction('xAccounts', 'readwrite');
     const store = tx.objectStore('xAccounts');
     const index = store.index('fromChainId');
     const range = IDBKeyRange.only(fromChainId);
+
     for await (const cursor of index.iterate(range)) {
       if (
         cursor.value.toChainId === toChainId &&
         cursor.value.fromAddress.toLowerCase() === fromAddress.toLowerCase()
       ) {
         const xAccountItem = cursor.value;
-        const updatedXAccountItem = { ...xAccountItem, status };
+        const updatedXAccountItem = { ...xAccountItem, ...updates };
         await cursor.update(updatedXAccountItem);
       }
     }
   } catch (error) {
-    console.error('Error updating xAccount status:', error);
+    console.error('Error updating xAccount:', error);
   }
 }
 

@@ -44,7 +44,7 @@ import {
 } from '@/config/abi/xAccountFactory';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress } from '@/database/xaccounts';
+import { updateXAccount } from '@/database/xaccounts';
 import { useTransactionStore } from '@/store/transaction';
 
 const iface = new Interface(xAccountFactoryAbi);
@@ -176,13 +176,17 @@ export function CreateXAccount({
             targetChainId: toChain?.id
           });
 
-          fromChainId &&
-            updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
+          if (fromChainId) {
+            updateXAccount({
               fromChainId: fromChainId,
               toChainId: toChain?.id,
-              fromAddress: fromAddress,
-              status: 'pending'
+              fromAddress: fromAddress as `0x${string}`,
+              updates: {
+                status: 'pending',
+                transactionHash: hash
+              }
             });
+          }
         });
     },
     [toChain, crossChainFeeData?.data, fromChainId, fromAddress, addTransaction, writeContractAsync]

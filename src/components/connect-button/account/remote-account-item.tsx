@@ -1,13 +1,16 @@
-import React, { useCallback } from 'react';
-import Image from 'next/image';
-import { Copy, Power, ExternalLink } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { useRemoteChainAddress } from '@/hooks/useRemoteChainAddress';
 import { ChainConfig } from '@/types/chains';
 import { MenubarCheckboxItem, MenubarItem } from '@/components/ui/menubar';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { toShortAddress } from '@/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fetchMessageDetails } from '@/server/messageDetails';
+import { updateXAccount } from '@/database/xaccounts';
+
+import RemoteAccountItemPending from './remote-account-item-pending';
+import RemoteAccountItemCompleted from './remote-account-item-completed';
+import RemoteAccountItemCreated from './remote-account-item-created';
 
 interface RemoteAccountItemProps {
   fromChainId: number;
@@ -28,6 +31,11 @@ interface RemoteAccountItemProps {
   onCopy?: (address: `0x${string}`) => void;
 }
 
+const classNameMap = {
+  pending: 'cursor-not-allowed',
+  created: 'cursor-pointer',
+  completed: 'cursor-pointer'
+};
 const RemoteAccountItem = ({
   fromChainId,
   toChain,
@@ -36,13 +44,22 @@ const RemoteAccountItem = ({
   onClick,
   onCopy
 }: RemoteAccountItemProps) => {
-  const { loading, safeAddress, moduleAddress, status } = useRemoteChainAddress({
+  const [state, dispatch] = useRemoteChainAddress({
     fromChainId: fromChainId ? BigInt(fromChainId) : undefined,
     toChainId: toChain.id ? BigInt(toChain.id) : undefined,
     fromAddress: localAddress
   });
 
-  const hasAccount = safeAddress !== '0x' && status === 'completed';
+  const { loading, safeAddress, moduleAddress, status, transactionHash } = state;
+
+  const { data, isSuccess } = useQuery({
+    queryKey: ['messageDetails', transactionHash],
+    queryFn: () => fetchMessageDetails(transactionHash),
+    enabled: Boolean(transactionHash),
+    refetchInterval: 1500
+  });
+
+  const hasAccount = safeAddress !== '0x' && status !== 'created';
   const checked = hasAccount && remoteChain?.id === toChain.id;
   const Component = checked ? MenubarCheckboxItem : MenubarItem;
 
@@ -55,42 +72,74 @@ const RemoteAccountItem = ({
   );
 
   const handleClick = useCallback(() => {
+    if (status === 'pending') return;
     onClick?.({
       hasAccount,
       safeAddress,
       moduleAddress,
       chain: toChain
     });
-  }, [onClick, hasAccount, safeAddress, moduleAddress, toChain]);
+  }, [onClick, hasAccount, safeAddress, moduleAddress, toChain, status]);
+
+  const Item = useMemo(() => {
+    switch (status) {
+      case 'created':
+        return <RemoteAccountItemCreated toChain={toChain} />;
+      case 'pending':
+        return <RemoteAccountItemPending toChain={toChain} />;
+      case 'completed':
+        return (
+          <RemoteAccountItemCompleted
+            toChain={toChain}
+            safeAddress={safeAddress}
+            onClick={handleCopy}
+          />
+        );
+
+      default:
+        return null;
+    }
+  }, [status, toChain, safeAddress, handleCopy]);
+
+  useEffect(() => {
+    if (isSuccess && (data?.status === 'dispatch_success' || data?.status === 'dispatch_error')) {
+      switch (data?.status) {
+        case 'dispatch_success':
+          updateXAccount({
+            fromAddress: localAddress,
+            toChainId: toChain.id,
+            fromChainId: fromChainId,
+            updates: {
+              status: 'completed'
+            }
+          });
+
+          dispatch({ type: 'SET_STATE', payload: { status: 'completed' } });
+
+          break;
+        case 'dispatch_error':
+          updateXAccount({
+            fromAddress: localAddress,
+            toChainId: toChain.id,
+            fromChainId: fromChainId,
+            updates: {
+              status: 'created'
+            }
+          });
+          dispatch({ type: 'SET_STATE', payload: { status: 'created' } });
+          break;
+      }
+    }
+  }, [data, isSuccess, fromChainId, localAddress, toChain.id, dispatch]);
 
   return (
-    <Component onClick={handleClick} checked={checked} className=" cursor-pointer">
+    <Component onClick={handleClick} checked={checked} className={classNameMap[status]}>
       {loading ? (
         <Skeleton className="h-full w-full">
           <span className="invisible">{toChain?.name}</span>
         </Skeleton>
-      ) : hasAccount ? (
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Image
-                src={toChain?.iconUrl as string}
-                width={16}
-                height={16}
-                className="rounded-full"
-                alt={toChain?.name || 'chain'}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{toChain?.name}</TooltipContent>
-          </Tooltip>
-
-          <div className="flex items-center gap-2">
-            <span>{toShortAddress(safeAddress)}</span>
-            <Copy className="h-4 w-4 hover:opacity-80" strokeWidth={1} onClick={handleCopy} />
-          </div>
-        </div>
       ) : (
-        <div className="text-muted-foreground">Create on {toChain?.name}</div>
+        Item
       )}
     </Component>
   );

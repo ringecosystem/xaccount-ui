@@ -22,8 +22,7 @@ const TransactionStatus = ({ hash, chainId, targetChainId }: TransactionStatusPr
 
   const { data, isSuccess, isError } = useQuery({
     queryKey: ['messageDetails', hash],
-    queryFn: () =>
-      fetchMessageDetails('0xc7a67d57ca1c5865adbabd799d1aae850e8d234113b9dd04d2ff9d3321369e67'),
+    queryFn: () => fetchMessageDetails(hash),
     enabled: Boolean(hash),
     refetchInterval: 1000
   });
@@ -50,7 +49,9 @@ const TransactionStatus = ({ hash, chainId, targetChainId }: TransactionStatusPr
           );
 
           toastRef.current = toast(statusMessage, {
-            classNames: toastClassName
+            classNames: toastClassName,
+            // TODO: Add duration
+            duration: 0
           });
           removeTransaction(hash);
         }
