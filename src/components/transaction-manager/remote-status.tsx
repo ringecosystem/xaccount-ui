@@ -9,6 +9,7 @@ import {
   CrossChainTransactionToast
 } from '@/components/chain-transaction-toast';
 import { getChainById } from '@/utils';
+import { TRANSACTION_REFETCH_INTERVAL } from '@/config/transaction';
 
 interface TransactionStatusProps {
   hash?: `0x${string}`;
@@ -28,7 +29,7 @@ const TransactionStatus = ({
     queryKey: ['messageDetails', hash],
     queryFn: () => fetchMessageDetails(hash),
     enabled: Boolean(hash),
-    refetchInterval: 1000
+    refetchInterval: TRANSACTION_REFETCH_INTERVAL
   });
 
   useEffect(() => {

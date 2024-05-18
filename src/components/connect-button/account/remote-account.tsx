@@ -5,10 +5,10 @@ import { useShallow } from 'zustand/react/shallow';
 import useChainStore, { RemoteChain } from '@/store/chain';
 import { getChains } from '@/utils';
 import { MenubarContent, MenubarMenu } from '@/components/ui/menubar';
+import CreateXAccount from '@/components/create-xaccount';
 import { ChainConfig } from '@/types/chains';
 
 import ChainButton from './chain-button';
-import { CreateXAccount } from './create-xaccount';
 import RemoteAccountItem from './remote-account-item';
 
 type AccountProps = {

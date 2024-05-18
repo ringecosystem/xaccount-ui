@@ -10,6 +10,7 @@ export enum TransactionStatus {
   SuccessOnRemote = 'remoteChainSuccess',
   FailureOnRemote = 'remoteChainFail'
 }
+export const TRANSACTION_REFETCH_INTERVAL = 2_000;
 
 // Descriptions for each transaction status to enhance user interface readability
 export const transactionStatusDescriptions: { [key in TransactionStatus]: string } = {

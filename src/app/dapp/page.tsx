@@ -9,7 +9,6 @@ import Spin from '@/components/ui/spin';
 import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
 import { DappInfo, searchDapp } from '@/database/dapps';
-import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import useChainStore from '@/store/chain';
 import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
 import { isSameUrl } from '@/utils';
@@ -48,16 +47,12 @@ const Page = () => {
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const { execute, hash, isPending, crossChainFeeData, isLoading } = useExecute({
+  const { execute, isPending, crossChainFeeData, isLoading } = useExecute({
     transactionInfo,
     fromChainId: chainId as number,
     toChainId: remoteChain?.id as number,
     fromAddress: address as `0x${string}`,
     toModuleAddress: remoteChain?.moduleAddress as `0x${string}`
-  });
-
-  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
-    hash
   });
 
   const communicator = useAppCommunicator(iframeRef, remoteChain, {
@@ -189,7 +184,7 @@ const Page = () => {
         dappItem={dappItem}
         isLoading={isLoading}
         crossChainFeeData={crossChainFeeData}
-        confirmLoading={isPending || isClaimTransactionConfirming}
+        confirmLoading={isPending}
         onSubmit={handleSubmit}
       />
     </>

@@ -39,7 +39,12 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
               . Data older than seven days is not retained.
             </SheetDescription>
           </SheetHeader>
-          <ScrollArea className="h-76 pr-4">
+          <ScrollArea
+            className="pr-4"
+            style={{
+              height: 'calc(100vh - 160px)'
+            }}
+          >
             <div className="space-y-6">
               {transactions.map((tx, index) => (
                 <TransactionItem key={tx.hash} status={tx.status} hash={tx.hash} index={index} />

@@ -84,7 +84,7 @@ interface Props {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange }: Props) {
+function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange }: Props) {
   const updateAccount = useXAccountsStore((state) => state.updateAccount);
   const addTransaction = useTransactionStore((state) => state.addTransaction);
 
@@ -306,3 +306,5 @@ export function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpen
     </Dialog>
   );
 }
+
+export default CreateXAccount;
