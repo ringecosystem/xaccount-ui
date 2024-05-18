@@ -1,14 +1,15 @@
 import { useEffect, useReducer, useRef, useMemo, useCallback } from 'react';
 import { JsonRpcProvider } from 'ethers';
 import { Config, readContract } from '@wagmi/core';
+import { useShallow } from 'zustand/react/shallow';
 
-import { getXAccount, addXAccount, updateXAccount } from '@/database/xaccounts';
 import { config } from '@/config/wagmi';
 import {
   abi as xAccountFactoryAbi,
   address as xAccountFactoryAddress
 } from '@/config/abi/xAccountFactory';
 import { getChainById } from '@/utils';
+import { useXAccountsStore } from '@/store/xaccounts';
 
 async function isSafeAddressExist(
   safeAddress: string,
@@ -63,6 +64,21 @@ export function useRemoteChainAddress({
   toChainId,
   fromAddress
 }: UseRemoteChainAddressProps): [state: State, dispatch: React.Dispatch<Action>] {
+  const { addAccount, updateAccount, accounts } = useXAccountsStore(
+    useShallow((state) => ({
+      addAccount: state.addAccount,
+      updateAccount: state.updateAccount,
+      accounts: state.accounts
+    }))
+  );
+
+  const storeAccount = useMemo(() => {
+    if (fromChainId && fromAddress && toChainId) {
+      return accounts[`${fromChainId}-${fromAddress.toLocaleLowerCase()}-${toChainId}`];
+    }
+    return undefined;
+  }, [accounts, fromChainId, toChainId, fromAddress]);
+
   const fetchAddressCalled = useRef(false);
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -78,42 +94,46 @@ export function useRemoteChainAddress({
       const exist = provider ? await isSafeAddressExist(safeAddress, provider) : false;
 
       if (exist) {
-        await updateXAccount({
-          fromChainId: Number(fromChainId),
-          toChainId: Number(toChainId),
-          fromAddress,
-          updates: { status: 'completed' }
-        });
+        updateAccount(
+          {
+            localChainId: Number(fromChainId),
+            localAddress: fromAddress,
+            remoteChainId: Number(toChainId)
+          },
+          { status: 'completed' }
+        );
         dispatch({ type: 'SET_STATE', payload: { status: 'completed' } });
       }
     },
-    [fromChainId, toChainId, fromAddress]
+    [fromChainId, toChainId, fromAddress, updateAccount]
   );
 
   useEffect(() => {
     const fetchAddress = async () => {
+      // console.log('start fetchAddress', storeAccount);
+
+      if (toChainId === 11155111n) {
+        console.log('xAccountFactoryAddress', storeAccount, storeAccount?.status);
+      }
+
       if (!fromChainId || !toChainId || !fromAddress) return;
       dispatch({ type: 'SET_STATE', payload: { loading: true } });
 
       try {
-        let xAccountItem = await getXAccount({
-          fromChainId: Number(fromChainId),
-          toChainId: Number(toChainId),
-          fromAddress
-        });
+        const xAccountItem = storeAccount;
         if (xAccountItem) {
           dispatch({
             type: 'SET_STATE',
             payload: {
-              safeAddress: xAccountItem.toSafeAddress,
-              moduleAddress: xAccountItem.toModuleAddress,
+              safeAddress: xAccountItem.safeAddress,
+              moduleAddress: xAccountItem.moduleAddress,
               status: xAccountItem.status,
               transactionHash: xAccountItem.transactionHash
             }
           });
 
           if (xAccountItem.status === 'created') {
-            await checkAndCompleteXAccount(xAccountItem.toSafeAddress, provider);
+            await checkAndCompleteXAccount(xAccountItem.safeAddress, provider);
           }
           return;
         }
@@ -128,14 +148,18 @@ export function useRemoteChainAddress({
 
         if (result) {
           const [safeAddress, moduleAddress] = result as [`0x${string}`, `0x${string}`];
-          await addXAccount({
-            fromChainId: Number(fromChainId),
-            toChainId: Number(toChainId),
-            fromAddress,
-            toSafeAddress: safeAddress,
-            toModuleAddress: moduleAddress,
-            status: 'created'
-          });
+          await addAccount(
+            {
+              localChainId: Number(fromChainId),
+              localAddress: fromAddress,
+              remoteChainId: Number(toChainId)
+            },
+            {
+              safeAddress,
+              moduleAddress,
+              status: 'created'
+            }
+          );
 
           dispatch({
             type: 'SET_STATE',
@@ -161,7 +185,15 @@ export function useRemoteChainAddress({
     return () => {
       fetchAddressCalled.current = false;
     };
-  }, [fromChainId, toChainId, fromAddress, checkAndCompleteXAccount, provider]);
+  }, [
+    storeAccount,
+    fromChainId,
+    toChainId,
+    fromAddress,
+    checkAndCompleteXAccount,
+    addAccount,
+    provider
+  ]);
 
   return [state, dispatch];
 }

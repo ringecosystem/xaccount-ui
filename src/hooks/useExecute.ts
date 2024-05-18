@@ -8,6 +8,7 @@ import { abi as MultiPortAbi } from '@/config/abi/MultiPort';
 import { getCrossChainFee } from '@/server/gaslimit';
 import { BaseTransaction } from '@/types/transaction';
 import { useTransactionStore } from '@/store/transaction';
+import { TransactionStatus } from '@/config/transaction';
 
 import usePortAddress from './usePortAddress';
 
@@ -102,10 +103,13 @@ const useExecute = ({
         crossChainFeeData?.data?.params
       ]
     })?.then((hash) => {
+      console.log('hash', hash);
+
       addTransaction({
         hash,
         chainId: fromChainId as number,
-        targetChainId: toChainId
+        targetChainId: toChainId,
+        status: TransactionStatus.ProcessingOnLocal
       });
 
       return hash;

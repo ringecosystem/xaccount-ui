@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Item } from '@/database/dapps-repository';
+import { DappInfo } from '@/database/dapps';
 import useChainStore from '@/store/chain';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,7 @@ import type { FeeApiResponse } from '@/server/gaslimit';
 
 interface CrossChainExecutorProps {
   confirmLoading?: boolean;
-  dappItem?: Item;
+  dappItem?: DappInfo;
   transactionInfo?: BaseTransaction;
   crossChainFeeData?: FeeApiResponse;
   isLoading?: boolean;

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { getAllItems } from '@/database/dapps-repository';
+import { getDapps } from '@/database/dapps';
 
 /**
  * A hook to check if a URL's host is in the allowed list of hosts.
@@ -16,7 +16,7 @@ export function useAllowedHost(appUrl: string) {
     isLoading
   } = useQuery({
     queryKey: ['dapps'],
-    queryFn: getAllItems
+    queryFn: getDapps
   });
 
   const allowUrls = useMemo(() => dapps?.map((dapp) => dapp.url) ?? [], [dapps]);

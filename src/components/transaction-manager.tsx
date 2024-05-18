@@ -1,40 +1,103 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState, memo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
-import { useTransactionStore } from '@/store/transaction';
+import { Transaction, useTransactionStore } from '@/store/transaction';
+import { useXAccountsStore } from '@/store/xaccounts';
+import PendingTransactionsIndicator from '@/components/pending-transactions-indicator';
+import TransactionsSheet from '@/components/transactions-sheet';
+import {
+  TransactionStatus,
+  localTransactionStatuses,
+  remoteTransactionStatuses
+} from '@/config/transaction';
 
 import TransactionLocalStatus from './transaction-local-status';
 import TransactionRemoteStatus from './transaction-remote-status';
 
-const TransactionManager = () => {
-  const transactions = useTransactionStore((state) => state.transactions);
-
-  const initializedLocalTransactions = transactions?.filter(
-    (transaction) => !transaction.isLocalChainTransactionComplete
+/**
+ * Filters pending transactions that are currently processing on either local or remote blockchains.
+ * @param transactions An array of transactions to filter.
+ * @returns An array of transactions that are either processing on local or remote blockchains.
+ */
+const filterPendingTransactions = (transactions: Transaction[]): Transaction[] => {
+  return transactions.filter(
+    (transaction) =>
+      transaction.status === TransactionStatus.ProcessingOnLocal ||
+      transaction.status === TransactionStatus.ProcessingOnRemote
   );
-  const completedLocalTransactions = transactions?.filter(
-    (transaction) => transaction.isLocalChainTransactionComplete
-  );
-
-  return transactions?.length ? (
-    <>
-      {initializedLocalTransactions.map((transaction) => (
-        <TransactionLocalStatus
-          key={transaction.hash}
-          hash={transaction.hash}
-          chainId={transaction.chainId}
-          targetChainId={transaction.targetChainId}
-        />
-      ))}
-      {completedLocalTransactions.map((transaction) => (
-        <TransactionRemoteStatus
-          key={transaction.hash}
-          hash={transaction.hash}
-          chainId={transaction.chainId}
-          targetChainId={transaction.targetChainId}
-        />
-      ))}
-    </>
-  ) : null;
 };
 
-export default TransactionManager;
+const TransactionManager = () => {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const { transactions, cleanUpOldTransactions } = useTransactionStore(
+    useShallow((state) => ({
+      transactions: state.transactions,
+      cleanUpOldTransactions: state.cleanUpOldTransactions
+    }))
+  );
+
+  const pendingTransactions = filterPendingTransactions(transactions);
+
+  const updateAccountByTransactionHash = useXAccountsStore(
+    (state) => state.updateAccountByTransactionHash
+  );
+
+  const localPendingTransactions = pendingTransactions?.filter((transaction) =>
+    localTransactionStatuses.includes(transaction.status)
+  );
+  const remotePendingTransactions = pendingTransactions?.filter((transaction) =>
+    remoteTransactionStatuses.includes(transaction.status)
+  );
+
+  const handleResolved = useCallback(
+    (status: 'success' | 'failed', hash: `0x${string}`) => {
+      updateAccountByTransactionHash(hash, {
+        status: status === 'success' ? 'completed' : 'created'
+      });
+    },
+    [updateAccountByTransactionHash]
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      cleanUpOldTransactions();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cleanUpOldTransactions]);
+
+  return (
+    <>
+      {transactions?.length > 0 && (
+        <PendingTransactionsIndicator
+          pendingTransactions={pendingTransactions?.length}
+          onClick={() => setSheetOpen(true)}
+        />
+      )}
+
+      <TransactionsSheet transactions={transactions} open={sheetOpen} onOpenChange={setSheetOpen} />
+      {transactions?.length ? (
+        <>
+          {localPendingTransactions.map((transaction) => (
+            <TransactionLocalStatus
+              key={transaction.hash}
+              hash={transaction.hash}
+              chainId={transaction.chainId}
+              targetChainId={transaction.targetChainId}
+            />
+          ))}
+          {remotePendingTransactions.map((transaction) => (
+            <TransactionRemoteStatus
+              key={transaction.hash}
+              hash={transaction.hash}
+              chainId={transaction.chainId}
+              targetChainId={transaction.targetChainId}
+              onResolved={(status) => handleResolved(status, transaction.hash)}
+            />
+          ))}
+        </>
+      ) : null}
+    </>
+  );
+};
+
+export default memo(TransactionManager);

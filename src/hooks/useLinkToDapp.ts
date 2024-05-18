@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
-import { Item } from '@/database/dapps-repository';
+import { DappInfo } from '@/database/dapps';
 import useChainStore from '@/store/chain';
 
 const useNavigateToDapp = () => {
@@ -9,7 +9,7 @@ const useNavigateToDapp = () => {
   const router = useRouter();
 
   const handleNavigateToDapp = useCallback(
-    (item: Item) => {
+    (item: DappInfo) => {
       return new Promise<void>((resolve, reject) => {
         if (!remoteChain?.id) {
           return reject();

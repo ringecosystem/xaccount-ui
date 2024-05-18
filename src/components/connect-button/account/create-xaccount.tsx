@@ -43,9 +43,9 @@ import {
   address as xAccountFactoryAddress
 } from '@/config/abi/xAccountFactory';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { updateXAccount } from '@/database/xaccounts';
 import { useTransactionStore } from '@/store/transaction';
+import { useXAccountsStore } from '@/store/xaccounts';
+import { TransactionStatus } from '@/config/transaction';
 
 const iface = new Interface(xAccountFactoryAbi);
 
@@ -82,17 +82,10 @@ interface Props {
   fromAddress?: string;
   toChain: RemoteChain | null;
   onOpenChange?: (open: boolean) => void;
-  onFinish?: (data: z.infer<typeof formSchema>) => void;
 }
 
-export function CreateXAccount({
-  fromChainId,
-  fromAddress,
-  toChain,
-  open,
-  onOpenChange,
-  onFinish
-}: Props) {
+export function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange }: Props) {
+  const updateAccount = useXAccountsStore((state) => state.updateAccount);
   const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -142,14 +135,7 @@ export function CreateXAccount({
       })
   });
 
-  const { writeContractAsync, isPending, data: hash } = useWriteContract();
-
-  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
-    hash,
-    onSuccess: () => {
-      onOpenChange?.(false);
-    }
-  });
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const handleFormSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
@@ -170,26 +156,40 @@ export function CreateXAccount({
           ],
           value: crossChainFeeData?.data?.fee ? BigInt(crossChainFeeData?.data?.fee) : 0n
         })?.then((hash) => {
-          addTransaction({
-            hash: hash,
-            chainId: fromChainId as number,
-            targetChainId: toChain?.id
-          });
-
+          onOpenChange?.(false);
           if (fromChainId) {
-            updateXAccount({
-              fromChainId: fromChainId,
-              toChainId: toChain?.id,
-              fromAddress: fromAddress as `0x${string}`,
-              updates: {
+            updateAccount(
+              {
+                localChainId: fromChainId,
+                localAddress: fromAddress as `0x${string}`,
+                remoteChainId: toChain?.id
+              },
+              {
+                safeAddress: toChain?.safeAddress as `0x${string}`,
+                moduleAddress: toChain?.moduleAddress as `0x${string}`,
                 status: 'pending',
                 transactionHash: hash
               }
+            );
+            addTransaction({
+              hash: hash,
+              chainId: fromChainId as number,
+              targetChainId: toChain?.id,
+              status: TransactionStatus.ProcessingOnLocal
             });
           }
         });
     },
-    [toChain, crossChainFeeData?.data, fromChainId, fromAddress, addTransaction, writeContractAsync]
+    [
+      toChain,
+      crossChainFeeData?.data,
+      fromChainId,
+      fromAddress,
+      addTransaction,
+      writeContractAsync,
+      onOpenChange,
+      updateAccount
+    ]
   );
 
   return (
@@ -296,7 +296,7 @@ export function CreateXAccount({
               disabled={
                 isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params
               }
-              isLoading={isPending || isClaimTransactionConfirming}
+              isLoading={isPending}
             >
               {isLoading ? <span className=" animate-pulse">Create</span> : 'Create'}
             </Button>

@@ -8,7 +8,7 @@ import useGetSafeInfo from '@/hooks/useGetSafeInfo';
 import Spin from '@/components/ui/spin';
 import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
-import { Item, searchItemByUrl } from '@/database/dapps-repository';
+import { DappInfo, searchDapp } from '@/database/dapps';
 import { useTransactionStatus } from '@/hooks/useTransactionStatus';
 import useChainStore from '@/store/chain';
 import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
@@ -30,7 +30,7 @@ const Page = () => {
   const appUrl = params.get('appUrl') as string | undefined;
   const safeInfo = useGetSafeInfo();
   const [transactionOpen, setTransactionOpen] = useState(false);
-  const [dappItem, setDappItem] = useState<Item | undefined>();
+  const [dappItem, setDappItem] = useState<DappInfo | undefined>();
   const [transactionInfo, setTransactionInfo] = useState<BaseTransaction | undefined>();
   const { chainId, address, isConnected } = useAccount();
   const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
@@ -153,10 +153,9 @@ const Page = () => {
 
   useEffect(() => {
     if (appUrl) {
-      searchItemByUrl(appUrl as `https://${string}`).then((items) => {
-        if (items.length > 0) {
-          setDappItem(items[0]);
-        }
+      const hostname = new URL(appUrl).hostname;
+      searchDapp(hostname).then((items) => {
+        setDappItem(items);
       });
     } else {
       setDappItem(undefined);

@@ -11,6 +11,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { getChainById } from '@/utils';
+import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
 
 import type { WaitForTransactionReceiptData } from 'wagmi/query';
 import type { Config } from 'wagmi';
@@ -38,13 +39,9 @@ export function TransactionTrackingDialog({
     };
   }, [chain, data]);
 
-  const msgScanInfo = useMemo(() => {
-    if (!data?.transactionHash) return null;
-
-    return {
-      url: `https://scan.msgport.xyz/messages/${data?.transactionHash}`,
-      name: 'MsgPort'
-    };
+  const msgScanUrl = useMemo(() => {
+    if (!data?.transactionHash) return undefined;
+    return `${MSGPORT_URL}/messages/${data?.transactionHash}`;
   }, [data]);
 
   return (
@@ -74,9 +71,9 @@ export function TransactionTrackingDialog({
                 target="_blank"
                 rel="noopener"
                 className="break-all text-primary hover:underline"
-                href={msgScanInfo?.url}
+                href={msgScanUrl}
               >
-                View on {msgScanInfo?.name}
+                View on {MSGPORT_NAME}
               </a>
             </span>
           </AlertDialogDescription>

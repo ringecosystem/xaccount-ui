@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { State } from '@/store/chain';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BaseTransaction } from '@/types/transaction';
-import { Item } from '@/database/dapps-repository';
+import { DappInfo } from '@/database/dapps';
 import LoadingText from '@/components/loading-text';
 import {
   Accordion,
@@ -18,7 +18,7 @@ import type { FeeApiResponse } from '@/server/gaslimit';
 interface ActionContentProps {
   remoteChain: State['remoteChain'];
   transactionInfo?: BaseTransaction;
-  dappItem?: Item;
+  dappItem?: DappInfo;
   crossChainFeeData?: FeeApiResponse;
   isLoading?: boolean;
 }
@@ -73,7 +73,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
                   key={messageInfo.key}
                   className="flex flex-col items-start space-x-0 space-y-2 md:flex-row md:items-center md:space-x-4 md:space-y-0"
                 >
-                  <h4 className="w-24 text-sm font-bold capitalize">{messageInfo.key}</h4>
+                  <h4 className="w-24 shrink-0 text-sm font-bold capitalize">{messageInfo.key}</h4>
                   <div className="text-sm text-muted-foreground">
                     <span className=" break-all">{messageInfo.value}</span>
                     {messageInfo.extra && (

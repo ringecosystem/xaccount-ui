@@ -1,12 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useCallback, useMemo } from 'react';
 
 import { useRemoteChainAddress } from '@/hooks/useRemoteChainAddress';
 import { ChainConfig } from '@/types/chains';
 import { MenubarCheckboxItem, MenubarItem } from '@/components/ui/menubar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fetchMessageDetails } from '@/server/messageDetails';
-import { updateXAccount } from '@/database/xaccounts';
 
 import RemoteAccountItemPending from './remote-account-item-pending';
 import RemoteAccountItemCompleted from './remote-account-item-completed';
@@ -49,15 +46,7 @@ const RemoteAccountItem = ({
     toChainId: toChain.id ? BigInt(toChain.id) : undefined,
     fromAddress: localAddress
   });
-
   const { loading, safeAddress, moduleAddress, status, transactionHash } = state;
-
-  const { data, isSuccess } = useQuery({
-    queryKey: ['messageDetails', transactionHash],
-    queryFn: () => fetchMessageDetails(transactionHash),
-    enabled: Boolean(transactionHash),
-    refetchInterval: 1500
-  });
 
   const hasAccount = safeAddress !== '0x' && status !== 'created';
   const checked = hasAccount && remoteChain?.id === toChain.id;
@@ -101,47 +90,18 @@ const RemoteAccountItem = ({
     }
   }, [status, toChain, safeAddress, handleCopy]);
 
-  useEffect(() => {
-    if (isSuccess && (data?.status === 'dispatch_success' || data?.status === 'dispatch_error')) {
-      switch (data?.status) {
-        case 'dispatch_success':
-          updateXAccount({
-            fromAddress: localAddress,
-            toChainId: toChain.id,
-            fromChainId: fromChainId,
-            updates: {
-              status: 'completed'
-            }
-          });
-
-          dispatch({ type: 'SET_STATE', payload: { status: 'completed' } });
-
-          break;
-        case 'dispatch_error':
-          updateXAccount({
-            fromAddress: localAddress,
-            toChainId: toChain.id,
-            fromChainId: fromChainId,
-            updates: {
-              status: 'created'
-            }
-          });
-          dispatch({ type: 'SET_STATE', payload: { status: 'created' } });
-          break;
-      }
-    }
-  }, [data, isSuccess, fromChainId, localAddress, toChain.id, dispatch]);
-
   return (
-    <Component onClick={handleClick} checked={checked} className={classNameMap[status]}>
-      {loading ? (
-        <Skeleton className="h-full w-full">
-          <span className="invisible">{toChain?.name}</span>
-        </Skeleton>
-      ) : (
-        Item
-      )}
-    </Component>
+    <>
+      <Component onClick={handleClick} checked={checked} className={classNameMap[status]}>
+        {loading ? (
+          <Skeleton className="h-full w-full">
+            <span className="invisible">{toChain?.name}</span>
+          </Skeleton>
+        ) : (
+          Item
+        )}
+      </Component>
+    </>
   );
 };
 

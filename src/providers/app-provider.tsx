@@ -1,21 +1,21 @@
 import React, { useEffect, ReactNode, useRef } from 'react';
 import { useAccount, useChainId } from 'wagmi';
+import localforage from 'localforage';
 
 import useChainStore from '@/store/chain';
-import { initXAccountsDB } from '@/database/xaccounts';
-import { initDappsRepositoryDB } from '@/database/dapps-repository';
 import TransactionManager from '@/components/transaction-manager';
 import useReturnDashboard from '@/hooks/useReturnDashboard';
 
-type Web3ProviderProps = {
+localforage.config({
+  name: 'msgport xaccount',
+  storeName: 'xaccount'
+});
+
+type AppProviderProps = {
   children: ReactNode;
 };
 
-if (typeof window !== 'undefined') {
-  initDappsRepositoryDB();
-  initXAccountsDB();
-}
-export const Web3Provider = ({ children }: Web3ProviderProps) => {
+export const AppProvider = ({ children }: AppProviderProps) => {
   const { address } = useAccount();
 
   const chainId = useChainId();

@@ -7,7 +7,7 @@ import { useDebounce } from 'react-use';
 import { useMutation } from '@tanstack/react-query';
 
 import { generateIconUrl } from '@/utils';
-import { searchItemByUrl } from '@/database/dapps-repository';
+import { searchDapp } from '@/database/dapps';
 import { getWebMetadata } from '@/server/getWebMetadata';
 import {
   Dialog,
@@ -106,14 +106,15 @@ const AddDapp = forwardRef(
         const parseResult = formSchema.shape.url.safeParse(watchedUrl);
 
         if (parseResult.success) {
-          const searchData = await searchItemByUrl(watchedUrl);
+          const watchHostName = new URL(watchedUrl).hostname;
+          const matchedDapp = await searchDapp(watchHostName);
 
-          if (searchData?.length) {
+          if (matchedDapp) {
             setAppIsExist(true);
             setFormValues(
               {
-                ...searchData[0],
-                title: searchData[0].name
+                ...matchedDapp,
+                title: matchedDapp.name
               },
               watchedUrl
             );

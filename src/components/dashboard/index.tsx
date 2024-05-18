@@ -5,10 +5,10 @@ import { Plus } from 'lucide-react';
 
 import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SelectChainDialog from '@/components/select-chain-dialog';
 import useNavigateToDapp from '@/hooks/useLinkToDapp';
+import { addDapp, getDapps, deleteDapp, DappInfo } from '@/database/dapps';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
@@ -23,7 +23,7 @@ export default function Home() {
   const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
   const [deleteDappOpen, setDeleteDappOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [selectedItem, setSelectedItem] = useState<DappInfo | null>(null);
 
   const navigateToDapp = useNavigateToDapp();
   const {
@@ -32,25 +32,25 @@ export default function Home() {
     isPending
   } = useQuery({
     queryKey: ['dapps'],
-    queryFn: getAllItems
+    queryFn: getDapps
   });
 
   const { mutateAsync: mutateAddItem, isPending: addLoading } = useMutation({
-    mutationFn: addItem,
+    mutationFn: addDapp,
     onMutate: async () => {
       await refetch();
     }
   });
 
   const { mutateAsync: mutateDeleteItem, isPending: deleteLoading } = useMutation({
-    mutationFn: deleteItem,
+    mutationFn: deleteDapp,
     onMutate: async () => {
       await refetch();
     }
   });
 
   const handleFinish = useCallback(
-    async (data: Omit<Item, 'hostname'>) => {
+    async (data: Omit<DappInfo, 'hostname'>) => {
       await mutateAddItem(data);
       await refetch();
       formRef?.current?.reset();
@@ -64,8 +64,8 @@ export default function Home() {
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
-    if (!selectedItem?.id) return;
-    await mutateDeleteItem(selectedItem?.id);
+    if (!selectedItem?.hostname) return;
+    await mutateDeleteItem(selectedItem?.hostname);
     await refetch();
     setDeleteDappOpen(false);
   }, [selectedItem, mutateDeleteItem, refetch]);
@@ -110,7 +110,7 @@ export default function Home() {
               </AppItemWrapper>
               {dapps?.map((item) => (
                 <AppItem
-                  key={item.id}
+                  key={item.hostname}
                   item={item}
                   onClick={() => {
                     navigateToDapp(item).catch(() => {

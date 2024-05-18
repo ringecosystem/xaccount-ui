@@ -1,13 +1,13 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
-import { Item } from '@/database/dapps-repository';
+import { DappInfo } from '@/database/dapps';
 import IframeComponent from '@/components/frame-component';
 import { Card, CardContent } from '@/components/ui/card';
 import useNavigateToDapp from '@/hooks/useLinkToDapp';
 
 interface AppItemDetailProps {
-  item: Item | null;
+  item: DappInfo | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenAlertChange?: () => void;
@@ -17,7 +17,7 @@ const AppItemDetail = ({ item, open, onOpenChange, onOpenAlertChange }: AppItemD
   const navigateToDapp = useNavigateToDapp();
 
   const handleClick = () => {
-    navigateToDapp(item as Item)?.catch(() => {
+    navigateToDapp(item as DappInfo)?.catch(() => {
       onOpenAlertChange?.();
     });
   };

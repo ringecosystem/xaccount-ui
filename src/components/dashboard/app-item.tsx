@@ -1,15 +1,16 @@
 import * as React from 'react';
 import { Info, Trash } from 'lucide-react';
 
-import { Item } from '@/database/dapps-repository';
 import IframeComponent from '@/components/frame-component';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CardContent } from '@/components/ui/card';
 
 import AppItemWrapper from './app-item-wrapper';
 
+import type { DappInfo } from '@/database/dapps';
+
 type AppItemProps = React.PropsWithChildren<{
-  item?: Item;
+  item?: DappInfo;
   onDeleteClick?: () => void;
   onPreviewClick?: () => void;
 }> &

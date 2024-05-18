@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { cn } from '@/lib/utils';
+import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
 
 import type { Chain } from '@rainbow-me/rainbowkit';
 
@@ -34,10 +35,8 @@ export const CrossChainTransactionToast = ({
     name: chain?.blockExplorers?.default.name
   };
 
-  const msgScanInfo = {
-    url: `https://scan.msgport.xyz/messages/${transactionHash}`,
-    name: 'Msgport Scan'
-  };
+  const msgScanUrl = `${MSGPORT_URL}/messages/${transactionHash}`;
+
   const statusStyles = {
     success: {
       color: 'text-green-500',
@@ -75,9 +74,9 @@ export const CrossChainTransactionToast = ({
             target="_blank"
             rel="noopener noreferrer"
             className={cn('block w-1/2 text-primary hover:underline', color)}
-            href={msgScanInfo?.url}
+            href={msgScanUrl}
           >
-            View on {msgScanInfo?.name}
+            View on {MSGPORT_NAME}
           </a>
         </div>
       </div>
