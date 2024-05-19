@@ -21,6 +21,7 @@ import type { MutableRefObject } from 'react';
 import type { SafeInfo } from './useGetSafeInfo';
 
 // 200,000
+// default gas limit for transactions
 const DEFAULT_GAS_LIMIT = '0x30d40';
 
 interface TransactionsParams extends Omit<SendTransactionsParams, 'txs'> {
