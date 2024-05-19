@@ -12,7 +12,7 @@ const Header = () => {
   const router = useRouter();
   return (
     <header className="h-[var(--header)] w-full ">
-      <div className="mx-auto  flex h-full w-full items-center justify-between px-8">
+      <div className="mx-auto  flex h-full w-full items-center justify-between px-6">
         <Link href="/" title="darwinia" className="hidden mix-blend-exclusion md:inline-flex">
           <Image
             src={'/images/common/logo.png'}
