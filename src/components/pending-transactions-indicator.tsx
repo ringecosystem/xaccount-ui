@@ -1,7 +1,7 @@
 // src/components/PendingTransactionsIndicator.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity } from 'lucide-react';
+import { History } from 'lucide-react';
 
 interface Props {
   pendingTransactions: number;
@@ -22,10 +22,10 @@ const PendingTransactionsIndicator: React.FC<Props> = ({ pendingTransactions, on
           className="relative"
         >
           <motion.div
-            className="rounded-full bg-blue-500 p-3 text-white"
+            className="rounded-full bg-blue-500 p-2 text-white"
             whileHover={{ scale: 1.1 }}
           >
-            <Activity size={24} />
+            <History size={24} />
           </motion.div>
           {pendingTransactions > 0 && (
             <motion.span
