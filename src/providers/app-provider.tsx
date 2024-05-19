@@ -16,7 +16,7 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const { address, chainId: currentChainId } = useAccount();
+  const { address, chainId: currentChainId, isConnected } = useAccount();
   const chainId = useChainId();
 
   const isChainIdSupported = chainId && currentChainId && chainId === currentChainId;
@@ -27,6 +27,13 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const previousChainId = useRef(chainId);
   const previousAddress = useRef(address);
+
+  useEffect(() => {
+    if (!isConnected) {
+      removeRemoteChain();
+      returnDashboard();
+    }
+  }, [isConnected, removeRemoteChain, returnDashboard]);
 
   useEffect(() => {
     if (previousChainId.current !== chainId) {
