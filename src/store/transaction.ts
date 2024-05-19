@@ -9,6 +9,7 @@ import { getPastTime } from '@/utils';
 export interface Transaction {
   hash: `0x${string}`;
   chainId: number;
+  address: `0x${string}`;
   targetChainId: number;
   createdAt: number;
   status: TransactionStatus;

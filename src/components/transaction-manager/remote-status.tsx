@@ -25,7 +25,7 @@ const TransactionStatus = ({
 }: TransactionStatusProps) => {
   const toastRef = useRef<string | number | null>(null);
 
-  const { data, isSuccess, isError } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ['messageDetails', hash],
     queryFn: () => fetchMessageDetails(hash),
     enabled: Boolean(hash),
@@ -62,8 +62,6 @@ const TransactionStatus = ({
           }
         }
       }
-    } else if (isError) {
-      onResolved?.('failed');
     }
 
     return () => {
@@ -71,7 +69,7 @@ const TransactionStatus = ({
         toast.dismiss(toastRef.current);
       }
     };
-  }, [isSuccess, isError, data, targetChainId, chainId, hash, onResolved]);
+  }, [isSuccess, data, targetChainId, chainId, hash, onResolved]);
   return null;
 };
 

@@ -174,6 +174,7 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
             addTransaction({
               hash: hash,
               chainId: fromChainId as number,
+              address: fromAddress as `0x${string}`,
               targetChainId: toChain?.id,
               status: TransactionStatus.ProcessingOnLocal
             });

@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState, memo, useTransition } from 'react';
+import React, { useCallback, useEffect, useState, memo, useTransition, useMemo } from 'react';
+import { useAccount } from 'wagmi';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Transaction, useTransactionStore } from '@/store/transaction';
@@ -28,16 +29,25 @@ const filterPendingTransactions = (transactions: Transaction[]): Transaction[] =
 };
 
 const TransactionManager = () => {
+  const { address, chainId } = useAccount();
+
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const { transactions, cleanUpOldTransactions } = useTransactionStore(
+  const { transactions, cleanUpOldTransactions, setTransactionStatus } = useTransactionStore(
     useShallow((state) => ({
       transactions: state.transactions,
-      cleanUpOldTransactions: state.cleanUpOldTransactions
+      cleanUpOldTransactions: state.cleanUpOldTransactions,
+      setTransactionStatus: state.setTransactionStatus
     }))
   );
 
-  const pendingTransactions = filterPendingTransactions(transactions);
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      return transaction.address === address && transaction.chainId === chainId;
+    });
+  }, [transactions, address, chainId]);
+
+  const pendingTransactions = filterPendingTransactions(filteredTransactions);
 
   const updateAccountByTransactionHash = useXAccountsStore(
     (state) => state.updateAccountByTransactionHash
@@ -61,11 +71,18 @@ const TransactionManager = () => {
 
   const handleResolved = useCallback(
     (status: 'success' | 'failed', hash: `0x${string}`) => {
+      // handle xaccount status
       updateAccountByTransactionHash(hash, {
         status: status === 'success' ? 'completed' : 'created'
       });
+
+      // handle transaction status
+      setTransactionStatus(
+        hash,
+        status === 'success' ? TransactionStatus.SuccessOnRemote : TransactionStatus.FailureOnRemote
+      );
     },
-    [updateAccountByTransactionHash]
+    [updateAccountByTransactionHash, setTransactionStatus]
   );
 
   useEffect(() => {
@@ -75,11 +92,9 @@ const TransactionManager = () => {
     return () => clearInterval(interval);
   }, [cleanUpOldTransactions]);
 
-  console.log('pendingTransactions', pending);
-
   return (
     <>
-      {transactions?.length > 0 && (
+      {filteredTransactions?.length > 0 && (
         <PendingTransactionsIndicator
           pendingTransactions={pendingTransactions?.length}
           onClick={() => setSheetOpen(true)}
@@ -87,11 +102,11 @@ const TransactionManager = () => {
       )}
 
       <TransactionsSheet
-        transactions={transactions}
+        transactions={filteredTransactions}
         open={sheetOpen}
         onOpenChange={handleOpenChange}
       />
-      {transactions?.length ? (
+      {filteredTransactions?.length ? (
         <>
           {localPendingTransactions.map((transaction) => (
             <TransactionLocalStatus key={transaction.hash} hash={transaction.hash} />

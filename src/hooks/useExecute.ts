@@ -64,7 +64,11 @@ const useExecute = ({
     return { queryKey: key, isEnabled: isValid };
   }, [transactionInfo, fromChainId, toChainId, fromAddress, toModuleAddress, payload]);
 
-  const { data: crossChainFeeData, isLoading } = useQuery({
+  const {
+    data: crossChainFeeData,
+    isLoading,
+    isRefetching
+  } = useQuery({
     queryKey,
     enabled: isEnabled,
     queryFn: () =>
@@ -103,11 +107,10 @@ const useExecute = ({
         crossChainFeeData?.data?.params
       ]
     })?.then((hash) => {
-      console.log('hash', hash);
-
       addTransaction({
         hash,
         chainId: fromChainId as number,
+        address: fromAddress as `0x${string}`,
         targetChainId: toChainId,
         status: TransactionStatus.ProcessingOnLocal
       });
@@ -115,6 +118,7 @@ const useExecute = ({
       return hash;
     });
   }, [
+    fromAddress,
     writeContractAsync,
     srcPortAddress,
     crossChainFeeData,
@@ -126,7 +130,7 @@ const useExecute = ({
   ]);
 
   return {
-    isLoading,
+    isLoading: isLoading || isRefetching,
     isPending,
     execute,
     crossChainFeeData,

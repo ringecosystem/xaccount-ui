@@ -16,9 +16,10 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const { address } = useAccount();
-
+  const { address, chainId: currentChainId } = useAccount();
   const chainId = useChainId();
+
+  const isChainIdSupported = chainId && currentChainId && chainId === currentChainId;
 
   const removeRemoteChain = useChainStore((state) => state.removeRemoteChain);
 
@@ -46,7 +47,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <>
       {children}
-      <TransactionManager />
+      {isChainIdSupported && <TransactionManager />}
     </>
   );
 };
