@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -9,12 +9,15 @@ import {
   SheetDescription
 } from '@/components/ui/sheet';
 import { TransactionStatus } from '@/config/transaction';
+import { countTransactionsByDays } from '@/utils';
+import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
 
 import TransactionItem from './transaction';
 
 interface Transaction {
   hash: `0x${string}`;
   status: TransactionStatus;
+  createdAt: number;
 }
 
 interface Props {
@@ -24,6 +27,11 @@ interface Props {
 }
 
 const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }) => {
+  const groupedTransactionsByDays = useMemo(() => {
+    const sortedTransactions = transactions.sort((a, b) => b.createdAt - a.createdAt);
+    return countTransactionsByDays(sortedTransactions);
+  }, [transactions]);
+
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -33,8 +41,8 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
             <SheetDescription className="text-left">
               View the status and progress of recent transactions. Note that the displayed data is a
               local snapshot and may not include all details. For full transaction data, visit{' '}
-              <a href="https://msgport.com/" target="_blank" rel="noreferrer">
-                MSGPORT
+              <a href={MSGPORT_URL} target="_blank" rel="noreferrer" className=" text-blue-500">
+                {MSGPORT_NAME}
               </a>
               . Data older than seven days is not retained.
             </SheetDescription>
@@ -46,8 +54,20 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
             }}
           >
             <div className="space-y-6">
-              {transactions.map((tx, index) => (
-                <TransactionItem key={tx.hash} status={tx.status} hash={tx.hash} index={index} />
+              {Object.entries(groupedTransactionsByDays).map(([date, transactions]) => (
+                <div key={date} className="space-y-4">
+                  <div key={date} className="text-muted-foreground">
+                    {date}
+                  </div>
+                  {transactions.map((tx, index) => (
+                    <TransactionItem
+                      key={tx.hash}
+                      status={tx.status}
+                      hash={tx.hash}
+                      index={index}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
           </ScrollArea>

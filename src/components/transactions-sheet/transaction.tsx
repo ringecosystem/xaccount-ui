@@ -1,5 +1,4 @@
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { ExternalLink, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { Progress } from '@/components/ui/progress';
@@ -79,16 +78,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status, index }
   const txHashUrl = `${MSGPORT_URL}/messages/${hash}`;
   const shortHash = hash.slice(0, 5) + '...' + hash.slice(-5);
 
-  const motionVariants = useMemo(() => {
-    return {
-      initial: { opacity: 0, y: 50 },
-      animate: { opacity: 1, y: 0 },
-      transition: { delay: index * 0.1, duration: 0.1 }
-    };
-  }, [index]);
-
   return (
-    <motion.div {...motionVariants} className="flex flex-col gap-2" style={style}>
+    <div className="flex flex-col gap-2" style={style}>
       <div className="flex items-center justify-between">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -114,7 +105,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status, index }
       </div>
 
       <Progress value={getProcess(status)} className={bg} indicatorClassName={indicator} />
-    </motion.div>
+    </div>
   );
 };
 
