@@ -1,6 +1,8 @@
 import { memo, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import PubSub from 'pubsub-js';
+import { usePrevious } from 'react-use';
 
 import { fetchMessageDetails } from '@/server/messageDetails';
 import {
@@ -10,20 +12,24 @@ import {
 } from '@/components/chain-transaction-toast';
 import { getChainById } from '@/utils';
 import { TRANSACTION_REFETCH_INTERVAL } from '@/config/transaction';
+import { EMITTER_EVENTS } from '@/config/emitter';
 
 interface TransactionStatusProps {
   hash?: `0x${string}`;
   chainId?: number;
   targetChainId?: number;
+  requestId?: string;
   onResolved?: (status: 'success' | 'failed') => void;
 }
 const TransactionStatus = ({
   hash,
   chainId,
   targetChainId,
+  requestId,
   onResolved
 }: TransactionStatusProps) => {
   const toastRef = useRef<string | number | null>(null);
+  const previousRequestId = usePrevious(requestId);
 
   const { data, isSuccess } = useQuery({
     queryKey: ['messageDetails', hash],
@@ -36,8 +42,13 @@ const TransactionStatus = ({
     if (isSuccess) {
       if (data && hash) {
         const status = data?.status;
-
-        if (isSuccess && (status === 'dispatch_success' || status === 'dispatch_error')) {
+        if (requestId && data?.dispatch_transaction_hash) {
+          PubSub.publish(EMITTER_EVENTS.TRANSACTION_REQUEST, {
+            requestId,
+            hash: data?.dispatch_transaction_hash
+          });
+        }
+        if (status === 'dispatch_success' || status === 'dispatch_error') {
           const success = status === 'dispatch_success';
           const chain = getChainById(chainId);
           const targetChain = getChainById(targetChainId);
@@ -69,7 +80,8 @@ const TransactionStatus = ({
         toast.dismiss(toastRef.current);
       }
     };
-  }, [isSuccess, data, targetChainId, chainId, hash, onResolved]);
+  }, [isSuccess, data, targetChainId, chainId, hash, onResolved, previousRequestId, requestId]);
+
   return null;
 };
 

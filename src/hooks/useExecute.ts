@@ -7,8 +7,6 @@ import { abi as safeMsgportModuleAbi } from '@/config/abi/SafeMsgportModule';
 import { abi as MultiPortAbi } from '@/config/abi/MultiPort';
 import { getCrossChainFee } from '@/server/gaslimit';
 import { BaseTransaction } from '@/types/transaction';
-import { useTransactionStore } from '@/store/transaction';
-import { TransactionStatus } from '@/config/transaction';
 
 import usePortAddress from './usePortAddress';
 
@@ -29,7 +27,6 @@ const useExecute = ({
   fromAddress,
   toModuleAddress
 }: UseExecuteProps) => {
-  const addTransaction = useTransactionStore((state) => state.addTransaction);
   const srcPortAddress = usePortAddress({ toModuleAddress, toChainId, fromChainId });
 
   const payload = useMemo<`0x${string}`>(() => {
@@ -107,27 +104,9 @@ const useExecute = ({
         crossChainFeeData?.data?.params
       ]
     })?.then((hash) => {
-      addTransaction({
-        hash,
-        chainId: fromChainId as number,
-        address: fromAddress as `0x${string}`,
-        targetChainId: toChainId,
-        status: TransactionStatus.ProcessingOnLocal
-      });
-
       return hash;
     });
-  }, [
-    fromAddress,
-    writeContractAsync,
-    srcPortAddress,
-    crossChainFeeData,
-    toChainId,
-    toModuleAddress,
-    payload,
-    addTransaction,
-    fromChainId
-  ]);
+  }, [writeContractAsync, srcPortAddress, crossChainFeeData, toChainId, toModuleAddress, payload]);
 
   return {
     isLoading: isLoading || isRefetching,

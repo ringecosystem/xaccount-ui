@@ -1,10 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAccount, useSignMessage, useSignTypedData } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
+import PubSub from 'pubsub-js';
 
 import useGetSafeInfo from '@/hooks/useGetSafeInfo';
+import { EMITTER_EVENTS } from '@/config/emitter';
 import Spin from '@/components/ui/spin';
 import CrossChainExecutor from '@/components/cross-chain-executor';
 import { BaseTransaction } from '@/types/transaction';
@@ -14,6 +16,8 @@ import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunic
 import { isSameUrl } from '@/utils';
 import SelectChainDialog from '@/components/select-chain-dialog';
 import useExecute from '@/hooks/useExecute';
+import { TransactionStatus } from '@/config/transaction';
+import { useTransactionStore } from '@/store/transaction';
 import {
   EIP712TypedData,
   Methods,
@@ -27,6 +31,7 @@ import useAppIsLoading from './useAppIsLoading';
 const Page = () => {
   const params = useSearchParams();
   const appUrl = params.get('appUrl') as string | undefined;
+  const pubSubRef: React.MutableRefObject<any> = useRef();
   const safeInfo = useGetSafeInfo();
   const [transactionOpen, setTransactionOpen] = useState(false);
   const [dappItem, setDappItem] = useState<DappInfo | undefined>();
@@ -39,6 +44,7 @@ const Page = () => {
       remoteChain: state.remoteChain
     }))
   );
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
@@ -124,18 +130,36 @@ const Page = () => {
       return;
     }
     execute()?.then((hash) => {
-      // 此时给的hash是错误的，是本地区别的hash,但是对于目标的address来说无法捕获此hash事件
-      communicator?.send({ safeTxHash: hash }, currentRequestId as string);
+      addTransaction({
+        hash,
+        chainId: chainId as number,
+        address: address as `0x${string}`,
+        targetChainId: remoteChain?.id as number,
+        status: TransactionStatus.ProcessingOnLocal,
+        requestId: currentRequestId
+      });
       setTransactionOpen(false);
       setCurrentRequestId(undefined);
     });
-  }, [remoteChain, execute, communicator, currentRequestId]);
+  }, [remoteChain, execute, addTransaction, address, chainId, currentRequestId]);
 
   useEffect(() => {
     if (iframeRef?.current?.contentWindow) {
       iframeRef.current.contentWindow.location.href = appUrl as string;
     }
   }, [remoteChain?.id, remoteChain?.safeAddress, isConnected, iframeRef, appUrl, setAppIsLoading]);
+
+  useEffect(() => {
+    pubSubRef.current = PubSub.subscribe(EMITTER_EVENTS.TRANSACTION_REQUEST, (eventName, data) => {
+      const { hash, requestId } = data;
+      console.log(EMITTER_EVENTS.TRANSACTION_REQUEST, data);
+      communicator?.send({ safeTxHash: hash }, requestId as string);
+    });
+    return () => {
+      PubSub.unsubscribe(pubSubRef.current);
+      pubSubRef.current = null;
+    };
+  }, [communicator]);
 
   const onIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;

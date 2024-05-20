@@ -11,6 +11,8 @@ export interface Transaction {
   chainId: number;
   address: `0x${string}`;
   targetChainId: number;
+  targetHash?: `0x${string}`;
+  requestId?: string;
   createdAt: number;
   status: TransactionStatus;
 }
@@ -19,6 +21,11 @@ interface TransactionState {
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'createdAt'>) => void;
   setTransactionStatus: (hash: `0x${string}`, status: TransactionStatus) => void;
+  setTransactionTargetHashAndRequestId: (
+    hash: `0x${string}`,
+    targetHash: `0x${string}`,
+    requestId: `0x${string}`
+  ) => void;
   cleanUpOldTransactions: () => void;
   removeTransaction: (hash: `0x${string}`) => void;
 }
@@ -35,8 +42,15 @@ export const useTransactionStore = create<TransactionState>()(
         set((state) => ({
           transactions: state.transactions.map((tx) => (tx.hash === hash ? { ...tx, status } : tx))
         })),
+      setTransactionTargetHashAndRequestId: (hash, targetHash, requestId) =>
+        set((state) => ({
+          transactions: state.transactions.map((tx) =>
+            tx.hash === hash ? { ...tx, targetHash, requestId } : tx
+          )
+        })),
       cleanUpOldTransactions: () => {
         const pastTimeLimit = getPastTime(CLEANUP_INTERVAL_DAYS);
+
         set((state) => {
           const hasOldTransactions = state.transactions.some((tx) => tx.createdAt <= pastTimeLimit);
           if (!hasOldTransactions) {

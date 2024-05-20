@@ -117,6 +117,7 @@ const TransactionManager = () => {
               hash={transaction.hash}
               chainId={transaction.chainId}
               targetChainId={transaction.targetChainId}
+              requestId={transaction.requestId}
               onResolved={(status) => handleResolved(status, transaction.hash)}
             />
           ))}
