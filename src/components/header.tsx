@@ -2,14 +2,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { History } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 import ConnectButton from '@/components/connect-button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
+import useHistoryLink from '@/hooks/useHistoryLink';
 
 const Header = () => {
-  const router = useRouter();
+  const historyLink = useHistoryLink();
+
   return (
     <header className="h-[var(--header)] w-full ">
       <div className="mx-auto  flex h-full w-full items-center justify-between px-6">
@@ -26,16 +27,19 @@ const Header = () => {
         <div className="flex  w-full items-center justify-between gap-2 md:w-auto">
           <ConnectButton />
           <div className="flex items-center gap-2">
-            <Button
-              className=" flex-shrink-0"
-              variant="secondary"
-              size="icon"
-              onClick={() => {
-                router.push('/history');
-              }}
-            >
-              <History className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
+            {!!historyLink && (
+              <a
+                href={historyLink}
+                target="_blank"
+                rel="noreferrer"
+                title="History"
+                className="flex h-[2rem] w-[2rem] items-center justify-center rounded-full"
+              >
+                <Button className="flex-shrink-0" variant="secondary" size="icon">
+                  <History className="h-[1.2rem] w-[1.2rem]" />
+                </Button>
+              </a>
+            )}
             <ModeToggle />
           </div>
         </div>
