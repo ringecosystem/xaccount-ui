@@ -31,7 +31,7 @@ const PendingTransactionsIndicator: React.FC<Props> = ({ pendingTransactions, on
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -right-1 -top-1 rounded-full bg-red-500 px-2 py-1 text-xs"
+              className="absolute -right-1 -top-1 rounded-full bg-red-500 px-2 py-1 text-xs text-secondary"
             >
               {pendingTransactions}
             </motion.span>
