@@ -1,5 +1,3 @@
-//  交易回传
-
 export enum EMITTER_EVENTS {
   TRANSACTION_REQUEST = 'TRANSACTION_REQUEST'
 }

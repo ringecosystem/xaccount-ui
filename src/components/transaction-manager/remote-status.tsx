@@ -2,7 +2,6 @@ import { memo, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import PubSub from 'pubsub-js';
-import { usePrevious } from 'react-use';
 
 import { fetchMessageDetails } from '@/server/messageDetails';
 import {
@@ -29,7 +28,6 @@ const TransactionStatus = ({
   onResolved
 }: TransactionStatusProps) => {
   const toastRef = useRef<string | number | null>(null);
-  const previousRequestId = usePrevious(requestId);
 
   const { data, isSuccess } = useQuery({
     queryKey: ['messageDetails', hash],
@@ -80,7 +78,7 @@ const TransactionStatus = ({
         toast.dismiss(toastRef.current);
       }
     };
-  }, [isSuccess, data, targetChainId, chainId, hash, onResolved, previousRequestId, requestId]);
+  }, [isSuccess, data, targetChainId, chainId, hash, onResolved, requestId]);
 
   return null;
 };

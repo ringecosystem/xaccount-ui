@@ -11,9 +11,9 @@ export interface Transaction {
   chainId: number;
   address: `0x${string}`;
   targetChainId: number;
-  requestId?: string;
   createdAt: number;
   status: TransactionStatus;
+  requestId?: string;
 }
 
 interface TransactionState {
