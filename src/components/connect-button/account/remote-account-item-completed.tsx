@@ -9,7 +9,7 @@ import type { ChainConfig } from '@/types/chains';
 
 interface RemoteAccountItemCompletedProps {
   toChain: ChainConfig;
-  safeAddress: string;
+  safeAddress: `0x${string}`;
   onClick: MouseEventHandler<SVGSVGElement> | undefined;
 }
 const RemoteAccountItemCompleted = ({
