@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useAccount } from 'wagmi';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -8,9 +9,11 @@ import {
   SheetTitle,
   SheetDescription
 } from '@/components/ui/sheet';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { TransactionStatus } from '@/config/transaction';
-import { countTransactionsByDays } from '@/utils';
-import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
+import useHistoryLink from '@/hooks/useHistoryLink';
+import { countTransactionsByDays, getChainById, toShortAddress } from '@/utils';
+import { MSGPORT_NAME } from '@/config/site';
 
 import TransactionItem from './transaction';
 
@@ -27,6 +30,9 @@ interface Props {
 }
 
 const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }) => {
+  const { address, chainId } = useAccount();
+  const chain = getChainById(chainId);
+  const historyLink = useHistoryLink();
   const groupedTransactionsByDays = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => b.createdAt - a.createdAt);
     return countTransactionsByDays(sortedTransactions);
@@ -35,13 +41,22 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full space-y-4 sm:w-[450px] sm:max-w-[450px] md:w-[600px] md:max-w-[600px]">
+        <SheetContent className="w-full space-y-4 sm:w-[450px] sm:max-w-[450px] md:w-[550px] md:max-w-[550px]">
           <SheetHeader>
             <SheetTitle>Transaction Details</SheetTitle>
-            <SheetDescription className="text-left">
-              View the status and progress of recent transactions. Note that the displayed data is a
-              local snapshot and may not include all details. For full transaction data, visit{' '}
-              <a href={MSGPORT_URL} target="_blank" rel="noreferrer" className=" text-blue-500">
+            <SheetDescription className="text-left text-sm">
+              View recent transaction status and progress for the current address:{' '}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-pointer underline">
+                    {(address && toShortAddress(address)) || 'not connected'}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{address}</TooltipContent>
+              </Tooltip>{' '}
+              on the {chain?.name || 'unknown network'}. Local snapshot data may be incomplete. For
+              comprehensive details, visit{' '}
+              <a href={historyLink} target="_blank" rel="noreferrer" className="text-blue-500">
                 {MSGPORT_NAME}
               </a>
               . Data older than seven days is not retained.
