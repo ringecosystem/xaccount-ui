@@ -7,6 +7,7 @@ import ConnectButton from '@/components/connect-button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import useHistoryLink from '@/hooks/useHistoryLink';
+import { APP_NAME } from '@/config/site';
 
 const Header = () => {
   const historyLink = useHistoryLink();
@@ -14,14 +15,22 @@ const Header = () => {
   return (
     <header className="h-[var(--header)] w-full ">
       <div className="mx-auto  flex h-full w-full items-center justify-between px-6">
-        <Link href="/" title="darwinia" className="hidden mix-blend-exclusion md:inline-flex">
+        <Link href="/" title={APP_NAME} className="hidden mix-blend-exclusion md:inline-flex">
           <Image
-            src={'/images/common/logo.png'}
-            alt="darwinia logo"
+            src="/images/common/logo-white.svg"
+            alt={`${APP_NAME} logo`}
             priority
-            width={154}
-            height={18}
-            className="h-[18px] w-[154px] shrink-0"
+            width={156}
+            height={30}
+            className="hidden h-[30px] w-[156px] shrink-0 dark:inline"
+          />
+          <Image
+            src="/images/common/logo-black.svg"
+            alt={`${APP_NAME} logo`}
+            priority
+            width={156}
+            height={30}
+            className="inline h-[30px] w-[156px] shrink-0 dark:hidden"
           />
         </Link>
         <div className="flex  w-full items-center justify-between gap-2 md:w-auto">

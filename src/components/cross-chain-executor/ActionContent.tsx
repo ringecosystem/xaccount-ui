@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BaseTransaction } from '@/types/transaction';
 import { DappInfo } from '@/database/dapps';
 import LoadingText from '@/components/loading-text';
+import { APP_NAME } from '@/config/site';
 import {
   Accordion,
   AccordionContent,
@@ -62,7 +63,7 @@ const ActionContent: React.FC<ActionContentProps> = ({
             <div className="text-sm uppercase text-muted-foreground">{remoteChain?.name}</div>
           </div>
           <div className="space-y-2">
-            <h4 className="font-bold capitalize">To xAccount</h4>
+            <h4 className="font-bold capitalize">To {APP_NAME}</h4>
             <div className="text-sm text-muted-foreground">{remoteChain?.moduleAddress}</div>
           </div>
           <div className="space-y-2">

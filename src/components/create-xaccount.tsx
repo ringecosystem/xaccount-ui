@@ -46,6 +46,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTransactionStore } from '@/store/transaction';
 import { useXAccountsStore } from '@/store/xaccounts';
 import { TransactionStatus } from '@/config/transaction';
+import { APP_NAME } from '@/config/site';
 
 const iface = new Interface(xAccountFactoryAbi);
 
@@ -197,7 +198,9 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create xAccount on {toChain?.name}</DialogTitle>
+          <DialogTitle>
+            Create {APP_NAME} on {toChain?.name}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="grid gap-4 py-4">
