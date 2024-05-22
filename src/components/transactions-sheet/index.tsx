@@ -74,13 +74,8 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
                   <div key={date} className="text-muted-foreground">
                     {date}
                   </div>
-                  {transactions.map((tx, index) => (
-                    <TransactionItem
-                      key={tx.hash}
-                      status={tx.status}
-                      hash={tx.hash}
-                      index={index}
-                    />
+                  {transactions.map((tx) => (
+                    <TransactionItem key={tx.hash} status={tx.status} hash={tx.hash} />
                   ))}
                 </div>
               ))}

@@ -2,7 +2,6 @@ import React from 'react';
 import { ExternalLink, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { getTransactionStatusDescription } from '@/utils';
 import { TransactionStatus } from '@/config/transaction';
 import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
@@ -68,9 +67,8 @@ const style: React.CSSProperties = {
 interface TransactionItemProps {
   hash: `0x${string}`;
   status: TransactionStatus;
-  index: number;
 }
-const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status, index }) => {
+const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status }) => {
   const statusText = getTransactionStatusDescription(status);
   const statusIcon = getStatusIcon(status);
   const { indicator, bg } = getStatusColor(status);
@@ -79,24 +77,19 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status, index }
   const shortHash = hash.slice(0, 5) + '...' + hash.slice(-5);
 
   return (
-    <div className="flex flex-col gap-2" style={style}>
+    <div className="flex flex-col gap-1" style={style}>
       <div className="flex items-center justify-between">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <a
-              href={txHashUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              <ExternalLink size={16} />
-              {shortHash}
-            </a>
-          </TooltipTrigger>
-          <TooltipContent>
-            View transaction {hash} on {MSGPORT_NAME}
-          </TooltipContent>
-        </Tooltip>
+        <a
+          href={txHashUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`View transaction ${hash} on ${MSGPORT_NAME}`}
+          className="flex items-center gap-2 transition-opacity hover:opacity-80
+          "
+        >
+          <ExternalLink size={16} />
+          {shortHash}
+        </a>
 
         <div className="flex items-center gap-2">
           {statusIcon}
@@ -104,7 +97,12 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status, index }
         </div>
       </div>
 
-      <Progress value={getProcess(status)} className={bg} indicatorClassName={indicator} />
+      <Progress
+        value={getProcess(status)}
+        className={bg}
+        indicatorClassName={indicator}
+        style={{ height: '4px' }}
+      />
     </div>
   );
 };
