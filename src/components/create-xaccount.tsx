@@ -92,8 +92,8 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recoveryAccount: '',
-      refund: '',
+      recoveryAccount: fromAddress,
+      refund: fromAddress,
       msgPort: 'ORMP'
     }
   });
