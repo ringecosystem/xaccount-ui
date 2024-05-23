@@ -71,7 +71,7 @@ const TransactionManager = () => {
 
   const handleResolved = useCallback(
     (status: 'success' | 'failed', hash: `0x${string}`) => {
-      // handle xaccount status
+      // handle XAccount status
       updateAccountByTransactionHash(hash, {
         status: status === 'success' ? 'completed' : 'created'
       });
