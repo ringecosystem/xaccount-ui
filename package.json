@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo --experimental-https",
-    "build": "next build",
+    "build": "cross-env NEXT_PUBLIC_DEPLOYMENT_MODE=mainnet next build",
+    "build:testnet": "cross-env NEXT_PUBLIC_DEPLOYMENT_MODE=testnet next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -31,6 +32,7 @@
     "cheerio": "1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cross-env": "^7.0.3",
     "ethers": "^6.11.1",
     "framer-motion": "^11.0.20",
     "idb": "^8.0.0",

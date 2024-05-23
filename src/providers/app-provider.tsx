@@ -1,10 +1,11 @@
 import React, { useEffect, ReactNode, useRef } from 'react';
-import { useAccount, useChainId } from 'wagmi';
+import { useChainId } from 'wagmi';
 import localforage from 'localforage';
 
 import useChainStore from '@/store/chain';
 import TransactionManager from '@/components/transaction-manager';
 import useReturnDashboard from '@/hooks/useReturnDashboard';
+import { useIsConnectedToSupportedChain } from '@/hooks/useIsConnectedToSupportedChain';
 
 localforage.config({
   name: 'msgport xaccount',
@@ -16,10 +17,9 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const { address, chainId: currentChainId, isConnected } = useAccount();
   const chainId = useChainId();
 
-  const isChainIdSupported = chainId && currentChainId && chainId === currentChainId;
+  const { isChainSupported, isConnected, address } = useIsConnectedToSupportedChain();
 
   const removeRemoteChain = useChainStore((state) => state.removeRemoteChain);
 
@@ -54,7 +54,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <>
       {children}
-      {isChainIdSupported && <TransactionManager />}
+      {isChainSupported && <TransactionManager />}
     </>
   );
 };

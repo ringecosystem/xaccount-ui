@@ -1,16 +1,17 @@
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount } from 'wagmi';
+
+import { getChains } from '@/utils/chain';
 
 interface ConnectionStatus {
   isConnected: boolean;
   isChainSupported: boolean;
-  address?: string;
+  address?: `0x${string}`;
   currentChainId?: number;
   errorMessage?: string;
 }
 
 export function useIsConnectedToSupportedChain(): ConnectionStatus {
   const { address, chainId: currentChainId, isConnected } = useAccount();
-  const supportedChainId = useChainId();
 
   let errorMessage: string | undefined;
 
@@ -19,8 +20,9 @@ export function useIsConnectedToSupportedChain(): ConnectionStatus {
   }
 
   const isChainSupported = Boolean(
-    supportedChainId && currentChainId && supportedChainId === currentChainId
+    currentChainId && getChains().find((chain) => chain.id === currentChainId)
   );
+
   if (isConnected && !isChainSupported) {
     errorMessage = 'Connected chain is not supported.';
   }

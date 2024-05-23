@@ -1,7 +1,7 @@
 'use client';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
-import { useAccount, useChainId } from 'wagmi';
 
+import { useIsConnectedToSupportedChain } from '@/hooks/useIsConnectedToSupportedChain';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,11 +11,10 @@ interface ConnectButtonProps {
   className?: string;
 }
 const ConnectButton = ({ className }: ConnectButtonProps) => {
-  const supportChainId = useChainId();
   const { openConnectModal } = useConnectModal();
-  const { isConnected, address, chainId } = useAccount();
 
-  const isSupportedChain = chainId && supportChainId && chainId === supportChainId;
+  const { isConnected, address, currentChainId, isChainSupported } =
+    useIsConnectedToSupportedChain();
 
   return (
     <div
@@ -27,10 +26,10 @@ const ConnectButton = ({ className }: ConnectButtonProps) => {
       {!isConnected && openConnectModal ? (
         <Button onClick={openConnectModal}>Connect Wallet</Button>
       ) : null}
-      {isConnected && address && isSupportedChain ? (
-        <Account localAddress={address} chainId={chainId} />
+      {isConnected && address && isChainSupported ? (
+        <Account localAddress={address} chainId={currentChainId} />
       ) : null}
-      {isConnected && !isSupportedChain ? <ErrorChain /> : null}
+      {isConnected && !isChainSupported ? <ErrorChain /> : null}
     </div>
   );
 };
