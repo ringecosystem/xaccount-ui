@@ -15,7 +15,7 @@ const Header = () => {
   return (
     <header className="h-[var(--header)] w-full ">
       <div className="mx-auto  flex h-full w-full items-center justify-between px-6">
-        <Link href="/" title={APP_NAME} className="hidden mix-blend-exclusion md:inline-flex">
+        <Link href="/" title={APP_NAME} className="hidden  md:inline-flex">
           <Image
             src="/images/common/logo-white.svg"
             alt={`${APP_NAME} logo`}
