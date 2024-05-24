@@ -22,8 +22,7 @@ jobs:
           version: 8
 
       - uses: ./.github/actions/smart-vercel
-        name: Deploy to Vercel
-        id: smart-vercel
+        name: Deploy to Vercel (mainnet)
         with:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           vercel_group: itering
@@ -36,3 +35,16 @@ jobs:
           enable_notify_slack: true
           slack_channel: public-darwinia-websites-apps
           slack_webhook: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
+
+      - uses: ./.github/actions/smart-vercel
+        name: Deploy to Vercel (testnet)
+        with:
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_group: itering
+          preview_output: true
+          script_run: false
+          dist_path: .
+          project_name: xaccount-ui-testnet
+          prod_mode: true
+          enable_cache: true
+          enable_notify_slack: false
