@@ -1,12 +1,15 @@
-import type { MutableRefObject } from 'react';
-import type {
+import {
   SDKMessageEvent,
   MethodToResponse,
-  ErrorResponse,
-  RequestId
+  getSDKVersion,
+  MessageFormatter
 } from '@safe-global/safe-apps-sdk';
-import { getSDKVersion, Methods, MessageFormatter } from '@safe-global/safe-apps-sdk';
+
+import { ErrorResponse, Methods, RequestId } from '@/types/communicator';
+
 import { asError } from './as-error';
+
+import type { MutableRefObject } from 'react';
 
 const dec2hex = (dec: number): string => dec.toString(16).padStart(2, '0');
 
@@ -78,17 +81,10 @@ class AppCommunicator {
     const msg = error
       ? MessageFormatter.makeErrorResponse(requestId, data as string, sdkVersion)
       : MessageFormatter.makeResponse(requestId, data, sdkVersion);
-
-    console.log('msg', msg);
-
     this.iframeRef.current?.contentWindow?.postMessage(msg, '*');
   };
 
   handleIncomingMessage = async (msg: SDKMessageEvent): Promise<void> => {
-    if (msg?.data?.method) {
-      console.log('handleIncomingMessage', msg?.data?.method);
-    }
-
     const validMessage = this.isValidMessage(msg);
     const hasHandler = this.canHandleMessage(msg);
 

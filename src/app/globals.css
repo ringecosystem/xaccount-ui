@@ -159,3 +159,23 @@
 .animate-rotate-pause-rotate {
   animation: rotate-pause-rotate 4s infinite;
 }
+
+@keyframes ellipsis {
+  0%, 20% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+  80%, 100% {
+    content: '...';
+  }
+}
+
+.animate-ellipsis::after {
+  content: '';
+  animation: ellipsis 1.5s infinite;
+}

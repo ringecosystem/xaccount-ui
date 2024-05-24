@@ -1,12 +1,13 @@
-import React, { useCallback } from 'react';
-import Image from 'next/image';
+import React, { useCallback, useMemo } from 'react';
 
 import { useRemoteChainAddress } from '@/hooks/useRemoteChainAddress';
 import { ChainConfig } from '@/types/chains';
 import { MenubarCheckboxItem, MenubarItem } from '@/components/ui/menubar';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { toShortAddress } from '@/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+
+import RemoteAccountItemPending from './remote-account-item-pending';
+import RemoteAccountItemCompleted from './remote-account-item-completed';
+import RemoteAccountItemCreated from './remote-account-item-created';
 
 interface RemoteAccountItemProps {
   fromChainId: number;
@@ -24,61 +25,83 @@ interface RemoteAccountItemProps {
     moduleAddress: `0x${string}`;
     chain: ChainConfig;
   }) => void;
+  onCopy?: (address: `0x${string}`) => void;
 }
 
+const classNameMap = {
+  pending: 'cursor-not-allowed',
+  created: 'cursor-pointer',
+  completed: 'cursor-pointer'
+};
 const RemoteAccountItem = ({
   fromChainId,
   toChain,
   remoteChain,
   localAddress,
-  onClick
+  onClick,
+  onCopy
 }: RemoteAccountItemProps) => {
-  const { loading, safeAddress, moduleAddress, status } = useRemoteChainAddress({
+  const [state, dispatch] = useRemoteChainAddress({
     fromChainId: fromChainId ? BigInt(fromChainId) : undefined,
     toChainId: toChain.id ? BigInt(toChain.id) : undefined,
     fromAddress: localAddress
   });
+  const { loading, safeAddress, moduleAddress, status, transactionHash } = state;
 
-  const hasAccount = safeAddress !== '0x' && status === 'completed';
+  const hasAccount = safeAddress !== '0x' && status !== 'created';
   const checked = hasAccount && remoteChain?.id === toChain.id;
   const Component = checked ? MenubarCheckboxItem : MenubarItem;
 
+  const handleCopy: React.MouseEventHandler<SVGSVGElement> = useCallback(
+    (e) => {
+      e.stopPropagation();
+      onCopy?.(safeAddress);
+    },
+    [safeAddress, onCopy]
+  );
+
   const handleClick = useCallback(() => {
+    if (status === 'pending') return;
     onClick?.({
       hasAccount,
       safeAddress,
       moduleAddress,
       chain: toChain
     });
-  }, [onClick, hasAccount, safeAddress, moduleAddress, toChain]);
+  }, [onClick, hasAccount, safeAddress, moduleAddress, toChain, status]);
+
+  const Item = useMemo(() => {
+    switch (status) {
+      case 'created':
+        return <RemoteAccountItemCreated toChain={toChain} />;
+      case 'pending':
+        return <RemoteAccountItemPending toChain={toChain} />;
+      case 'completed':
+        return (
+          <RemoteAccountItemCompleted
+            toChain={toChain}
+            safeAddress={safeAddress}
+            onClick={handleCopy}
+          />
+        );
+
+      default:
+        return null;
+    }
+  }, [status, toChain, safeAddress, handleCopy]);
 
   return (
-    <Component onClick={handleClick} checked={checked} className=" cursor-pointer">
-      {loading ? (
-        <Skeleton className="h-full w-full">
-          <span className="invisible">{toChain?.name}</span>
-        </Skeleton>
-      ) : hasAccount ? (
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Image
-                src={toChain?.iconUrl as string}
-                width={16}
-                height={16}
-                className="rounded-full"
-                alt={toChain?.name || 'chain'}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{toChain?.name}</TooltipContent>
-          </Tooltip>
-
-          <div>{toShortAddress(safeAddress)}</div>
-        </div>
-      ) : (
-        <div className="text-muted-foreground">Create on {toChain?.name}</div>
-      )}
-    </Component>
+    <>
+      <Component onClick={handleClick} checked={checked} className={classNameMap[status]}>
+        {loading ? (
+          <Skeleton className="h-full w-full">
+            <span className="invisible">{toChain?.name}</span>
+          </Skeleton>
+        ) : (
+          Item
+        )}
+      </Component>
+    </>
   );
 };
 

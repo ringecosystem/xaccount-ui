@@ -1,36 +1,40 @@
 'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAccount, useSignMessage, useSignTypedData } from 'wagmi';
+import { useSearchParams } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
+import PubSub from 'pubsub-js';
 
-import { getChainById, isSameUrl } from '@/utils';
+import useGetSafeInfo from '@/hooks/useGetSafeInfo';
+import { EMITTER_EVENTS } from '@/config/emitter';
+import Spin from '@/components/ui/spin';
+import CrossChainExecutor from '@/components/cross-chain-executor';
+import { BaseTransaction } from '@/types/transaction';
+import { DappInfo, searchDapp } from '@/database/dapps';
+import useChainStore from '@/store/chain';
 import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
-import useAppIsLoading from './useAppIsLoading';
-import SafeAppIframe from './SafeAppIframe';
-import { useCallback, useEffect, useState } from 'react';
+import { isSameUrl } from '@/utils';
+import SelectChainDialog from '@/components/select-chain-dialog';
+import useExecute from '@/hooks/useExecute';
+import { TransactionStatus } from '@/config/transaction';
+import { useTransactionStore } from '@/store/transaction';
 import {
   EIP712TypedData,
   Methods,
   RequestId,
   SendTransactionRequestParams
-} from '@safe-global/safe-apps-sdk';
+} from '@/types/communicator';
 
-import { useAccount, useSendTransaction, useSignMessage, useSignTypedData } from 'wagmi';
-import { useSearchParams } from 'next/navigation';
-import useGetSafeInfo from '@/hooks/useGetSafeInfo';
-import Spin from '@/components/ui/spin';
-import CrossChainExecutor from '@/components/cross-chain-executor';
-import { BaseTransaction } from '@/types/transaction';
-import { Item, searchItemByUrl } from '@/database/dapps-repository';
-import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { TransactionStatusDialog } from '@/components/TransactionStatusDialog';
-import useChainStore from '@/store/chain';
-import { useShallow } from 'zustand/react/shallow';
-import SelectChainDialog from '@/components/SelectChainDialog';
+import SafeAppIframe from './SafeAppIframe';
+import useAppIsLoading from './useAppIsLoading';
 
 const Page = () => {
   const params = useSearchParams();
   const appUrl = params.get('appUrl') as string | undefined;
+  const pubSubRef: React.MutableRefObject<any> = useRef();
   const safeInfo = useGetSafeInfo();
   const [transactionOpen, setTransactionOpen] = useState(false);
-  const [dappItem, setDappItem] = useState<Item | undefined>();
+  const [dappItem, setDappItem] = useState<DappInfo | undefined>();
   const [transactionInfo, setTransactionInfo] = useState<BaseTransaction | undefined>();
   const { chainId, address, isConnected } = useAccount();
   const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
@@ -40,31 +44,24 @@ const Page = () => {
       remoteChain: state.remoteChain
     }))
   );
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
 
-  const chain = getChainById(chainId as number);
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading();
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>();
-
-  const [transactionResponse, setTransactionResponse] = useState<string>('pending');
 
   const { signMessageAsync } = useSignMessage();
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const { data: hash, sendTransactionAsync, isPending } = useSendTransaction();
-
-  const { isLoading: isClaimTransactionConfirming, data } = useTransactionStatus({
-    customToast: true,
-    hash,
-    onSuccess: () => {
-      setTransactionResponse('success');
-    },
-    onError: () => {
-      setTransactionResponse('failure');
-    }
+  const { execute, isPending, crossChainFeeData, isLoading } = useExecute({
+    transactionInfo,
+    fromChainId: chainId as number,
+    toChainId: remoteChain?.id as number,
+    fromAddress: address as `0x${string}`,
+    toModuleAddress: remoteChain?.moduleAddress as `0x${string}`
   });
 
-  const communicator = useAppCommunicator(iframeRef, chain, {
+  const communicator = useAppCommunicator(iframeRef, remoteChain, {
     onConfirmTransactions: (
       txs: BaseTransaction[],
       requestId: RequestId,
@@ -97,14 +94,11 @@ const Page = () => {
         });
       }
     },
-
     onGetEnvironmentInfo: () => ({
       origin: document.location.origin
     }),
     onGetSafeInfo: () => safeInfo,
-    onGetTxBySafeTxHash: (safeTxHash: string) => {
-      return safeTxHash;
-    }
+    onGetTxBySafeTxHash: (safeTxHash: string) => safeTxHash
   });
 
   const handleSelectChainOpenChange = (open: boolean) => {
@@ -130,28 +124,57 @@ const Page = () => {
       });
     }
   };
+  const handleSubmit = useCallback(() => {
+    if (!remoteChain) {
+      setRemoteChainAlertOpen(true);
+      return;
+    }
+    execute()?.then((hash) => {
+      addTransaction({
+        hash,
+        chainId: chainId as number,
+        address: address as `0x${string}`,
+        targetChainId: remoteChain?.id as number,
+        status: TransactionStatus.ProcessingOnLocal,
+        requestId: currentRequestId
+      });
+      setTransactionOpen(false);
+      setCurrentRequestId(undefined);
+    });
+  }, [remoteChain, execute, addTransaction, address, chainId, currentRequestId]);
 
   useEffect(() => {
     if (iframeRef?.current?.contentWindow) {
       iframeRef.current.contentWindow.location.href = appUrl as string;
     }
-  }, [chainId, address, isConnected, iframeRef, appUrl, setAppIsLoading]);
+  }, [remoteChain?.id, remoteChain?.safeAddress, isConnected, iframeRef, appUrl, setAppIsLoading]);
+
+  useEffect(() => {
+    pubSubRef.current = PubSub.subscribe(EMITTER_EVENTS.TRANSACTION_REQUEST, (eventName, data) => {
+      const { hash, requestId } = data;
+      console.log(EMITTER_EVENTS.TRANSACTION_REQUEST, data);
+      communicator?.send({ safeTxHash: hash }, requestId as string);
+    });
+    return () => {
+      PubSub.unsubscribe(pubSubRef.current);
+      pubSubRef.current = null;
+    };
+  }, [communicator]);
 
   const onIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
     if (!iframe || !isSameUrl(iframe.src, appUrl as string)) {
+      setAppIsLoading(false);
       return;
     }
-
     setAppIsLoading(false);
   }, [appUrl, iframeRef, setAppIsLoading]);
 
   useEffect(() => {
     if (appUrl) {
-      searchItemByUrl(appUrl as `https://${string}`).then((items) => {
-        if (items.length > 0) {
-          setDappItem(items[0]);
-        }
+      const hostname = new URL(appUrl).hostname;
+      searchDapp(hostname).then((items) => {
+        setDappItem(items);
       });
     } else {
       setDappItem(undefined);
@@ -171,9 +194,9 @@ const Page = () => {
       )}
       <div
         style={{
-          height: '100%',
           display: appIsLoading ? 'none' : 'block'
         }}
+        className="h-full"
       >
         <SafeAppIframe appUrl={appUrl as string} iframeRef={iframeRef} onLoad={onIframeLoad} />
       </div>
@@ -181,31 +204,12 @@ const Page = () => {
       <CrossChainExecutor
         open={transactionOpen}
         onOpenChange={handleOpenChange}
-        requestId={currentRequestId}
         transactionInfo={transactionInfo}
         dappItem={dappItem}
-        confirmLoading={isPending || isClaimTransactionConfirming}
-        onSubmit={() => {
-          if (!remoteChain) {
-            setRemoteChainAlertOpen(true);
-            return;
-          }
-          sendTransactionAsync(transactionInfo as BaseTransaction)?.then((hash) => {
-            communicator?.send({ safeTxHash: hash }, currentRequestId as string);
-            setTransactionOpen(false);
-            setCurrentRequestId(undefined);
-          });
-        }}
-      />
-      <TransactionStatusDialog
-        open={transactionResponse !== 'pending'}
-        onOpenChange={(open) => {
-          if (!open) {
-            setTransactionResponse('pending');
-          }
-        }}
-        transactionStatus={transactionResponse as any}
-        data={data}
+        isLoading={isLoading}
+        crossChainFeeData={crossChainFeeData}
+        confirmLoading={isPending}
+        onSubmit={handleSubmit}
       />
     </>
   );

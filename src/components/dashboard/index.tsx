@@ -1,13 +1,14 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 
 import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAllItems, addItem, deleteItem, Item } from '@/database/dapps-repository';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import SelectChainDialog from '@/components/select-chain-dialog';
+import useNavigateToDapp from '@/hooks/useLinkToDapp';
+import { addDapp, getDapps, deleteDapp, DappInfo } from '@/database/dapps';
 
 import AddDapp, { FormReturn } from './add-dapp';
 import AppItem from './app-item';
@@ -17,38 +18,39 @@ import AppItemDetail from './app-item-detail';
 
 // appUrl
 export default function Home() {
-  const router = useRouter();
   const formRef: React.MutableRefObject<FormReturn | null> = useRef(null);
   const [addDappOpen, setAddDappOpen] = useState(false);
+  const [remoteChainAlertOpen, setRemoteChainAlertOpen] = useState(false);
   const [deleteDappOpen, setDeleteDappOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [selectedItem, setSelectedItem] = useState<DappInfo | null>(null);
 
+  const navigateToDapp = useNavigateToDapp();
   const {
     data: dapps,
     refetch,
     isPending
   } = useQuery({
     queryKey: ['dapps'],
-    queryFn: getAllItems
+    queryFn: getDapps
   });
 
   const { mutateAsync: mutateAddItem, isPending: addLoading } = useMutation({
-    mutationFn: addItem,
+    mutationFn: addDapp,
     onMutate: async () => {
       await refetch();
     }
   });
 
   const { mutateAsync: mutateDeleteItem, isPending: deleteLoading } = useMutation({
-    mutationFn: deleteItem,
+    mutationFn: deleteDapp,
     onMutate: async () => {
       await refetch();
     }
   });
 
   const handleFinish = useCallback(
-    async (data: Omit<Item, 'hostname'>) => {
+    async (data: Omit<DappInfo, 'hostname'>) => {
       await mutateAddItem(data);
       await refetch();
       formRef?.current?.reset();
@@ -57,9 +59,13 @@ export default function Home() {
     [mutateAddItem, refetch]
   );
 
+  const handleSelectChainOpenChange = useCallback((open: boolean) => {
+    setRemoteChainAlertOpen(open);
+  }, []);
+
   const handleConfirmDelete = useCallback(async () => {
-    if (!selectedItem?.id) return;
-    await mutateDeleteItem(selectedItem?.id);
+    if (!selectedItem?.hostname) return;
+    await mutateDeleteItem(selectedItem?.hostname);
     await refetch();
     setDeleteDappOpen(false);
   }, [selectedItem, mutateDeleteItem, refetch]);
@@ -70,7 +76,7 @@ export default function Home() {
 
   return (
     <div
-      className="container relative px-16 py-6"
+      className="container relative px-8 py-6"
       style={{
         height: 'calc(100vh - var(--header) - var(--footer)'
       }}
@@ -80,7 +86,7 @@ export default function Home() {
         style={{
           height: 'calc(100% - 1rem)'
         }}
-        className="scroll-fade-bottom"
+        className="scroll-fade-bottom px-4"
       >
         <div className="dapps-grid gap-6">
           {isPending ? (
@@ -97,17 +103,19 @@ export default function Home() {
                     className=" flex h-full w-full flex-col items-center justify-center gap-2"
                     title="Add App"
                   >
-                    <AiOutlinePlus className="text-[50px]" />
+                    <Plus size={48} strokeWidth={2} />
                     <p className="text-sm font-bold text-muted-foreground">Add Dapp</p>
                   </div>
                 </CardContent>
               </AppItemWrapper>
               {dapps?.map((item) => (
                 <AppItem
-                  key={item.id}
+                  key={item.hostname}
                   item={item}
                   onClick={() => {
-                    router.push(`/dapp?appUrl=${item.url}`);
+                    navigateToDapp(item).catch(() => {
+                      handleSelectChainOpenChange(true);
+                    });
                   }}
                   onPreviewClick={() => {
                     setSelectedItem(item);
@@ -143,7 +151,15 @@ export default function Home() {
         }}
         onConfirm={handleConfirmDelete}
       />
-      <AppItemDetail item={selectedItem} open={previewOpen} onOpenChange={setPreviewOpen} />
+      <AppItemDetail
+        item={selectedItem}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onOpenAlertChange={() => {
+          handleSelectChainOpenChange(true);
+        }}
+      />
+      <SelectChainDialog open={remoteChainAlertOpen} onOpenChange={handleSelectChainOpenChange} />
     </div>
   );
 }

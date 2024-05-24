@@ -1,30 +1,27 @@
 'use client';
 import { useCallback, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { useShallow } from 'zustand/react/shallow';
 
 import useChainStore, { RemoteChain } from '@/store/chain';
 import { getChains } from '@/utils';
 import { MenubarContent, MenubarMenu } from '@/components/ui/menubar';
-
-import ChainButton from './chain-button';
+import CreateXAccount from '@/components/create-xaccount';
 import { ChainConfig } from '@/types/chains';
 
-import { CreateXAccount } from './create-xaccount';
+import ChainButton from './chain-button';
 import RemoteAccountItem from './remote-account-item';
 
 type AccountProps = {
+  localChain?: ChainConfig;
+  localAddress?: `0x${string}`;
   onCopy?: (address: `0x${string}`) => void;
 };
 
-const RemoteAccount = ({ onCopy }: AccountProps) => {
-  const { address } = useAccount();
-
+const RemoteAccount = ({ localChain, localAddress, onCopy }: AccountProps) => {
   const [selectedChain, setSelectedChain] = useState<RemoteChain | null>(null);
 
-  const { localChain, remoteChain, setRemoteChain } = useChainStore(
+  const { remoteChain, setRemoteChain } = useChainStore(
     useShallow((state) => ({
-      localChain: state.localChain,
       remoteChain: state.remoteChain,
       setRemoteChain: state.setRemoteChain
     }))
@@ -62,29 +59,31 @@ const RemoteAccount = ({ onCopy }: AccountProps) => {
     <>
       <MenubarMenu>
         <ChainButton label="Remote" chain={remoteChain} address={remoteChain?.safeAddress} />
-
-        <MenubarContent>
-          {supportedRemoteChains?.map((chain) => {
-            return (
-              address && (
-                <RemoteAccountItem
-                  key={chain.id}
-                  fromChainId={localChain?.id}
-                  toChain={chain}
-                  localAddress={address}
-                  remoteChain={remoteChain}
-                  onClick={handleClick}
-                />
-              )
-            );
-          })}
-        </MenubarContent>
+        {localChain?.id ? (
+          <MenubarContent>
+            {supportedRemoteChains?.map((chain) => {
+              return (
+                localAddress && (
+                  <RemoteAccountItem
+                    key={chain.id}
+                    fromChainId={localChain?.id}
+                    toChain={chain}
+                    localAddress={localAddress}
+                    remoteChain={remoteChain}
+                    onClick={handleClick}
+                    onCopy={onCopy}
+                  />
+                )
+              );
+            })}
+          </MenubarContent>
+        ) : null}
       </MenubarMenu>
       <CreateXAccount
         open={!!selectedChain}
         onOpenChange={() => setSelectedChain(null)}
         fromChainId={localChain?.id}
-        fromAddress={address}
+        fromAddress={localAddress}
         toChain={selectedChain}
       />
     </>

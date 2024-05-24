@@ -1,6 +1,8 @@
 import { ChainId } from '@/types/chains';
-import type { ChainConfig } from '@/types/chains';
+
 import { getRpcUrl } from '../rpc-url';
+
+import type { ChainConfig } from '@/types/chains';
 
 export const darwinia: ChainConfig = {
   id: ChainId.DARWINIA,

@@ -1,1 +1,1 @@
-darwinia xAccount ui
+XAccount ui

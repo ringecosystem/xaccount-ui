@@ -1,26 +1,28 @@
-import type { MutableRefObject } from 'react';
 import { useEffect, useState } from 'react';
-
 import { Chain } from '@rainbow-me/rainbowkit';
+import { JsonRpcProvider } from 'ethers';
 
-import type {
+import AppCommunicator from '@/utils/communicator';
+import { useEthersProvider } from '@/utils/ethers-adapters';
+import { BaseTransaction } from '@/types/transaction';
+import {
   EIP712TypedData,
   EnvironmentInfo,
   GetTxBySafeTxHashParams,
-  RequestId,
+  Methods,
   RPCPayload,
+  RequestId,
   SendTransactionRequestParams,
   SendTransactionsParams,
   SignTypedMessageParams
-} from '@safe-global/safe-apps-sdk';
-import { Methods } from '@safe-global/safe-apps-sdk';
+} from '@/types/communicator';
 
-import AppCommunicator from '@/utils/communicator';
-
-import { useEthersProvider } from '@/utils/ethers-adapters';
-import { BaseTransaction } from '@/types/transaction';
+import type { MutableRefObject } from 'react';
 import type { SafeInfo } from './useGetSafeInfo';
-import { JsonRpcProvider } from 'ethers';
+
+// 200,000
+// default gas limit for transactions
+const DEFAULT_GAS_LIMIT = '0x30d40';
 
 interface TransactionsParams extends Omit<SendTransactionsParams, 'txs'> {
   txs: BaseTransaction[];
@@ -59,21 +61,15 @@ const useAppCommunicator = (
   handlers: UseAppCommunicatorHandlers
 ): AppCommunicator | undefined => {
   const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined);
-  const provider = useEthersProvider();
+  const provider = useEthersProvider({
+    chainId: chain?.id
+  });
 
   useEffect(() => {
     let communicatorInstance: AppCommunicator;
 
     const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement>) => {
-      communicatorInstance = new AppCommunicator(iframeRef, {
-        onMessage: (msg) => {
-          if (!msg.data) return;
-          console.log('app-communicator-message', msg?.data);
-        },
-        onError: (error) => {
-          console.log('app-communicator-error', error);
-        }
-      });
+      communicatorInstance = new AppCommunicator(iframeRef);
 
       setCommunicator(communicatorInstance);
     };
@@ -101,9 +97,16 @@ const useAppCommunicator = (
       const params = msg.data.params as RPCPayload;
 
       try {
-        console.log(params);
         return await (provider as JsonRpcProvider)?.send(params.call, params.params);
       } catch (err) {
+        // extra logic for eth_estimateGas
+        switch (params?.call) {
+          case 'eth_estimateGas':
+            return Promise.resolve(DEFAULT_GAS_LIMIT);
+          default:
+            break;
+        }
+
         throw new Error((err as JsonRpcResponse).error);
       }
     });
@@ -114,7 +117,6 @@ const useAppCommunicator = (
       const transactions = txs.map(({ to, value, data }) => {
         return {
           to,
-          // value: value ? BigInt(value).toString() : '0',
           value: value ? BigInt(value) : 0n,
           data: data || '0x'
         };

@@ -1,260 +1,199 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useMemo, useCallback } from 'react';
 import { JsonRpcProvider } from 'ethers';
-import {
-  getXAccountByFromChainIdAndToChainIdAndFromAddress,
-  addXAccount,
-  updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress
-} from '@/database/xaccounts';
-import { config } from '@/config/wagmi';
 import { Config, readContract } from '@wagmi/core';
+import { useShallow } from 'zustand/react/shallow';
+
+import { config } from '@/config/wagmi';
 import {
   abi as xAccountFactoryAbi,
   address as xAccountFactoryAddress
 } from '@/config/abi/xAccountFactory';
 import { getChainById } from '@/utils';
+import { useXAccountsStore } from '@/store/xaccounts';
 
 async function isSafeAddressExist(
   safeAddress: string,
   provider: JsonRpcProvider,
   retry: number = 1
 ): Promise<boolean> {
-  let exist = false;
-  let attempts = 0;
-
-  while (attempts < retry) {
+  for (let attempts = 0; attempts < retry; attempts++) {
     try {
       const code = await provider.getCode(safeAddress);
-      console.log(`Attempt ${attempts + 1}: code fetched`, code);
-      exist = code !== '0x';
-      if (exist) break; // 如果找到代码，提前退出循环
+      if (code !== '0x') return true;
     } catch (error) {
       console.error(`Failed to check safe address on attempt ${attempts + 1}: ${error}`);
     }
-    attempts++;
   }
-
-  return exist;
+  return false;
 }
 
-type State = {
+interface State {
   safeAddress: `0x${string}`;
   moduleAddress: `0x${string}`;
+  transactionHash?: `0x${string}`;
+  status: 'created' | 'pending' | 'completed';
   loading: boolean;
-  status: 'create' | 'completed';
-};
+}
 
-type Action = {
-  type: 'SET_ADDRESS' | 'SET_LOADING';
-  payload:
-    | {
-        safeAddress: `0x${string}`;
-        moduleAddress: `0x${string}`;
-        status: 'create' | 'pending' | 'completed';
-      }
-    | boolean;
-};
+type Action = { type: 'SET_STATE'; payload: Partial<State> };
 
 const initialState: State = {
   safeAddress: '0x',
   moduleAddress: '0x',
-  status: 'create',
+  status: 'created',
   loading: false
 };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'SET_ADDRESS':
-      if (typeof action.payload === 'boolean') {
-        return state;
-      }
-      return {
-        ...state,
-        safeAddress: action.payload?.safeAddress,
-        moduleAddress: action.payload?.moduleAddress,
-        status: action.payload?.status as 'create' | 'completed'
-      };
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload as boolean };
+    case 'SET_STATE':
+      return { ...state, ...action.payload };
     default:
       return state;
   }
 };
 
-type UseRemoteChainAddressType = {
+interface UseRemoteChainAddressProps {
   fromChainId?: bigint;
   toChainId?: bigint;
   fromAddress?: `0x${string}`;
-};
+}
+
 export function useRemoteChainAddress({
   fromChainId,
   toChainId,
   fromAddress
-}: UseRemoteChainAddressType) {
-  console.log('fromChainId:', fromChainId);
-  console.log('toChainId:', toChainId);
+}: UseRemoteChainAddressProps): [state: State, dispatch: React.Dispatch<Action>] {
+  const { addAccount, updateAccount, accounts } = useXAccountsStore(
+    useShallow((state) => ({
+      addAccount: state.addAccount,
+      updateAccount: state.updateAccount,
+      accounts: state.accounts
+    }))
+  );
+
+  const storeAccount = useMemo(() => {
+    if (fromChainId && fromAddress && toChainId) {
+      return accounts[`${fromChainId}-${fromAddress.toLocaleLowerCase()}-${toChainId}`];
+    }
+    return undefined;
+  }, [accounts, fromChainId, toChainId, fromAddress]);
 
   const fetchAddressCalled = useRef(false);
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const provider = useMemo(() => {
-    return toChainId
-      ? new JsonRpcProvider(getChainById(Number(toChainId))?.rpcUrls?.default?.http?.[0])
-      : null;
+    const chain = getChainById(Number(toChainId));
+    return chain ? new JsonRpcProvider(chain.rpcUrls.default.http[0]) : undefined;
   }, [toChainId]);
 
-  const checkAddressAndUpdateStatusIfNotExist = useCallback(
-    async ({
-      fromChainId,
-      fromAddress,
-      toChainId,
-      safeAddress
-    }: {
-      fromChainId: bigint;
-      fromAddress: `0x${string}`;
-      toChainId: bigint;
-      safeAddress: `0x${string}`;
-    }): Promise<boolean> => {
-      const exist = provider
-        ? await isSafeAddressExist(safeAddress as `0x${string}`, provider as JsonRpcProvider, 10)
-        : false;
-      if (!exist) {
-        await updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
-          fromChainId: Number(fromChainId),
-          toChainId: Number(toChainId),
-          fromAddress,
-          status: 'create'
-        });
-      }
+  const checkAndCompleteXAccount = useCallback(
+    async (safeAddress: string, provider?: JsonRpcProvider) => {
+      if (!fromAddress) return;
 
-      return exist;
+      const exist = provider ? await isSafeAddressExist(safeAddress, provider) : false;
+
+      if (exist) {
+        updateAccount(
+          {
+            localChainId: Number(fromChainId),
+            localAddress: fromAddress,
+            remoteChainId: Number(toChainId)
+          },
+          { status: 'completed' }
+        );
+        dispatch({ type: 'SET_STATE', payload: { status: 'completed' } });
+      }
     },
-    [provider]
+    [fromChainId, toChainId, fromAddress, updateAccount]
   );
 
   useEffect(() => {
     const fetchAddress = async () => {
-      if (!fromChainId || !toChainId || !fromAddress) {
-        return;
+      // console.log('start fetchAddress', storeAccount);
+
+      if (toChainId === 11155111n) {
+        console.log('xAccountFactoryAddress', storeAccount, storeAccount?.status);
       }
-      dispatch({ type: 'SET_LOADING', payload: true });
+
+      if (!fromChainId || !toChainId || !fromAddress) return;
+      dispatch({ type: 'SET_STATE', payload: { loading: true } });
 
       try {
-        let xAccountItem = await getXAccountByFromChainIdAndToChainIdAndFromAddress({
-          fromChainId: Number(fromChainId),
-          toChainId: Number(toChainId),
-          fromAddress
-        });
-
+        const xAccountItem = storeAccount;
         if (xAccountItem) {
-          const safeAddress = xAccountItem.toSafeAddress as `0x${string}`;
-          const moduleAddress = xAccountItem.toModuleAddress as `0x${string}`;
+          dispatch({
+            type: 'SET_STATE',
+            payload: {
+              safeAddress: xAccountItem.safeAddress,
+              moduleAddress: xAccountItem.moduleAddress,
+              status: xAccountItem.status,
+              transactionHash: xAccountItem.transactionHash
+            }
+          });
 
-          switch (xAccountItem.status) {
-            case 'completed':
-              dispatch({
-                type: 'SET_ADDRESS',
-                payload: {
-                  safeAddress,
-                  moduleAddress,
-                  status: 'completed'
-                }
-              });
-              return;
-
-            case 'pending':
-              const exist = await checkAddressAndUpdateStatusIfNotExist({
-                fromChainId,
-                fromAddress,
-                toChainId,
-                safeAddress
-              });
-              if (exist) {
-                await updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
-                  fromChainId: Number(fromChainId),
-                  toChainId: Number(toChainId),
-                  fromAddress,
-                  status: 'completed'
-                });
-              }
-              dispatch({
-                type: 'SET_ADDRESS',
-                payload: {
-                  safeAddress,
-                  moduleAddress,
-                  status: exist ? 'completed' : 'create'
-                }
-              });
-              return;
-
-            case 'create':
-              dispatch({
-                type: 'SET_ADDRESS',
-                payload: {
-                  safeAddress: xAccountItem?.toSafeAddress,
-                  moduleAddress: xAccountItem?.toModuleAddress,
-                  status: 'create'
-                }
-              });
-              break;
-            default:
-              break;
+          if (xAccountItem.status === 'created') {
+            await checkAndCompleteXAccount(xAccountItem.safeAddress, provider);
           }
+          return;
         }
 
         const result = await readContract(config as unknown as Config, {
-          abi: xAccountFactoryAbi,
           address: xAccountFactoryAddress,
+          abi: xAccountFactoryAbi,
           functionName: 'xAccountOf',
           chainId: Number(toChainId),
           args: [fromChainId, toChainId, fromAddress]
         });
 
         if (result) {
-          await addXAccount({
-            fromChainId: Number(fromChainId),
-            toChainId: Number(toChainId),
-            fromAddress,
-            toSafeAddress: result?.[0] as `0x${string}`,
-            toModuleAddress: result?.[1] as `0x${string}`,
-            status: 'create'
-          });
-          const exist = provider
-            ? await isSafeAddressExist(result?.[0] as `0x${string}`, provider as JsonRpcProvider)
-            : false;
-
-          if (exist) {
-            await updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
-              fromChainId: Number(fromChainId),
-              toChainId: Number(toChainId),
-              fromAddress,
-              status: 'completed'
-            });
-          }
+          const [safeAddress, moduleAddress] = result as [`0x${string}`, `0x${string}`];
+          await addAccount(
+            {
+              localChainId: Number(fromChainId),
+              localAddress: fromAddress,
+              remoteChainId: Number(toChainId)
+            },
+            {
+              safeAddress,
+              moduleAddress,
+              status: 'created'
+            }
+          );
 
           dispatch({
-            type: 'SET_ADDRESS',
+            type: 'SET_STATE',
             payload: {
-              safeAddress: result?.[0] as `0x${string}`,
-              moduleAddress: result?.[1] as `0x${string}`,
-              status: exist ? 'completed' : 'create'
+              safeAddress,
+              moduleAddress,
+              status: 'created'
             }
           });
+
+          await checkAndCompleteXAccount(safeAddress, provider);
         }
       } catch (error) {
       } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: 'SET_STATE', payload: { loading: false } });
       }
     };
+
     if (!fetchAddressCalled.current) {
       fetchAddressCalled.current = true;
-      fetchAddress()?.finally(() => {
-        fetchAddressCalled.current = false;
-      });
+      fetchAddress().finally(() => (fetchAddressCalled.current = false));
     }
     return () => {
       fetchAddressCalled.current = false;
     };
-  }, [fromChainId, toChainId, fromAddress, provider, checkAddressAndUpdateStatusIfNotExist]);
+  }, [
+    storeAccount,
+    fromChainId,
+    toChainId,
+    fromAddress,
+    checkAndCompleteXAccount,
+    addAccount,
+    provider
+  ]);
 
-  return state;
+  return [state, dispatch];
 }

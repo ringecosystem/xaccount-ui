@@ -5,7 +5,6 @@ import { toShortAddress } from '@/utils';
 import { RemoteChain } from '@/store/chain';
 import { MenubarTrigger } from '@/components/ui/menubar';
 
-// Props 类型定义
 type ChainButtonProps = {
   label: string;
   chain?: Chain | RemoteChain;

@@ -4,18 +4,21 @@ import { useCopyToClipboard } from 'react-use';
 import { toast } from 'sonner';
 
 import { Menubar } from '@/components/ui/menubar';
+import { getChainById } from '@/utils';
 
 import LocalAccount from './local-account';
 import RemoteAccount from './remote-account';
-import { useChains } from 'wagmi';
 
 type AccountProps = {
+  chainId?: number;
   localAddress?: `0x${string}`;
 };
 
-const Account = ({ localAddress }: AccountProps) => {
+const Account = ({ chainId, localAddress }: AccountProps) => {
   const toastRef = useRef<string | number | null>(null);
   const [, copyToClipboard] = useCopyToClipboard();
+
+  const chain = getChainById(chainId);
 
   const handleCopy = useCallback(
     (address: `0x${string}`) => {
@@ -27,12 +30,10 @@ const Account = ({ localAddress }: AccountProps) => {
     [copyToClipboard]
   );
 
-  const chains = useChains();
-
   return (
     <Menubar className="h-[40px] gap-2 border-none p-0">
       {!!localAddress && <LocalAccount address={localAddress} onCopy={handleCopy} />}
-      {<RemoteAccount onCopy={handleCopy} />}
+      {<RemoteAccount localChain={chain} localAddress={localAddress} onCopy={handleCopy} />}
     </Menubar>
   );
 };

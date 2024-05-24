@@ -1,5 +1,7 @@
 import { polygon as polygonBase } from 'wagmi/chains';
+
 import { ChainId, type ChainConfig } from '@/types/chains';
+
 import { getRpcUrl } from '../rpc-url';
 
 export const polygon: ChainConfig = {

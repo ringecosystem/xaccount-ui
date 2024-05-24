@@ -3,6 +3,7 @@ import { Inter as FontSans } from 'next/font/google';
 import { DAppProvider } from '@/providers/dapp-provider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { APP_NAME } from '@/config/site';
 import { cn } from '@/lib/utils';
 
 import type { Metadata } from 'next';
@@ -10,8 +11,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'darwinia xAccount',
-  description: 'xAccount'
+  title: APP_NAME,
+  description: APP_NAME
 };
 
 const fontSans = FontSans({

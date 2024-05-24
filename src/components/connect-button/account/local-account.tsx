@@ -2,10 +2,10 @@
 import { useCallback } from 'react';
 import { Copy, Power, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useAccount } from 'wagmi';
 
 import { useDisconnectWallet } from '@/hooks/useDisconnectWallet';
-import useChainStore from '@/store/chain';
-import { toShortAddress } from '@/utils';
+import { getChainById, toShortAddress } from '@/utils';
 import {
   MenubarContent,
   MenubarItem,
@@ -22,10 +22,8 @@ type AccountProps = {
 
 const LocalAccount = ({ address, onCopy }: AccountProps) => {
   const { disconnectWallet } = useDisconnectWallet();
-
-  const { localChain } = useChainStore((state) => ({
-    localChain: state.localChain
-  }));
+  const { chainId } = useAccount();
+  const chain = getChainById(chainId);
 
   const handleCopy = useCallback(() => {
     onCopy?.(address);
@@ -37,11 +35,11 @@ const LocalAccount = ({ address, onCopy }: AccountProps) => {
 
   return (
     <MenubarMenu>
-      <ChainButton label="Local" chain={localChain} address={address} />
+      <ChainButton label="Local" chain={chain} address={address} />
 
       <MenubarContent>
         <MenubarItem disabled className="gap-2">
-          Local : {localChain?.name}
+          Local : {chain?.name}
         </MenubarItem>
         <MenubarSeparator />
 
@@ -54,12 +52,12 @@ const LocalAccount = ({ address, onCopy }: AccountProps) => {
         <MenubarItem className="cursor-pointer gap-2">
           <Link
             className="flex items-center gap-2"
-            href={`${localChain?.blockExplorers?.default?.url}/address/${address}`}
+            href={`${chain?.blockExplorers?.default?.url}/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
           >
             <ExternalLink className="h-4 w-4" strokeWidth={1} />
-            View on {localChain?.blockExplorers?.default?.name}
+            View on {chain?.blockExplorers?.default?.name}
           </Link>
         </MenubarItem>
 

@@ -1,6 +1,13 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useWriteContract } from 'wagmi';
+import { Interface } from 'ethers';
+import { Plus } from 'lucide-react';
+import { isAddress } from 'viem';
+import { useForm } from 'react-hook-form';
+import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,9 +21,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-import { useWriteContract } from 'wagmi';
-import { Interface } from 'ethers';
 import {
   Accordion,
   AccordionContent,
@@ -31,28 +35,23 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import { isAddress } from 'viem';
-import { useForm } from 'react-hook-form';
-import { useCallback } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { getCrossChainFee } from '@/server/gaslimit';
-import { useQuery } from '@tanstack/react-query';
-import useChainStore, { RemoteChain } from '@/store/chain';
+import { RemoteChain } from '@/store/chain';
 import {
   abi as xAccountFactoryAbi,
   address as xAccountFactoryAddress
 } from '@/config/abi/xAccountFactory';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTransactionStatus } from '@/hooks/useTransactionStatus';
-import { updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress } from '@/database/xaccounts';
+import { useTransactionStore } from '@/store/transaction';
+import { useXAccountsStore } from '@/store/xaccounts';
+import { TransactionStatus } from '@/config/transaction';
+import { APP_NAME } from '@/config/site';
 
 const iface = new Interface(xAccountFactoryAbi);
 
-// 尝试获取函数定义
 const functionFragment = iface.getFunction('xDeploy');
 
-// 定义Zod验证模式
 const formSchema = z.object({
   recoveryAccount: z
     .string()
@@ -84,24 +83,17 @@ interface Props {
   fromAddress?: string;
   toChain: RemoteChain | null;
   onOpenChange?: (open: boolean) => void;
-  onFinish?: (data: z.infer<typeof formSchema>) => void;
 }
 
-export function CreateXAccount({
-  fromChainId,
-  fromAddress,
-  toChain,
-  open,
-  onOpenChange,
-  onFinish
-}: Props) {
-  const setRemoteChain = useChainStore((state) => state.setRemoteChain);
+function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange }: Props) {
+  const updateAccount = useXAccountsStore((state) => state.updateAccount);
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recoveryAccount: '',
-      refund: '',
+      recoveryAccount: fromAddress,
+      refund: fromAddress,
       msgPort: 'ORMP'
     }
   });
@@ -144,14 +136,7 @@ export function CreateXAccount({
       })
   });
 
-  const { writeContractAsync, isPending, data: hash } = useWriteContract();
-
-  const { isLoading: isClaimTransactionConfirming } = useTransactionStatus({
-    hash,
-    onSuccess: () => {
-      onOpenChange?.(false);
-    }
-  });
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const handleFormSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
@@ -171,24 +156,51 @@ export function CreateXAccount({
             (data?.recoveryAccount || fromAddress) as `0x${string}`
           ],
           value: crossChainFeeData?.data?.fee ? BigInt(crossChainFeeData?.data?.fee) : 0n
-        })?.then(() => {
-          fromChainId &&
-            updateXAccountStatusByFromChainIdAndToChainIdAndFromAddress({
-              fromChainId: fromChainId,
-              toChainId: toChain?.id,
-              fromAddress: fromAddress,
-              status: 'pending'
+        })?.then((hash) => {
+          onOpenChange?.(false);
+          if (fromChainId) {
+            updateAccount(
+              {
+                localChainId: fromChainId,
+                localAddress: fromAddress as `0x${string}`,
+                remoteChainId: toChain?.id
+              },
+              {
+                safeAddress: toChain?.safeAddress as `0x${string}`,
+                moduleAddress: toChain?.moduleAddress as `0x${string}`,
+                status: 'pending',
+                transactionHash: hash
+              }
+            );
+            addTransaction({
+              hash: hash,
+              chainId: fromChainId as number,
+              address: fromAddress as `0x${string}`,
+              targetChainId: toChain?.id,
+              status: TransactionStatus.ProcessingOnLocal
             });
+          }
         });
     },
-    [toChain, crossChainFeeData?.data, fromChainId, fromAddress, writeContractAsync]
+    [
+      toChain,
+      crossChainFeeData?.data,
+      fromChainId,
+      fromAddress,
+      addTransaction,
+      writeContractAsync,
+      onOpenChange,
+      updateAccount
+    ]
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create xAccount on {toChain?.name}</DialogTitle>
+          <DialogTitle>
+            Create {APP_NAME} on {toChain?.name}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="grid gap-4 py-4">
@@ -247,7 +259,7 @@ export function CreateXAccount({
                         <div className="flex items-center gap-2 pr-1">
                           <FormLabel className="w-20">refund</FormLabel>
                           <FormControl>
-                            <Input placeholder="0x..." {...field} />
+                            <Input placeholder="0x..." {...field} autoComplete="off" />
                           </FormControl>
                         </div>
                         <FormMessage />
@@ -262,7 +274,7 @@ export function CreateXAccount({
               <div className="flex items-center gap-2">
                 <Label className="w-20 text-sm capitalize text-muted-foreground">gas limit</Label>
                 {isLoading ? (
-                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-8 w-full" />
                 ) : (
                   <Input
                     value={(crossChainFeeData?.data?.gas?.total || 0)?.toLocaleString()}
@@ -272,8 +284,9 @@ export function CreateXAccount({
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-20 text-sm capitalize text-muted-foreground">fee</Label>
+
                 {isLoading ? (
-                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-8 w-full" />
                 ) : (
                   <Input value={(crossChainFeeData?.data?.fee || 0)?.toLocaleString()} disabled />
                 )}
@@ -283,10 +296,13 @@ export function CreateXAccount({
             <Button
               size="lg"
               type="submit"
-              className="w-full"
-              isLoading={isPending || isClaimTransactionConfirming}
+              className="w-full rounded-xl"
+              disabled={
+                isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params
+              }
+              isLoading={isPending}
             >
-              Create
+              {isLoading ? <span className=" animate-pulse">Create</span> : 'Create'}
             </Button>
           </form>
         </Form>
@@ -294,3 +310,5 @@ export function CreateXAccount({
     </Dialog>
   );
 }
+
+export default CreateXAccount;

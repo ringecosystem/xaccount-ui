@@ -1,13 +1,15 @@
 'use client';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import Spin from '@/components/ui/spin';
 import { useEffect, useState } from 'react';
-import TransactionCard from './components/history-item';
 import { useInView } from 'react-intersection-observer';
+import { Package2 } from 'lucide-react';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package2 } from 'lucide-react';
+import Spin from '@/components/ui/spin';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+
+import TransactionCard from './components/history-item';
 
 const fetchData = (
   currentLength: number
@@ -110,7 +112,7 @@ const Page = () => {
 
           {isRefetching && (
             <div className="mx-auto flex h-10 w-full items-center justify-center gap-2 ">
-              <Spin className=" text-muted-foreground"></Spin>
+              <Spin className="text-muted-foreground"></Spin>
               <span>Loading more...</span>
             </div>
           )}

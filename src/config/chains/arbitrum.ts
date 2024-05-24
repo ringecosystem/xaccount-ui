@@ -1,5 +1,7 @@
 import { arbitrum as arbitrumChain } from 'wagmi/chains';
+
 import { ChainId, type ChainConfig } from '@/types/chains';
+
 import { getRpcUrl } from '../rpc-url';
 
 export const arbitrum: ChainConfig = {

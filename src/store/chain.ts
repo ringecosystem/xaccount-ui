@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-import { getDefaultChain } from '@/utils';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { ChainConfig } from '@/types/chains';
 
@@ -10,24 +9,27 @@ export type RemoteChain = ChainConfig & {
 };
 
 export type State = {
-  localChain: ChainConfig;
   remoteChain?: RemoteChain;
 };
 
 export type Action = {
-  setLocalChain: (chain: ChainConfig) => void;
   setRemoteChain: (chain: RemoteChain) => void;
   removeRemoteChain: () => void;
 };
 
-const initialChainState: ChainConfig = getDefaultChain();
-
-const useChainStore = create<State & Action>((set) => ({
-  localChain: initialChainState,
-  remoteChain: undefined,
-  setLocalChain: (chain) => set({ localChain: chain }),
-  setRemoteChain: (chain) => set({ remoteChain: chain }),
-  removeRemoteChain: () => set({ remoteChain: undefined })
-}));
+const useChainStore = create<State & Action>()(
+  persist(
+    (set) => ({
+      remoteChain: undefined,
+      setRemoteChain: (chain) => set({ remoteChain: chain }),
+      removeRemoteChain: () => set({ remoteChain: undefined })
+    }),
+    {
+      name: 'chain-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ remoteChain: state.remoteChain })
+    }
+  )
+);
 
 export default useChainStore;

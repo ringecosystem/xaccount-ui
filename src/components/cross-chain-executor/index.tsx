@@ -1,20 +1,25 @@
-import { useEffect, useState } from 'react';
-import { RequestId } from '@safe-global/safe-apps-sdk';
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Item } from '@/database/dapps-repository';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { DappInfo } from '@/database/dapps';
 import useChainStore from '@/store/chain';
+import { Button } from '@/components/ui/button';
 
 import ActionContent from './ActionContent';
 
 import type { BaseTransaction } from '@/types/transaction';
-import { useShallow } from 'zustand/react/shallow';
+import type { FeeApiResponse } from '@/server/gaslimit';
 
 interface CrossChainExecutorProps {
   confirmLoading?: boolean;
-  requestId?: RequestId;
-  dappItem?: Item;
+  dappItem?: DappInfo;
   transactionInfo?: BaseTransaction;
+  crossChainFeeData?: FeeApiResponse;
+  isLoading?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: () => void;
@@ -23,39 +28,44 @@ const CrossChainExecutor = ({
   confirmLoading,
   dappItem,
   transactionInfo,
+  crossChainFeeData,
+  isLoading,
   open,
   onOpenChange,
   onSubmit
 }: CrossChainExecutorProps) => {
-  const { localChain, remoteChain } = useChainStore(
-    useShallow((state) => ({
-      localChain: state.localChain,
-      remoteChain: state.remoteChain
-    }))
-  );
-  const [localValue, setLocalValue] = useState<string>('0.0');
-
-  useEffect(() => {
-    if (transactionInfo) {
-      setLocalValue(transactionInfo.value.toString());
-    }
-  }, [transactionInfo]);
+  const remoteChain = useChainStore((state) => state.remoteChain);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[600px]">
+      <DialogContent className="w-full md:max-w-[650px]">
         <DialogHeader>
-          <DialogTitle className="text-xl uppercase">Execute transaction</DialogTitle>
+          <DialogTitle className="text-xl uppercase">Cross-chain Call</DialogTitle>
         </DialogHeader>
         <ActionContent
-          localChain={localChain}
           remoteChain={remoteChain}
           transactionInfo={transactionInfo}
           dappItem={dappItem}
-          localValue={localValue}
-          confirmLoading={confirmLoading}
-          onSubmit={onSubmit}
+          isLoading={isLoading}
+          crossChainFeeData={crossChainFeeData}
         />
+        <DialogFooter className="flex !flex-col items-center justify-center gap-2">
+          <Button
+            type="submit"
+            className="w-full rounded-xl"
+            onClick={onSubmit}
+            isLoading={confirmLoading}
+            disabled={
+              isLoading || !crossChainFeeData?.data?.fee || !crossChainFeeData?.data?.params
+            }
+            size="lg"
+          >
+            {isLoading ? <span className="animate-pulse">EXECUTE</span> : 'EXECUTE'}
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            this transaction will execute the remote call on {remoteChain?.name}
+          </p>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

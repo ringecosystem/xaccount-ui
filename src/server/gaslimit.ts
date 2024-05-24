@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // 定义返回数据的接口
-interface FeeApiResponse {
+export interface FeeApiResponse {
   code: number;
   data: {
     fee: string;
-    params: string;
+    params: `0x${string}`;
     gas: {
       gasForMessagingLayer: number;
       gasForMsgport: number;
@@ -36,7 +36,7 @@ export async function getCrossChainFee({
   }
 
   const response = await axios.get<FeeApiResponse>(
-    `https://msgport-api.darwinia.network/ormp/fee`,
+    'https://msgport-api.darwinia.network/ormp/fee',
     {
       params: {
         from_chain_id: fromChainId,
