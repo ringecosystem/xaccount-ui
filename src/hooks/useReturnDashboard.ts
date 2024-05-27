@@ -1,3 +1,4 @@
+'use client';
 import { useRouter, usePathname } from 'next/navigation';
 import { useCallback } from 'react';
 

@@ -53,6 +53,9 @@ dependencies:
   '@safe-global/safe-apps-sdk':
     specifier: ^9.0.0
     version: 9.0.0(typescript@5.0.2)(zod@3.22.4)
+  '@safe-global/safe-gateway-typescript-sdk':
+    specifier: ^3.21.1
+    version: 3.21.1
   '@tanstack/react-query':
     specifier: ^5.28.6
     version: 5.28.6(react@18.2.0)
@@ -3798,7 +3801,7 @@ packages:
   /@safe-global/safe-apps-sdk@8.1.0(typescript@5.0.2)(zod@3.22.4):
     resolution: {integrity: sha512-XJbEPuaVc7b9n23MqlF6c+ToYIS3f7P2Sel8f3cSBQ9WORE4xrSuvhMpK9fDSFqJ7by/brc+rmJR/5HViRr0/w==}
     dependencies:
-      '@safe-global/safe-gateway-typescript-sdk': 3.19.0
+      '@safe-global/safe-gateway-typescript-sdk': 3.21.1
       viem: 1.21.4(typescript@5.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - bufferutil
@@ -3810,7 +3813,7 @@ packages:
   /@safe-global/safe-apps-sdk@9.0.0(typescript@5.0.2)(zod@3.22.4):
     resolution: {integrity: sha512-fEqmQBU3JqTjORSl3XYrcaxdxkUqeeM39qsQjqCzzTHioN8DEfg3JCLq6EBoXzcKTVOYi8SPzLV7KJccdDw+4w==}
     dependencies:
-      '@safe-global/safe-gateway-typescript-sdk': 3.19.0
+      '@safe-global/safe-gateway-typescript-sdk': 3.21.1
       viem: 1.21.4(typescript@5.0.2)(zod@3.22.4)
     transitivePeerDependencies:
       - bufferutil
@@ -3819,8 +3822,8 @@ packages:
       - zod
     dev: false
 
-  /@safe-global/safe-gateway-typescript-sdk@3.19.0:
-    resolution: {integrity: sha512-TRlP05KY6t3wjLJ74FiirWlEt3xTclnUQM2YdYto1jx5G1o0meMnugIUZXhzm7Bs3rDEDNhz/aDf2KMSZtoCFg==}
+  /@safe-global/safe-gateway-typescript-sdk@3.21.1:
+    resolution: {integrity: sha512-7nakIjcRSs6781LkizYpIfXh1DYlkUDqyALciqz/BjFU/S97sVjZdL4cuKsG9NEarytE+f6p0Qbq2Bo1aocVUA==}
     engines: {node: '>=16'}
     dev: false
 
@@ -9878,6 +9881,7 @@ packages:
 
   /rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3

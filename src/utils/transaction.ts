@@ -1,3 +1,5 @@
+import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk';
+
 import {
   MILLISECONDS_IN_A_DAY,
   TransactionStatus,
@@ -54,3 +56,31 @@ export const countTransactionsByDays = (
 
   return groupedTransactions;
 };
+
+const POLL_INTERVAL = 2000;
+const MAX_ATTEMPTS = 999;
+
+export async function waitForSafeTransactionHash(
+  chainId: string,
+  safeTxHash: string
+): Promise<`0x${string}`> {
+  let attempts = 0;
+
+  while (attempts < MAX_ATTEMPTS) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+    attempts++;
+
+    try {
+      const result = await getTransactionDetails(chainId, safeTxHash);
+
+      if (result.txHash) {
+        return result?.txHash as `0x${string}`;
+      }
+    } catch (error: Error | any) {
+      console.error('Error fetching Safe transaction details:', error);
+      throw error;
+    }
+  }
+
+  throw new Error('Safe transaction hash not found after maximum attempts'); // 超过最大尝试次数后抛出异常
+}

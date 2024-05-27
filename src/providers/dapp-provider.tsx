@@ -15,7 +15,7 @@ const queryClient = new QueryClient();
 
 export function DAppProvider({ children }: React.PropsWithChildren<unknown>) {
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} reconnectOnMount={false}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <RainbowKitProvider>

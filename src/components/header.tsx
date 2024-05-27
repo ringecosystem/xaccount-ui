@@ -8,9 +8,12 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import useHistoryLink from '@/hooks/useHistoryLink';
 import { APP_NAME } from '@/config/site';
+import { useAppAutoConnect } from '@/hooks/useAppAutoConnect';
 
 const Header = () => {
   const historyLink = useHistoryLink();
+
+  useAppAutoConnect();
 
   return (
     <header className="h-[var(--header)] w-full ">

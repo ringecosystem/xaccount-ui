@@ -103,8 +103,6 @@ const useExecute = ({
         payload,
         crossChainFeeData?.data?.params
       ]
-    })?.then((hash) => {
-      return hash;
     });
   }, [writeContractAsync, srcPortAddress, crossChainFeeData, toChainId, toModuleAddress, payload]);
 

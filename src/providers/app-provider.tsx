@@ -1,6 +1,7 @@
-import React, { useEffect, ReactNode, useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { useChainId } from 'wagmi';
 import localforage from 'localforage';
+import { useDebounce } from 'react-use';
 
 import useChainStore from '@/store/chain';
 import TransactionManager from '@/components/transaction-manager';
@@ -11,45 +12,38 @@ localforage.config({
   name: 'msgport xaccount',
   storeName: 'xaccount'
 });
+const DEBOUNCE_TIME = 500;
 
 type AppProviderProps = {
   children: ReactNode;
 };
-
 export const AppProvider = ({ children }: AppProviderProps) => {
   const chainId = useChainId();
-
-  const { isChainSupported, isConnected, address } = useIsConnectedToSupportedChain();
-
+  const { isChainSupported, address, isConnected } = useIsConnectedToSupportedChain();
   const removeRemoteChain = useChainStore((state) => state.removeRemoteChain);
-
   const returnDashboard = useReturnDashboard();
 
   const previousChainId = useRef(chainId);
   const previousAddress = useRef(address);
 
-  useEffect(() => {
-    if (!isConnected) {
-      removeRemoteChain();
-      returnDashboard();
-    }
-  }, [isConnected, removeRemoteChain, returnDashboard]);
+  useDebounce(
+    () => {
+      if (
+        !isConnected ||
+        !isChainSupported ||
+        (previousChainId.current && previousChainId.current !== chainId) ||
+        (previousAddress.current && previousAddress.current !== address)
+      ) {
+        removeRemoteChain();
+        returnDashboard();
+      }
 
-  useEffect(() => {
-    if (previousChainId.current !== chainId) {
-      removeRemoteChain();
-      returnDashboard();
-    }
-    previousChainId.current = chainId;
-  }, [chainId, removeRemoteChain, returnDashboard]);
-
-  useEffect(() => {
-    if (previousAddress.current !== address) {
-      removeRemoteChain();
-      returnDashboard();
-    }
-    previousAddress.current = address;
-  }, [address, removeRemoteChain, returnDashboard]);
+      previousChainId.current = chainId;
+      previousAddress.current = address;
+    },
+    DEBOUNCE_TIME,
+    [chainId, address, isConnected, isChainSupported, removeRemoteChain, returnDashboard]
+  );
 
   return (
     <>
