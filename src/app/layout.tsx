@@ -3,7 +3,7 @@ import { Inter as FontSans } from 'next/font/google';
 import { DAppProvider } from '@/providers/dapp-provider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { APP_NAME } from '@/config/site';
+import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { cn } from '@/lib/utils';
 
 import type { Metadata } from 'next';
@@ -11,8 +11,28 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  applicationName: APP_NAME,
   title: APP_NAME,
-  description: APP_NAME
+  description: APP_DESCRIPTION,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: APP_NAME
+  },
+  formatDetection: {
+    telephone: false
+  },
+  openGraph: {
+    type: 'website',
+    siteName: APP_NAME,
+    title: APP_NAME,
+    description: APP_DESCRIPTION
+  },
+  twitter: {
+    card: 'summary',
+    title: APP_NAME,
+    description: APP_DESCRIPTION
+  }
 };
 
 const fontSans = FontSans({
