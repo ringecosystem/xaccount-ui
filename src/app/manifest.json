@@ -19,5 +19,6 @@
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "description": "Control your remote accounts without touching the remote blockchains."
+  "description": "Control your remote accounts without touching the remote blockchains.",
+  "iconPath": "/images/common/favicon.png"
 }
