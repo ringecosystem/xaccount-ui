@@ -28,7 +28,7 @@ jobs:
           script_run: false
           dist_path: .
           project_name: xaccount-ui
-          enable_cache: true
+          enable_cache: false
           enable_notify_comment: true
           enable_notify_slack: true
           slack_channel: public-darwinia-websites-apps
@@ -43,7 +43,6 @@ jobs:
           script_run: false
           dist_path: .
           project_name: xaccount-ui-testnet
-          enable_cache: true
+          enable_cache: false
           enable_notify_comment: true
           enable_notify_slack: false
-
