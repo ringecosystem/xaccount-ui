@@ -15,6 +15,9 @@ jobs:
           repository: darwinia-network/devops
           path: .github
 
+      - name: Clear Next.js build cache
+        run: rm -rf .next/cache
+
       - uses: pnpm/action-setup@v3
         with:
           version: 8
@@ -28,7 +31,7 @@ jobs:
           script_run: false
           dist_path: .
           project_name: xaccount-ui
-          enable_cache: false
+          enable_cache: true
           enable_notify_comment: true
           enable_notify_slack: true
           slack_channel: public-darwinia-websites-apps
@@ -43,6 +46,6 @@ jobs:
           script_run: false
           dist_path: .
           project_name: xaccount-ui-testnet
-          enable_cache: false
+          enable_cache: true
           enable_notify_comment: true
           enable_notify_slack: false
