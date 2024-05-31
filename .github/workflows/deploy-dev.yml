@@ -15,9 +15,6 @@ jobs:
           repository: darwinia-network/devops
           path: .github
 
-      - name: Clear Next.js build cache
-        run: rm -rf .next/cache
-
       - uses: pnpm/action-setup@v3
         with:
           version: 8
