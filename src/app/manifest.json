@@ -18,5 +18,6 @@
   "background_color": "#FFFFFF",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "description": "Control your remote accounts without touching the remote blockchains."
 }
