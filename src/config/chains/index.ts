@@ -6,4 +6,4 @@ export * from './polygon';
 export * from './blast';
 export * from './darwinia';
 export * from './crab';
-export * from './pangolin';
+// export * from './pangolin';

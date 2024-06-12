@@ -9,7 +9,7 @@ export enum ChainId {
   ARBITRUM_SEPOLIA = 421614,
   DARWINIA = 46,
   CRAB = 44,
-  PANGOLIN = 43,
+  // PANGOLIN = 43,
   POLYGON = 137,
   BLAST = 81457
 }
