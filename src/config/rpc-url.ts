@@ -26,9 +26,9 @@ const rpcUrlsMap: Record<string, any> = {
   [ChainId.CRAB]: {
     default: 'https://crab-rpc.darwinia.network'
   },
-  [ChainId.PANGOLIN]: {
-    default: 'https://pangolin-rpc.darwinia.network'
-  },
+  // [ChainId.PANGOLIN]: {
+  //   default: 'https://pangolin-rpc.darwinia.network'
+  // },
   [ChainId.POLYGON]: {
     infura: 'https://polygon-mainnet.infura.io/v3/',
     default: polygon?.rpcUrls?.default?.http[0]

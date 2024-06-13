@@ -11,11 +11,19 @@ import { Provider as RainbowKitProvider } from './rainbowkit-provider';
 import { AppProvider } from './app-provider';
 import { UIComponentsProvider } from './ui-components-provider';
 
-const queryClient = new QueryClient();
-
 export function DAppProvider({ children }: React.PropsWithChildren<unknown>) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000
+          }
+        }
+      })
+  );
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} reconnectOnMount={false}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <RainbowKitProvider>

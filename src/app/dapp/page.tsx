@@ -13,7 +13,7 @@ import { BaseTransaction } from '@/types/transaction';
 import { DappInfo, searchDapp } from '@/database/dapps';
 import useChainStore from '@/store/chain';
 import useAppCommunicator, { CommunicatorMessages } from '@/hooks/useAppCommunicator';
-import { isSameUrl } from '@/utils';
+import { checkIfRunningInSafeGlobalIframe, isSameUrl, waitForSafeTransactionHash } from '@/utils';
 import SelectChainDialog from '@/components/select-chain-dialog';
 import useExecute from '@/hooks/useExecute';
 import { TransactionStatus } from '@/config/transaction';
@@ -124,12 +124,9 @@ const Page = () => {
       });
     }
   };
-  const handleSubmit = useCallback(() => {
-    if (!remoteChain) {
-      setRemoteChainAlertOpen(true);
-      return;
-    }
-    execute()?.then((hash) => {
+
+  const finalizeTransaction = useCallback(
+    (hash: `0x${string}`) => {
       addTransaction({
         hash,
         chainId: chainId as number,
@@ -140,8 +137,34 @@ const Page = () => {
       });
       setTransactionOpen(false);
       setCurrentRequestId(undefined);
-    });
-  }, [remoteChain, execute, addTransaction, address, chainId, currentRequestId]);
+    },
+    [addTransaction, chainId, address, remoteChain, currentRequestId]
+  );
+
+  const handleSubmit = useCallback(async () => {
+    if (!remoteChain) {
+      setRemoteChainAlertOpen(true);
+      return;
+    }
+    try {
+      const safeTxHash = await execute();
+      if (!safeTxHash) {
+        console.error('No transaction hash returned');
+        return;
+      }
+
+      // if the dapp is running in the Safe iframe, we need to wait for the Safe transaction hash
+      if (checkIfRunningInSafeGlobalIframe()) {
+        const txHash = await waitForSafeTransactionHash(String(chainId), safeTxHash);
+        finalizeTransaction(txHash as `0x${string}`);
+        return;
+      }
+
+      finalizeTransaction(safeTxHash);
+    } catch (error) {
+      console.error('Error handling the transaction:', error);
+    }
+  }, [remoteChain, execute, chainId, finalizeTransaction]);
 
   useEffect(() => {
     if (iframeRef?.current?.contentWindow) {

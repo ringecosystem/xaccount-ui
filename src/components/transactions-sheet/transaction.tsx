@@ -74,7 +74,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status }) => {
   const { indicator, bg } = getStatusColor(status);
 
   const txHashUrl = `${MSGPORT_URL}/messages/${hash}`;
-  const shortHash = hash.slice(0, 5) + '...' + hash.slice(-5);
+  const shortHash = hash?.slice(0, 5) + '...' + hash?.slice(-5);
 
   return (
     <div className="flex flex-col gap-1" style={style}>

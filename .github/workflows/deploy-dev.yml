@@ -46,4 +46,3 @@ jobs:
           enable_cache: true
           enable_notify_comment: true
           enable_notify_slack: false
-

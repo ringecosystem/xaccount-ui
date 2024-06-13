@@ -30,7 +30,7 @@ export function useIsConnectedToSupportedChain(): ConnectionStatus {
   return {
     isConnected,
     isChainSupported,
-    address: isConnected ? address : undefined,
+    address,
     currentChainId: isConnected && isChainSupported ? currentChainId : undefined,
     errorMessage
   };
