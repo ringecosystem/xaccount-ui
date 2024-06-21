@@ -34,11 +34,13 @@ export interface MessageResponse {
   updated_at: string;
 }
 
+const scanUrl = process.env.NEXT_PUBLIC_SCAN_URL;
+
 export async function fetchMessageDetails(
   sourceTransactionHash?: `0x${string}`
 ): Promise<MessageResponse> {
   if (!sourceTransactionHash) throw new Error('No source transaction hash provided');
-  const url = `https://scan.msgport.xyz/messages/${sourceTransactionHash}.json`;
+  const url = `${scanUrl}/messages/${sourceTransactionHash}.json`;
   try {
     const response = await axios.get<MessageResponse>(url);
     return response.data;
