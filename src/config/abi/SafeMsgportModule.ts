@@ -1,4 +1,4 @@
-export const address = '0x000080fc9c29c366DC8c1C656846E277BA7b6cB9' as `0x${string}`;
+export const address = '0x1899e901F53534489CEA580b6Ec688DddCcd0b91' as `0x${string}`;
 export const abi = [
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   { inputs: [], name: 'AlreadySetup', type: 'error' },
