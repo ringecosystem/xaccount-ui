@@ -148,6 +148,7 @@ const Page = () => {
     }
     try {
       const safeTxHash = await execute();
+
       if (!safeTxHash) {
         console.error('No transaction hash returned');
         return;

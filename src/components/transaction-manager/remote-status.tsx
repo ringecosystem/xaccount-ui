@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import PubSub from 'pubsub-js';
 
-import { fetchMessageDetails } from '@/server/messageDetails';
+import { fetchMessage } from '@/server/graphql/services';
 import {
   failedToastClassName,
   successToastClassName,
@@ -12,6 +12,7 @@ import {
 import { getChainById } from '@/utils';
 import { TRANSACTION_REFETCH_INTERVAL } from '@/config/transaction';
 import { EMITTER_EVENTS } from '@/config/emitter';
+import { MESSAGE_STATUS } from '@/types/message';
 
 interface TransactionStatusProps {
   hash?: `0x${string}`;
@@ -31,7 +32,7 @@ const TransactionStatus = ({
 
   const { data, isSuccess } = useQuery({
     queryKey: ['messageDetails', hash],
-    queryFn: () => fetchMessageDetails(hash),
+    queryFn: () => fetchMessage(hash!),
     enabled: Boolean(hash),
     refetchInterval: TRANSACTION_REFETCH_INTERVAL
   });
@@ -40,14 +41,14 @@ const TransactionStatus = ({
     if (isSuccess) {
       if (data && hash) {
         const status = data?.status;
-        if (requestId && data?.dispatch_transaction_hash) {
+        if (requestId && data?.targetTransactionHash) {
           PubSub.publish(EMITTER_EVENTS.TRANSACTION_REQUEST, {
             requestId,
-            hash: data?.dispatch_transaction_hash
+            hash: data?.targetTransactionHash
           });
         }
-        if (status === 'dispatch_success' || status === 'dispatch_error') {
-          const success = status === 'dispatch_success';
+        if (status === MESSAGE_STATUS.SUCCESS || status === MESSAGE_STATUS.FAILED) {
+          const success = status === MESSAGE_STATUS.SUCCESS;
           const chain = getChainById(chainId);
           const targetChain = getChainById(targetChainId);
 
