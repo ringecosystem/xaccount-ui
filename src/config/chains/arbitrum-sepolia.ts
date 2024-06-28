@@ -10,6 +10,12 @@ export const arbitrumSepolia: ChainConfig = {
   ...arbitrumSepoliaBase,
   iconUrl: '/images/chains/arbitrum.svg',
   shortName: 'arb-sep',
+  blockExplorers: {
+    default: {
+      name: 'Arbitrum Sepolia Testnet Explorer',
+      url: 'https://sepolia.arbiscan.io/'
+    }
+  },
   rpcUrls: {
     default: {
       http: [getRpcUrl(ChainId.ARBITRUM_SEPOLIA)]
