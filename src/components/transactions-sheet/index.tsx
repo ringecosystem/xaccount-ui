@@ -10,18 +10,12 @@ import {
   SheetDescription
 } from '@/components/ui/sheet';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { TransactionStatus } from '@/config/transaction';
 import useHistoryLink from '@/hooks/useHistoryLink';
 import { countTransactionsByDays, getChainById, toShortAddress } from '@/utils';
 import { MSGPORT_NAME } from '@/config/site';
+import { Transaction } from '@/store/transaction';
 
 import TransactionItem from './transaction';
-
-interface Transaction {
-  hash: `0x${string}`;
-  status: TransactionStatus;
-  createdAt: number;
-}
 
 interface Props {
   transactions: Transaction[];
@@ -75,7 +69,12 @@ const TransactionsSheet: React.FC<Props> = ({ transactions, open, onOpenChange }
                     {date}
                   </div>
                   {transactions.map((tx) => (
-                    <TransactionItem key={tx.hash} status={tx.status} hash={tx.hash} />
+                    <TransactionItem
+                      key={tx.hash}
+                      status={tx.status}
+                      hash={tx.hash}
+                      chainId={tx.chainId}
+                    />
                   ))}
                 </div>
               ))}

@@ -5,12 +5,7 @@ import {
   TransactionStatus,
   transactionStatusDescriptions
 } from '@/config/transaction';
-
-interface Transaction {
-  hash: `0x${string}`;
-  status: TransactionStatus;
-  createdAt: number;
-}
+import { Transaction } from '@/store/transaction';
 
 // Retrieves a user-friendly description for a specified transaction status
 export const getTransactionStatusDescription = (status: TransactionStatus): string => {

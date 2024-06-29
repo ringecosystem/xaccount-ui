@@ -35,7 +35,7 @@ export const CrossChainTransactionToast = ({
     name: chain?.blockExplorers?.default.name
   };
 
-  const msgScanUrl = `${MSGPORT_URL}/messages/${transactionHash}`;
+  const msgScanUrl = `${MSGPORT_URL}/messages/${transactionHash}?network=${chain?.testnet ? 'testnet' : 'mainnet'}`;
 
   const statusStyles = {
     success: {
