@@ -12,7 +12,7 @@ function useHistoryLink() {
   const historyLink = useMemo(() => {
     if (isConnected && isChainSupported && address) {
       const currentChain = getChainById(currentChainId);
-      return `${MSGPORT_URL}/sent_by/${address}?network=${currentChain?.testnet ? 'testnet' : 'mainnet'}`;
+      return `${MSGPORT_URL}/sender/${address}?network=${currentChain?.testnet ? 'testnet' : 'mainnet'}`;
     }
     return '';
   }, [isConnected, isChainSupported, address, currentChainId]);
