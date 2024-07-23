@@ -75,7 +75,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ chainId, hash, status
   const statusIcon = getStatusIcon(status);
   const { indicator, bg } = getStatusColor(status);
 
-  const txHashUrl = `${MSGPORT_URL}/messages/${hash}?network=${sourceChain?.testnet ? 'testnet' : 'mainnet'}`;
+  const txHashUrl = `${MSGPORT_URL}/message/${hash}?network=${sourceChain?.testnet ? 'testnet' : 'mainnet'}`;
   const shortHash = hash?.slice(0, 5) + '...' + hash?.slice(-5);
 
   return (
