@@ -6,7 +6,7 @@ import { Interface } from 'ethers';
 import { Plus } from 'lucide-react';
 import { isAddress } from 'viem';
 import { useForm } from 'react-hook-form';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
@@ -47,6 +47,7 @@ import { useTransactionStore } from '@/store/transaction';
 import { useXAccountsStore } from '@/store/xaccounts';
 import { TransactionStatus } from '@/config/transaction';
 import { APP_NAME } from '@/config/site';
+import { MSG_PORT_OPTIONS, MsgPort } from '@/config/msg-port';
 
 const iface = new Interface(xAccountFactoryAbi);
 
@@ -74,7 +75,7 @@ const formSchema = z.object({
       message: 'Refund address must be a valid Ethereum address or left blank'
     }
   ),
-  msgPort: z.enum(['ORMP', 'Multi'])
+  msgPort: z.enum([MsgPort.ORMP_U, MsgPort.Multi])
 });
 
 interface Props {
@@ -94,9 +95,16 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
     defaultValues: {
       recoveryAccount: fromAddress,
       refund: fromAddress,
-      msgPort: 'ORMP'
+      msgPort: MsgPort.ORMP_U
     }
   });
+  useEffect(() => {
+    form.reset({
+      recoveryAccount: fromAddress,
+      refund: fromAddress,
+      msgPort: form.getValues('msgPort')
+    });
+  }, [fromAddress, form]);
 
   const watchRefundAddress = form.watch('refund') || fromAddress || '0x';
   const msgPort = form.watch('msgPort');
@@ -144,7 +152,7 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
         typeof toChain?.id !== 'undefined' &&
         typeof crossChainFeeData?.data?.params !== 'undefined' &&
         typeof fromAddress !== 'undefined'
-      )
+      ) {
         writeContractAsync({
           abi: xAccountFactoryAbi,
           address: xAccountFactoryAddress,
@@ -152,7 +160,7 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
           args: [
             data?.msgPort,
             toChain?.id ? BigInt(toChain?.id) : 0n,
-            crossChainFeeData?.data?.params as any,
+            crossChainFeeData?.data?.params,
             (data?.recoveryAccount || fromAddress) as `0x${string}`
           ],
           value: crossChainFeeData?.data?.fee ? BigInt(crossChainFeeData?.data?.fee) : 0n
@@ -181,6 +189,7 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
             });
           }
         });
+      }
     },
     [
       toChain,
@@ -242,8 +251,11 @@ function CreateXAccount({ fromChainId, fromAddress, toChain, open, onOpenChange 
 
                           <SelectContent>
                             <SelectGroup>
-                              <SelectItem value="ORMP">ORMP</SelectItem>
-                              <SelectItem value="Multi">Multi</SelectItem>
+                              {Array.from(MSG_PORT_OPTIONS.entries()).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>

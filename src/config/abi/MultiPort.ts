@@ -1,4 +1,4 @@
-export const address = '0x000002C33f83AE045d5EBB8972F09674379e6A31' as `0x${string}`;
+export const address = '0xab3172FB251B2047813Ea1940F2cFaA287B1a665' as `0x${string}`;
 
 export const abi = [
   {
@@ -11,9 +11,27 @@ export const abi = [
     type: 'constructor'
   },
   {
-    inputs: [{ internalType: 'bytes', name: 'errorData', type: 'bytes' }],
-    name: 'MessageFailure',
-    type: 'error'
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: 'bytes32', name: 'msgId', type: 'bytes32' },
+      { indexed: false, internalType: 'bool', name: 'result', type: 'bool' },
+      { indexed: false, internalType: 'bytes', name: 'returnData', type: 'bytes' }
+    ],
+    name: 'MessageRecv',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: 'bytes32', name: 'msgId', type: 'bytes32' },
+      { indexed: false, internalType: 'address', name: 'fromDapp', type: 'address' },
+      { indexed: false, internalType: 'uint256', name: 'toChainId', type: 'uint256' },
+      { indexed: false, internalType: 'address', name: 'toDapp', type: 'address' },
+      { indexed: false, internalType: 'bytes', name: 'message', type: 'bytes' },
+      { indexed: false, internalType: 'bytes', name: 'params', type: 'bytes' }
+    ],
+    name: 'MessageSent',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -31,6 +49,15 @@ export const abi = [
       { indexed: true, internalType: 'address', name: 'newOwner', type: 'address' }
     ],
     name: 'OwnershipTransferred',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: 'uint256', name: 'chainId', type: 'uint256' },
+      { indexed: false, internalType: 'address', name: 'peer', type: 'address' }
+    ],
+    name: 'PeerSet',
     type: 'event'
   },
   {
@@ -79,26 +106,8 @@ export const abi = [
   },
   {
     anonymous: false,
-    inputs: [
-      { indexed: false, internalType: 'uint256', name: 'fromChainId', type: 'uint256' },
-      { indexed: false, internalType: 'address', name: 'fromPort', type: 'address' }
-    ],
-    name: 'SetFromPort',
-    type: 'event'
-  },
-  {
-    anonymous: false,
     inputs: [{ indexed: false, internalType: 'uint256', name: 'threshold', type: 'uint256' }],
     name: 'SetThreshold',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: false, internalType: 'uint256', name: 'toChainId', type: 'uint256' },
-      { indexed: false, internalType: 'address', name: 'toPort', type: 'address' }
-    ],
-    name: 'SetToPort',
     type: 'event'
   },
   {
@@ -163,18 +172,12 @@ export const abi = [
     inputs: [
       { internalType: 'uint256', name: '', type: 'uint256' },
       { internalType: 'address', name: '', type: 'address' },
+      { internalType: 'address', name: '', type: 'address' },
       { internalType: 'bytes', name: '', type: 'bytes' },
       { internalType: 'bytes', name: '', type: 'bytes' }
     ],
     name: 'fee',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    name: 'fromPortLookup',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function'
   },
@@ -244,6 +247,13 @@ export const abi = [
     type: 'function'
   },
   {
+    inputs: [{ internalType: 'uint256', name: 'chainId', type: 'uint256' }],
+    name: 'peerOf',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
     inputs: [],
     name: 'pendingOwner',
     outputs: [{ internalType: 'address', name: '', type: 'address' }],
@@ -272,16 +282,16 @@ export const abi = [
       { internalType: 'bytes', name: 'params', type: 'bytes' }
     ],
     name: 'send',
-    outputs: [],
+    outputs: [{ internalType: 'bytes32', name: 'msgId', type: 'bytes32' }],
     stateMutability: 'payable',
     type: 'function'
   },
   {
     inputs: [
-      { internalType: 'uint256', name: 'fromChainId', type: 'uint256' },
-      { internalType: 'address', name: 'fromPortAddress', type: 'address' }
+      { internalType: 'uint256', name: 'chainId', type: 'uint256' },
+      { internalType: 'address', name: 'peer', type: 'address' }
     ],
-    name: 'setFromPort',
+    name: 'setPeer',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -289,16 +299,6 @@ export const abi = [
   {
     inputs: [{ internalType: 'uint256', name: 'threshold_', type: 'uint256' }],
     name: 'setThreshold',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      { internalType: 'uint256', name: 'toChainId', type: 'uint256' },
-      { internalType: 'address', name: 'toPortAddress', type: 'address' }
-    ],
-    name: 'setToPort',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -314,13 +314,6 @@ export const abi = [
     inputs: [],
     name: 'threshold',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    name: 'toPortLookup',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function'
   },

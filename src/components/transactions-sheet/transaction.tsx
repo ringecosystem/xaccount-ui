@@ -2,7 +2,7 @@ import React from 'react';
 import { ExternalLink, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { Progress } from '@/components/ui/progress';
-import { getTransactionStatusDescription } from '@/utils';
+import { getChains, getTransactionStatusDescription } from '@/utils';
 import { TransactionStatus } from '@/config/transaction';
 import { MSGPORT_NAME, MSGPORT_URL } from '@/config/site';
 
@@ -65,15 +65,17 @@ const style: React.CSSProperties = {
 };
 
 interface TransactionItemProps {
+  chainId: number;
   hash: `0x${string}`;
   status: TransactionStatus;
 }
-const TransactionItem: React.FC<TransactionItemProps> = ({ hash, status }) => {
+const TransactionItem: React.FC<TransactionItemProps> = ({ chainId, hash, status }) => {
+  const sourceChain = getChains().find((chain) => chain.id === chainId);
   const statusText = getTransactionStatusDescription(status);
   const statusIcon = getStatusIcon(status);
   const { indicator, bg } = getStatusColor(status);
 
-  const txHashUrl = `${MSGPORT_URL}/messages/${hash}`;
+  const txHashUrl = `${MSGPORT_URL}/message/${hash}?network=${sourceChain?.testnet ? 'testnet' : 'mainnet'}`;
   const shortHash = hash?.slice(0, 5) + '...' + hash?.slice(-5);
 
   return (

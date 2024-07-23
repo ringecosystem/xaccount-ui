@@ -30,7 +30,7 @@ const usePortAddress = ({ toModuleAddress, toChainId, fromChainId }: UsePortAddr
         abi: MultiPortAbi,
         address: portResult,
         chainId: toChainId,
-        functionName: 'fromPortLookup',
+        functionName: 'peerOf',
         args: [BigInt(fromChainId)]
       });
 

@@ -37,6 +37,7 @@
     "cross-env": "^7.0.3",
     "ethers": "^6.11.1",
     "framer-motion": "^11.0.20",
+    "graphql-request": "^7.1.0",
     "idb": "^8.0.0",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
@@ -78,4 +79,3 @@
     "typescript": "^5"
   }
 }
-

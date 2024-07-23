@@ -1,4 +1,4 @@
-export const address = '0x0000918d16dd376a21B8775FeF0303b10e9A654F' as `0x${string}`;
+export const address = '0x99503F8A95dD259547900131E3d98F394B6BA88A' as `0x${string}`;
 export const abi = [
   {
     inputs: [
