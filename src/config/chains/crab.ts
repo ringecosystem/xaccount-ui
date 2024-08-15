@@ -15,8 +15,8 @@ export const crab: ChainConfig = {
   },
   blockExplorers: {
     default: {
-      name: 'Subscan',
-      url: 'https://crab.subscan.io'
+      name: 'CrabExplorer',
+      url: 'https://crab-scan.darwinia.network'
     }
   },
   contracts: {
