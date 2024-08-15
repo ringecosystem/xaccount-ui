@@ -31,7 +31,7 @@ jobs:
           enable_cache: true
           enable_notify_comment: true
           enable_notify_slack: true
-          slack_channel: public-darwinia-websites-apps
+          slack_channel: public-ringdao-apps
           slack_webhook: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
 
       - uses: ./.github/actions/smart-vercel
