@@ -3,6 +3,7 @@ import { Urbanist } from 'next/font/google';
 import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { DAppProvider } from '@/providers/dapp-provider';
 import { Footer } from '@/components/footer';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -44,17 +45,19 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${urbanist.className} antialiased`}>
         <DAppProvider>
-          <div className="flex h-dvh w-screen flex-col overflow-hidden lg:h-screen">
-            <main
-              style={{
-                height: 'calc(100vh  - var(--footer))'
-              }}
-            >
-              {children}
-            </main>
+          <TooltipProvider delayDuration={0}>
+            <div className="flex h-dvh w-screen flex-col overflow-hidden lg:h-screen">
+              <main
+                style={{
+                  height: 'calc(100vh  - var(--footer))'
+                }}
+              >
+                {children}
+              </main>
 
-            <Footer />
-          </div>
+              <Footer />
+            </div>
+          </TooltipProvider>
         </DAppProvider>
       </body>
     </html>

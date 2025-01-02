@@ -3,23 +3,46 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
+import { Select } from '@/components/select';
+import { getChains } from '@/utils';
+import { CreateXAccount } from './create-xaccount';
+import { GenerateAction } from './generate-action';
 interface DaoPanelProps {
   className?: string;
 }
 
+const chains = getChains();
 export function DaoPanel({ className }: DaoPanelProps) {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [activeTab, setActiveTab] = useState<'create' | 'generate'>('create');
+  const [sourceChain, setSourceChain] = useState(chains[0].id.toString());
+  const [targetChain, setTargetChain] = useState(chains[1].id.toString());
+  const handleSourceChainChange = (value: string) => {
+    setSourceChain(value);
+    if (value === targetChain) {
+      const availableChain = chains.find((chain) => chain.id.toString() !== value);
+      if (availableChain) {
+        setTargetChain(availableChain.id.toString());
+      }
+    }
+  };
+
+  const handleTargetChainChange = (value: string) => {
+    setTargetChain(value);
+    if (value === sourceChain) {
+      const availableChain = chains.find((chain) => chain.id.toString() !== value);
+      if (availableChain) {
+        setSourceChain(availableChain.id.toString());
+      }
+    }
+  };
+
+  const chainOptions = chains.map((chain) => ({
+    value: chain.id.toString(),
+    label: chain.name,
+    asset: chain.iconUrl as string
+  }));
 
   return (
     <div
@@ -62,67 +85,31 @@ export function DaoPanel({ className }: DaoPanelProps) {
           <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
             Source Chain
           </label>
-          <Select>
-            <SelectTrigger className="h-[62px] rounded-[8px] bg-[#262626] p-[20px]">
-              <SelectValue
-                placeholder={
-                  <div className="flex items-center gap-[12px]">
-                    <div className="size-[36px] rounded-full bg-[#666]"></div>
-                    <span className="text-[18px] font-medium leading-[130%] text-[#666]">
-                      Select Chain
-                    </span>
-                  </div>
-                }
-                className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]/70"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ethereum">Ethereum</SelectItem>
-              <SelectItem value="polygon">Polygon</SelectItem>
-              <SelectItem value="bsc">BSC</SelectItem>
-            </SelectContent>
-          </Select>
+          <Select
+            placeholder="Select Chain"
+            options={chainOptions}
+            value={sourceChain}
+            onValueChange={handleSourceChainChange}
+          />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
             Target Chain
           </label>
-          <Select>
-            <SelectTrigger className="h-[62px] rounded-[8px] bg-[#262626] p-[20px]">
-              <SelectValue
-                placeholder={
-                  <div className="flex items-center gap-[12px]">
-                    <div className="size-[36px] rounded-full bg-[#666]"></div>
-                    <span className="text-[18px] font-medium leading-[130%] text-[#666]">
-                      Select Chain
-                    </span>
-                  </div>
-                }
-                className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]/70"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ethereum">Ethereum</SelectItem>
-              <SelectItem value="polygon">Polygon</SelectItem>
-              <SelectItem value="bsc">BSC</SelectItem>
-            </SelectContent>
-          </Select>
+          <Select
+            placeholder="Select Chain"
+            options={chainOptions}
+            value={targetChain}
+            onValueChange={handleTargetChainChange}
+          />
         </div>
       </div>
 
-      <div className="space-y-[20px]">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex items-center justify-center">
-          <Button
-            variant="secondary"
-            className="h-[50px] w-full max-w-[226px] rounded-[8px] bg-[#7838FF] text-sm font-medium leading-[150%] text-[#F6F1E8] hover:bg-[#7838FF]/80"
-            onClick={() => setIsWalletConnected(true)}
-          >
-            Connect Wallet
-          </Button>
-        </div>
-      </div>
+      <Tabs activeTab={activeTab} setActiveTab={setActiveTab}>
+        {/* <CreateXAccount /> */}
+        <GenerateAction />
+      </Tabs>
     </div>
   );
 }
