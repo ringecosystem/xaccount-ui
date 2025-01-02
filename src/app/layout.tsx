@@ -1,13 +1,8 @@
-import { Inter as FontSans } from 'next/font/google';
-
-import { DAppProvider } from '@/providers/dapp-provider';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
-import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
-import { cn } from '@/lib/utils';
-
 import type { Metadata } from 'next';
-
+import { Urbanist } from 'next/font/google';
+import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
+import { DAppProvider } from '@/providers/dapp-provider';
+import { Footer } from '@/components/footer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -35,9 +30,9 @@ export const metadata: Metadata = {
   }
 };
 
-const fontSans = FontSans({
+const urbanist = Urbanist({
   subsets: ['latin'],
-  variable: '--font-sans'
+  variable: '--font-urbanist'
 });
 
 export default function RootLayout({
@@ -46,18 +41,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-      />
-      <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
+    <html lang="en">
+      <body className={`${urbanist.className} antialiased`}>
         <DAppProvider>
           <div className="flex h-dvh w-screen flex-col overflow-hidden lg:h-screen">
-            <Header />
             <main
               style={{
-                height: 'calc(100vh - var(--header) - var(--footer))'
+                height: 'calc(100vh  - var(--footer))'
               }}
             >
               {children}

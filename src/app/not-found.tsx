@@ -1,10 +1,10 @@
 'use client';
 
-import ErrorDisplay from '@/components/error-display';
+import { ErrorDisplay } from '@/components/error-display';
 
 const NotFound = () => {
   return (
-    <div className=" flex h-full w-full items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <ErrorDisplay
         title="404"
         message="Sorry, Page not found"

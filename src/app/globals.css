@@ -2,69 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 329 100% 50%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --blue: 221.2 83.2% 53.3%;
-    --blue-foreground: 210 40% 98%;
-    --green: 142.1 76.2% 36.3%;
-    --green-foreground: 355.7 100% 97.3%;
-    --skeleton: 240 5.9% 10%;
-    --skeleton-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 346.8 77.2% 49.8%;
-    --scroll-fade-color: rgba(255, 255, 255, 1);
-
-    /* size or other */
-    --min-column-width: 250px;
-    --radius: 0.5rem;
-    --header: 50px;
-    --footer: 50px;
-  }
-
-  .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 329 100% 50%;
-    --primary-foreground: 355.7 100% 97.3%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
+    --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 12 6.5% 15.1%;
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --blue: 221.2 83.2% 53.3%;
-    --blue-foreground: 210 40% 98%;
-    --green: 142.1 76.2% 36.3%;
-    --green-foreground: 355.7 100% 97.3%;
-    --skeleton: 0 0% 98%;
-    --skeleton-foreground: 240 5.9% 10%;
+    --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 329 100% 20%;
-    --scroll-fade-color: rgba(0, 0, 0, 1);
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    --footer: 60px;
   }
 }
 
@@ -72,110 +41,7 @@
   * {
     @apply border-border;
   }
-  *,
-  *::before,
-  *::after {
-    @apply box-border;
-  }
   body {
     @apply bg-background text-foreground;
   }
-}
-
-@layer utilities {
-  .dapps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--min-column-width), 1fr));
-  }
-  .scroll-fade-bottom::after {
-    @apply absolute bottom-0 inline-block h-14 w-full;
-    content: '';
-    background: linear-gradient(0deg, hsl(var(--background) / 0.8) 34%, transparent 98%);
-  }
-  .dialog-shadow {
-    box-shadow:
-      rgba(51, 53, 72, 0.04) 8px 12px 20px,
-      rgba(51, 53, 72, 0.02) 4px 6px 12px,
-      rgba(51, 53, 72, 0.04) 4px 4px 8px;
-  }
-  .dark .dialog-shadow {
-    box-shadow:
-      rgba(0, 0, 0, 0.24) 12px 16px 24px,
-      rgba(0, 0, 0, 0.24) 12px 8px 12px,
-      rgba(0, 0, 0, 0.32) 4px 4px 8px;
-  }
-}
-
-.account-button {
-  display: flex;
-  flex-direction: row;
-  -webkit-box-align: center;
-  align-items: center;
-  white-space: nowrap;
-  cursor: pointer;
-  border-radius: var(--radius);
-  /* border: 2px solid transparent; */
-  border-width: 2px;
-  transition: border var(--cow-animation-duration) ease-in-out;
-  pointer-events: auto;
-  width: auto;
-}
-.account-button-network {
-  padding: 0px 8px 0px 12px;
-}
-.account-button-address {
-  color: inherit;
-  height: 36px;
-  display: flex;
-  padding: 0px;
-  margin: 0px;
-  -webkit-box-pack: center;
-  justify-content: center;
-  border-radius: var(--radius);
-
-  border: 1px solid transparent;
-  color: hsl(var(--primary-foreground));
-
-  padding: 6px 12px;
-}
-@keyframes rotate-pause-rotate {
-  0% {
-    transform: rotateZ(0deg);
-  }
-  25% {
-    transform: rotateZ(180deg);
-  }
-  50% {
-    transform: rotateZ(180deg);
-  }
-  75% {
-    transform: rotateZ(360deg);
-  }
-  100% {
-    transform: rotateZ(360deg);
-  }
-}
-
-.animate-rotate-pause-rotate {
-  animation: rotate-pause-rotate 4s infinite;
-}
-
-@keyframes ellipsis {
-  0%, 20% {
-    content: '';
-  }
-  40% {
-    content: '.';
-  }
-  60% {
-    content: '..';
-  }
-  80%, 100% {
-    content: '...';
-  }
-}
-
-.animate-ellipsis::after {
-  content: '';
-  animation: ellipsis 1.5s infinite;
 }
