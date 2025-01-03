@@ -6,6 +6,7 @@ import { blo } from 'blo';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionPreview } from './action-preview';
+import ConnectTabs from './connect-tabs';
 
 export const GenerateAction = () => {
   const accountOptions = [
@@ -34,6 +35,8 @@ export const GenerateAction = () => {
           onValueChange={setTargetAccount}
         />
       </div>
+
+      <ConnectTabs />
 
       <div className="space-y-2">
         <label className="flex items-center gap-[5px] text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
