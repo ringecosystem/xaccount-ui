@@ -6,6 +6,11 @@ import { useAccount } from 'wagmi';
 
 export const WalletGuard = ({ children }: { children: React.ReactNode }) => {
   const { isConnected, address, chainId, isConnecting } = useAccount();
+  console.log('isConnected', isConnected);
+  console.log('address', address);
+  console.log('chainId', chainId);
+  console.log('isConnecting', isConnecting);
+
   const { openConnectModal } = useConnectModal();
   const activeChain = getChainById(chainId);
 

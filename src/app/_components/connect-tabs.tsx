@@ -1,23 +1,15 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ConnectURI } from './connect-uri';
-import { ConnectIframe } from './connect-iframe';
 
 const ConnectTabs = ({
   activeTab,
   onTabChange,
-  disabled,
-  value,
-  onValueChange,
-  errorMessage
+  children
 }: {
   activeTab: 'wallet' | 'iframe';
   onTabChange: (tab: 'wallet' | 'iframe') => void;
-  disabled?: boolean;
-  value: string;
-  onValueChange: (value: string) => void;
-  errorMessage?: string;
+  children: React.ReactNode;
 }) => {
   return (
     <div className="flex flex-col gap-[20px]">
@@ -47,15 +39,8 @@ const ConnectTabs = ({
           iFrame
         </button>
       </div>
-      {activeTab === 'wallet' && (
-        <ConnectURI
-          value={value}
-          onValueChange={onValueChange}
-          disabled={disabled}
-          errorMessage={errorMessage}
-        />
-      )}
-      {activeTab === 'iframe' && <ConnectIframe value={value} onValueChange={onValueChange} />}
+
+      {children}
     </div>
   );
 };

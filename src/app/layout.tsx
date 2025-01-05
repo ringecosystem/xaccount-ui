@@ -4,7 +4,7 @@ import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { DAppProvider } from '@/providers/dapp-provider';
 import { Footer } from '@/components/footer';
 import { TooltipProvider } from '@/components/ui/tooltip';
-
+import { ImpersonatorIframeProvider } from '@/contexts/ImpersonatorIframeContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -44,22 +44,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.className} min-h-screen antialiased`}>
+      <body className={`${urbanist.className} antialiased`}>
         <DAppProvider>
-          <TooltipProvider delayDuration={0}>
-            <div className="flex min-h-screen flex-col">
-              <main
-                style={{
-                  minHeight: 'calc(100vh - var(--footer))'
-                }}
-                className="flex-1 py-[50px]"
-              >
-                {children}
-              </main>
-
-              <Footer />
-            </div>
-          </TooltipProvider>
+          <ImpersonatorIframeProvider>
+            <TooltipProvider delayDuration={0}>
+              <div className="flex min-h-screen flex-col">
+                <main className="flex-1 py-[50px]">{children}</main>
+                <Footer />
+              </div>
+            </TooltipProvider>
+          </ImpersonatorIframeProvider>
         </DAppProvider>
       </body>
     </html>
