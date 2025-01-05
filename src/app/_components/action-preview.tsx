@@ -27,14 +27,14 @@ const customStyle = {
     borderRadius: '8px',
     fontSize: '12px',
     // Add scrollbar styling
-    '&::-webkit-scrollbar': {
+    '&::WebkitScrollbar': {
       width: '8px',
       height: '8px'
     },
-    '&::-webkit-scrollbar-track': {
+    '&::WebkitScrollbarTrack': {
       background: '#1e2021'
     },
-    '&::-webkit-scrollbar-thumb': {
+    '&::WebkitScrollbarThumb': {
       background: '#3f4142',
       borderRadius: '4px',
       '&:hover': {

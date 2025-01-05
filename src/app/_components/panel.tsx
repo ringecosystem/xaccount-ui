@@ -2,38 +2,49 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
 import { Select } from '@/components/select';
 import { getChains } from '@/utils';
 import { CreateXAccount } from './create-xaccount';
 import { GenerateAction } from './generate-action';
+import { AddressInput } from '@/components/address-input';
+import { WalletGuard } from './wallet-guard';
+import { useSearchParams, useRouter } from 'next/navigation';
+
 interface DaoPanelProps {
   className?: string;
 }
 
 const chains = getChains();
 export function DaoPanel({ className }: DaoPanelProps) {
-  const [activeTab, setActiveTab] = useState<'create' | 'generate'>('create');
-  const [sourceChain, setSourceChain] = useState(chains[0].id.toString());
-  const [targetChain, setTargetChain] = useState(chains[1].id.toString());
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [activeTab, setActiveTab] = useState<'create' | 'generate'>(
+    () => (searchParams.get('tab') as 'create' | 'generate') || 'create'
+  );
+  const [sourceChainId, setSourceChainId] = useState(chains[0].id.toString());
+  const [targetChainId, setTargetChainId] = useState(chains[1].id.toString());
+  const [timeLockContractAddress, setTimeLockContractAddress] = useState<`0x${string}` | ''>('');
+  const [timeLockContractAddressValid, setTimeLockContractAddressValid] = useState(false);
+
   const handleSourceChainChange = (value: string) => {
-    setSourceChain(value);
-    if (value === targetChain) {
+    setSourceChainId(value);
+    if (value === targetChainId) {
       const availableChain = chains.find((chain) => chain.id.toString() !== value);
       if (availableChain) {
-        setTargetChain(availableChain.id.toString());
+        setTargetChainId(availableChain.id.toString());
       }
     }
   };
 
   const handleTargetChainChange = (value: string) => {
-    setTargetChain(value);
-    if (value === sourceChain) {
+    setTargetChainId(value);
+    if (value === sourceChainId) {
       const availableChain = chains.find((chain) => chain.id.toString() !== value);
       if (availableChain) {
-        setSourceChain(availableChain.id.toString());
+        setSourceChainId(availableChain.id.toString());
       }
     }
   };
@@ -43,6 +54,13 @@ export function DaoPanel({ className }: DaoPanelProps) {
     label: chain.name,
     asset: chain.iconUrl as string
   }));
+
+  const handleTabChange = (tab: 'create' | 'generate') => {
+    const params = new URLSearchParams(searchParams);
+    params.set('tab', tab);
+    router.push(`?${params.toString()}`);
+    setActiveTab(tab);
+  };
 
   return (
     <div
@@ -70,16 +88,12 @@ export function DaoPanel({ className }: DaoPanelProps) {
       </header>
 
       <div className="flex flex-col gap-[20px]">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
-            Source Chain DAO TimeLock Contract
-          </label>
-          <Input
-            type="text"
-            placeholder="Input contract address"
-            className="h-[62px] rounded-[8px] bg-[#262626] p-[20px] text-[18px] font-medium leading-[130%] text-[#F6F1E8]/70 placeholder:text-[18px] placeholder:text-[#666]"
-          />
-        </div>
+        <AddressInput
+          value={timeLockContractAddress}
+          onChange={setTimeLockContractAddress}
+          placeholder="Input contract address"
+          onValidationChange={setTimeLockContractAddressValid}
+        />
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
@@ -88,7 +102,7 @@ export function DaoPanel({ className }: DaoPanelProps) {
           <Select
             placeholder="Select Chain"
             options={chainOptions}
-            value={sourceChain}
+            value={sourceChainId}
             onValueChange={handleSourceChainChange}
           />
         </div>
@@ -100,15 +114,28 @@ export function DaoPanel({ className }: DaoPanelProps) {
           <Select
             placeholder="Select Chain"
             options={chainOptions}
-            value={targetChain}
+            value={targetChainId}
             onValueChange={handleTargetChainChange}
           />
         </div>
       </div>
 
-      <Tabs activeTab={activeTab} setActiveTab={setActiveTab}>
-        {/* <CreateXAccount /> */}
-        <GenerateAction />
+      <Tabs activeTab={activeTab} setActiveTab={handleTabChange}>
+        <WalletGuard>
+          {activeTab === 'create' ? (
+            <CreateXAccount
+              timeLockContractAddress={
+                timeLockContractAddressValid && timeLockContractAddress
+                  ? timeLockContractAddress
+                  : ''
+              }
+              sourceChainId={sourceChainId}
+              targetChainId={targetChainId}
+            />
+          ) : (
+            <GenerateAction />
+          )}
+        </WalletGuard>
       </Tabs>
     </div>
   );

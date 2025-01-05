@@ -36,7 +36,7 @@ export const Select = ({ placeholder, options, value, onValueChange }: SelectPro
       <SelectContent className="rounded-[8px] bg-[#1A1A1A]">
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            <div className="flex h-[56px] items-center gap-[10px] p-[10px]">
+            <div className="flex h-[56px] items-center gap-[10px] p-[10px] text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
               {option.asset && (
                 <Image
                   src={option.asset}
@@ -46,7 +46,7 @@ export const Select = ({ placeholder, options, value, onValueChange }: SelectPro
                   className="rounded-full"
                 />
               )}
-              {option.label}
+              <span className="truncate">{option.label}</span>
             </div>
           </SelectItem>
         ))}

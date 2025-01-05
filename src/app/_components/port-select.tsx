@@ -17,27 +17,28 @@ export const PortSelect = ({ value, onValueChange }: PortSelectProps) => {
       <SelectTrigger className="h-[62px] w-full rounded-[8px] bg-[#262626] p-[10px]">
         <SelectValue
           placeholder={
-            <div className="flex items-center gap-[12px]">
-              <div className="size-[36px] rounded-full bg-[#666]"></div>
-              <span className="text-[18px] font-medium leading-[130%] text-[#666]">
-                Select Port
-              </span>
-            </div>
+            <span className="text-[18px] font-medium leading-[130%] text-[#666]">Select Port</span>
           }
           className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]/70"
         />
       </SelectTrigger>
       <SelectContent className="rounded-[8px] bg-[#1A1A1A]">
-        {Object.entries(CROSS_CHAIN_ENDPOINTS).map(([key, value]) => (
-          <SelectItem key={key} value={value}>
-            <div className="flex h-[56px] items-center gap-[12px] p-[10px]">
-              <span className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]">{key}</span>
-              <span className="truncate text-[18px] font-medium leading-[130%] text-[#666]">
-                {value}
-              </span>
-            </div>
-          </SelectItem>
-        ))}
+        {(Object.entries(CROSS_CHAIN_ENDPOINTS) as [string, string][]).map(
+          ([portName, endpoint]) => {
+            return (
+              <SelectItem key={portName} value={portName}>
+                <div className="flex h-[56px] items-center gap-[12px] p-[10px]">
+                  <span className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
+                    {portName}
+                  </span>
+                  <span className="truncate text-[18px] font-medium leading-[130%] text-[#666]">
+                    {endpoint}
+                  </span>
+                </div>
+              </SelectItem>
+            );
+          }
+        )}
       </SelectContent>
     </SelectPrimitive>
   );
