@@ -30,7 +30,7 @@ export const AddressInput = ({
   useEffect(() => {
     if (!value) {
       setError('');
-      onValidationChange?.(false);
+      onValidationChange?.(true);
       return;
     }
 

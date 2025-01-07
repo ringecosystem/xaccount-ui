@@ -26,7 +26,7 @@ export const PortSelect = ({ value, onValueChange }: PortSelectProps) => {
         {(Object.entries(CROSS_CHAIN_ENDPOINTS) as [string, string][]).map(
           ([portName, endpoint]) => {
             return (
-              <SelectItem key={portName} value={portName}>
+              <SelectItem key={portName} value={endpoint}>
                 <div className="flex h-[56px] items-center gap-[12px] p-[10px]">
                   <span className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
                     {portName}

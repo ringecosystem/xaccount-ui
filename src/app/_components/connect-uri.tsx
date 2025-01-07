@@ -202,7 +202,7 @@ export const ConnectURI = ({
               </span>
               <a
                 href={connectionInfo?.url || ''}
-                target={connectionInfo?.url || ''}
+                // target={connectionInfo?.url || ''}
                 className="text-[14px] font-semibold leading-[150%] text-[#F6F1E8]/70 hover:text-[#F6F1E8] hover:underline"
               >
                 {connectionInfo?.url}

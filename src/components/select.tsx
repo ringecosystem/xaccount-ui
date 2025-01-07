@@ -16,8 +16,20 @@ interface SelectProps {
   }[];
   value: string;
   onValueChange: (value: string) => void;
+  empty?: React.ReactNode;
 }
-export const Select = ({ placeholder, options, value, onValueChange }: SelectProps) => {
+
+export const Select = ({
+  placeholder,
+  options,
+  value,
+  onValueChange,
+  empty = (
+    <div className="flex h-[56px] items-center justify-center p-[10px] text-[16px] text-[#666]">
+      No options available
+    </div>
+  )
+}: SelectProps) => {
   return (
     <SelectPrimitive value={value} onValueChange={onValueChange}>
       <SelectTrigger className="h-[62px] w-full rounded-[8px] bg-[#262626] p-[10px]">
@@ -34,22 +46,24 @@ export const Select = ({ placeholder, options, value, onValueChange }: SelectPro
         />
       </SelectTrigger>
       <SelectContent className="rounded-[8px] bg-[#1A1A1A]">
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            <div className="flex h-[56px] items-center gap-[10px] p-[10px] text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
-              {option.asset && (
-                <Image
-                  src={option.asset}
-                  alt={option.label}
-                  width={36}
-                  height={36}
-                  className="rounded-full"
-                />
-              )}
-              <span className="truncate">{option.label}</span>
-            </div>
-          </SelectItem>
-        ))}
+        {options.length === 0
+          ? empty
+          : options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                <div className="flex h-[56px] items-center gap-[10px] p-[10px] text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
+                  {option.asset && (
+                    <Image
+                      src={option.asset}
+                      alt={option.label}
+                      width={36}
+                      height={36}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="truncate">{option.label}</span>
+                </div>
+              </SelectItem>
+            ))}
       </SelectContent>
     </SelectPrimitive>
   );

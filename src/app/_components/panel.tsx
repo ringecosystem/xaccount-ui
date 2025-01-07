@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
@@ -11,6 +11,7 @@ import { GenerateAction } from './generate-action';
 import { AddressInput } from '@/components/address-input';
 import { WalletGuard } from './wallet-guard';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useSwitchChain } from 'wagmi';
 
 interface DaoPanelProps {
   className?: string;
@@ -28,6 +29,8 @@ export function DaoPanel({ className }: DaoPanelProps) {
   const [targetChainId, setTargetChainId] = useState(chains[1].id.toString());
   const [timeLockContractAddress, setTimeLockContractAddress] = useState<`0x${string}` | ''>('');
   const [timeLockContractAddressValid, setTimeLockContractAddressValid] = useState(false);
+
+  const { switchChain } = useSwitchChain();
 
   const handleSourceChainChange = (value: string) => {
     setSourceChainId(value);
@@ -62,6 +65,13 @@ export function DaoPanel({ className }: DaoPanelProps) {
     setActiveTab(tab);
   };
 
+  useEffect(() => {
+    if (targetChainId) {
+      setTimeout(() => {
+        switchChain({ chainId: Number(targetChainId) });
+      }, 1000);
+    }
+  }, [targetChainId, switchChain]);
   return (
     <div
       className={cn(
@@ -133,7 +143,15 @@ export function DaoPanel({ className }: DaoPanelProps) {
               targetChainId={targetChainId}
             />
           ) : (
-            <GenerateAction />
+            <GenerateAction
+              timeLockContractAddress={
+                timeLockContractAddressValid && timeLockContractAddress
+                  ? timeLockContractAddress
+                  : ''
+              }
+              sourceChainId={sourceChainId}
+              targetChainId={targetChainId}
+            />
           )}
         </WalletGuard>
       </Tabs>

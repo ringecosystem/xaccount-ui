@@ -5,8 +5,10 @@ import { DAppProvider } from '@/providers/dapp-provider';
 import { Footer } from '@/components/footer';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ImpersonatorIframeProvider } from '@/contexts/ImpersonatorIframeContext';
-import './globals.css';
+import { ToastContainer } from 'react-toastify';
 
+import './globals.css';
+import { SafeAddressProvider } from '@/providers/address-provider';
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: APP_NAME,
@@ -48,10 +50,13 @@ export default function RootLayout({
         <DAppProvider>
           <ImpersonatorIframeProvider>
             <TooltipProvider delayDuration={0}>
-              <div className="flex min-h-screen flex-col">
-                <main className="flex-1 py-[50px]">{children}</main>
-                <Footer />
-              </div>
+              <SafeAddressProvider>
+                <div className="flex min-h-screen flex-col">
+                  <main className="flex-1 py-[50px]">{children}</main>
+                  <Footer />
+                </div>
+              </SafeAddressProvider>
+              <ToastContainer theme="dark" className="w-auto text-[14px] md:w-[380px]" />
             </TooltipProvider>
           </ImpersonatorIframeProvider>
         </DAppProvider>

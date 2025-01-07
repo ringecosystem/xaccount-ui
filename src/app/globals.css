@@ -34,6 +34,10 @@ body {
     --chart-5: 340 75% 55%;
 
     --footer: 60px;
+
+    --toastify-color-dark: #262626;
+    --toastify-color-error: hsl(0, 100%, 50%);
+    --toastify-toast-bd-radius: 8px;
   }
 }
 
