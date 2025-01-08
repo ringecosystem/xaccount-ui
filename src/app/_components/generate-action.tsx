@@ -25,7 +25,8 @@ export const GenerateAction = ({
   const {
     data: deployedXAccounts,
     isLoading: isDeployedXAccountsLoading,
-    refetch
+    refetch,
+    isRefetching: isRefetchingDeployedXAccounts
   } = useGetDeployed({
     fromChainId: sourceChainId ? BigInt(sourceChainId) : BigInt(0),
     targetChainId: Number(targetChainId),
@@ -50,10 +51,9 @@ export const GenerateAction = ({
 
   useEffect(() => {
     refetch();
-    console.log('称呼； ， ');
   }, [refetch]);
 
-  if (isDeployedXAccountsLoading) {
+  if (isDeployedXAccountsLoading || isRefetchingDeployedXAccounts) {
     return <ContentSkeleton />;
   }
 
