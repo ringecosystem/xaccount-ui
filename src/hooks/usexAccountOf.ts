@@ -4,20 +4,21 @@ import { address, abi } from '@/config/abi/XAccountUIFactory';
 export function useXAccountOf({
   deployer,
   sourceChainId,
-  owner,
-  enabled
+  targetChainId,
+  owner
 }: {
   deployer: `0x${string}`;
   sourceChainId: bigint;
+  targetChainId: number;
   owner: `0x${string}`;
-  enabled: boolean;
 }) {
   const result = useReadContract({
     address,
     abi,
     functionName: 'xAccountOf',
+    chainId: targetChainId,
     args: [deployer, sourceChainId, owner],
-    query: { enabled }
+    query: { enabled: !!deployer && !!sourceChainId && !!owner && !!targetChainId }
   });
   return result;
 }

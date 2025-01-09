@@ -2,7 +2,6 @@ import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import ClipboardIconButton from '@/components/clipboard-icon-button';
 
-// Register the language
 SyntaxHighlighter.registerLanguage('json', json);
 
 interface GeneratedAction {
@@ -17,7 +16,6 @@ interface GeneratedAction {
   Value: string;
 }
 
-// 自定义颜色方案
 const customStyle = {
   hljs: {
     background: '#161818',
@@ -53,18 +51,32 @@ const customStyle = {
   }
 };
 
-export const ActionPreview = () => {
+export const ActionPreview = ({
+  sourcePort,
+  targetChainId,
+  moduleAddress,
+  message,
+  params,
+  fee
+}: {
+  sourcePort: string;
+  targetChainId: number;
+  moduleAddress: string;
+  message: string;
+  params: string;
+  fee: string;
+}) => {
   const generatedAction: GeneratedAction = {
-    'Target Contract Address': '0x2cd1867FbB016f93710B6386f7f9F1',
+    'Target Contract Address': sourcePort,
     'Contract Method':
       'function send(uint256 toChainId, address message, bytes calldata.params) external payable',
     CallDatas: {
-      toChainId: '1',
-      toDapp: '0x9Fc3d617873c95D8dd8DbBDbB8377A16cf11376eE',
-      message: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      params: '0xxxxxxxxxxxxxxxxxxxxx'
+      toChainId: targetChainId.toString(),
+      toDapp: moduleAddress,
+      message: message,
+      params: params
     },
-    Value: '100'
+    Value: fee
   };
 
   return (
@@ -76,7 +88,13 @@ export const ActionPreview = () => {
         <ClipboardIconButton text={JSON.stringify(generatedAction, null, 2)} size={18} />
       </header>
       <div className="scrollWrapper">
-        <SyntaxHighlighter language="json" style={customStyle} showLineNumbers>
+        <SyntaxHighlighter
+          language="json"
+          style={customStyle}
+          showLineNumbers
+          showInlineLineNumbers
+          wrapLines
+        >
           {JSON.stringify(generatedAction, null, 2)}
         </SyntaxHighlighter>
       </div>

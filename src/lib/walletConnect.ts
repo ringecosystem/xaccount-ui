@@ -3,7 +3,6 @@ import { WalletKit, IWalletKit } from '@reown/walletkit';
 import { SessionTypes, ProposalTypes } from '@walletconnect/types';
 import { JsonRpcProvider, isAddress } from 'ethers';
 import { getSdkError, parseUri } from '@walletconnect/utils';
-
 interface WalletConnectConfig {
   projectId: string;
   metadata: {
@@ -41,6 +40,15 @@ export class WalletConnectManager {
   private isConnected: boolean = false;
   private transactions: Transaction[] = [];
   private onTransactionCallback?: (transaction: Transaction) => void;
+  private connectionStatusCallback?: (info: {
+    isConnected: boolean;
+    dappInfo?: {
+      name: string;
+      url: string;
+      icon: string;
+      description: string;
+    };
+  }) => void;
 
   // Store references to event handlers
   private boundHandleSessionProposal: (args: {
@@ -60,7 +68,6 @@ export class WalletConnectManager {
     });
     this.provider = new JsonRpcProvider(rpcUrl);
 
-    // 绑定事件处理函数
     this.boundHandleSessionProposal = async (args) => {
       try {
         console.log('Received session proposal:', args);
@@ -74,19 +81,44 @@ export class WalletConnectManager {
       const { topic, params, id } = event;
       const { request } = params;
 
+      console.log('Received transaction request:', {
+        topic,
+        id,
+        method: request.method,
+        params: request.params
+      });
+
       if (request.method === 'eth_sendTransaction') {
-        await this.handleTransaction(id, request.params[0]);
-        await this.web3wallet?.respondSessionRequest({
-          topic,
-          response: {
-            jsonrpc: '2.0',
-            id,
-            error: {
-              code: 0,
-              message: 'Transaction simulated'
+        try {
+          await this.handleTransaction(id, request.params[0]);
+
+          // Respond with simulation result
+          await this.web3wallet?.respondSessionRequest({
+            topic,
+            response: {
+              jsonrpc: '2.0',
+              id,
+              error: {
+                code: 0,
+                message: 'Transaction simulated successfully'
+              }
             }
-          }
-        });
+          });
+        } catch (error) {
+          console.error('Transaction handling failed:', error);
+          // Respond with error
+          await this.web3wallet?.respondSessionRequest({
+            topic,
+            response: {
+              jsonrpc: '2.0',
+              id,
+              error: {
+                code: -32000,
+                message: 'Transaction simulation failed'
+              }
+            }
+          });
+        }
       }
     };
 
@@ -196,6 +228,7 @@ export class WalletConnectManager {
 
       this.currentSession = session;
       this.isConnected = true;
+      this.emitConnectionStatus();
     } catch (error) {
       console.error('Failed to handle session proposal:', error);
       if (this.web3wallet) {
@@ -223,13 +256,17 @@ export class WalletConnectManager {
    * Handle transaction request
    */
   private async handleTransaction(id: number, params: TransactionParams): Promise<void> {
+    console.log('Processing transaction:', { id, params });
+
     const transaction: Transaction = {
       id,
       from: this.currentAddress,
       to: params.to,
       data: params.data,
-      value: params.value ? parseInt(params.value, 16).toString() : '0'
+      value: params.value || '0'
     };
+
+    console.log('Processed transaction:', transaction);
 
     this.transactions.push(transaction);
     this.onTransactionCallback?.(transaction);
@@ -245,22 +282,35 @@ export class WalletConnectManager {
   /**
    * Update session state (address or chain ID change)
    */
-  public async updateSession(params: { chainId?: string; address?: string }): Promise<void> {
-    if (!this.web3wallet || !this.currentSession) return;
+  public async updateSession(params: { address?: string; chainId?: string }) {
+    try {
+      if (!this.web3wallet || !this.currentSession) {
+        throw new Error('WalletConnect not initialized');
+      }
 
-    const { chainId, address } = params;
-    if (address) {
-      this.currentAddress = address;
+      const namespace = 'eip155';
+      const accounts = params.address
+        ? [params.address]
+        : this.currentSession.namespaces[namespace].accounts;
+      const chains = params.chainId
+        ? [params.chainId]
+        : this.currentSession.namespaces[namespace].chains;
+
+      await this.web3wallet.updateSession({
+        topic: this.currentSession.topic,
+        namespaces: {
+          [namespace]: {
+            accounts,
+            chains,
+            methods: this.currentSession.namespaces[namespace].methods,
+            events: this.currentSession.namespaces[namespace].events
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Failed to update session:', error);
+      throw error;
     }
-
-    await this.web3wallet.emitSessionEvent({
-      topic: this.currentSession.topic,
-      event: {
-        name: address ? 'accountsChanged' : 'chainChanged',
-        data: [address || chainId]
-      },
-      chainId: chainId || this.currentSession.namespaces['eip155']?.chains?.[0] || ''
-    });
   }
 
   /**
@@ -279,6 +329,7 @@ export class WalletConnectManager {
     }
     this.currentSession = null;
     this.isConnected = false;
+    this.emitConnectionStatus();
   }
 
   /**
@@ -388,6 +439,16 @@ export class WalletConnectManager {
     } catch (error) {
       console.error('Failed to destroy WalletConnectManager:', error);
       throw error;
+    }
+  }
+
+  public onConnectionStatusChange(callback: typeof this.connectionStatusCallback) {
+    this.connectionStatusCallback = callback;
+  }
+
+  private emitConnectionStatus() {
+    if (this.connectionStatusCallback) {
+      this.connectionStatusCallback(this.getConnectionInfo());
     }
   }
 }

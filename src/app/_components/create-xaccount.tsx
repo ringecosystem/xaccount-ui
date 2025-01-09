@@ -38,8 +38,8 @@ export const CreateXAccount = ({
   const { data: xAccount } = useXAccountOf({
     deployer: address as `0x${string}`,
     sourceChainId: BigInt(sourceChainId || 0),
-    owner: timeLockContractAddress as `0x${string}`,
-    enabled: !!address && !!timeLockContractAddress && !!sourceChainId
+    targetChainId: Number(targetChainId),
+    owner: timeLockContractAddress as `0x${string}`
   });
 
   const provider = useMemo(() => {
@@ -47,6 +47,7 @@ export const CreateXAccount = ({
     return chain ? new JsonRpcProvider(chain.rpcUrls.default.http[0]) : undefined;
   }, [targetChainId]);
 
+  // provider 一直在变导致loading时间不正确
   const { isLoading: isRemoteAddressLoading } = useRemoteAddressExistence({
     xAccount,
     provider

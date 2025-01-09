@@ -1,6 +1,6 @@
 import { Select } from '@/components/select';
 import { blo } from 'blo';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { ActionPreview } from './action-preview';
 import ConnectTabs from './connect-tabs';
 import { ConnectURI } from './connect-uri';
@@ -8,6 +8,9 @@ import { ConnectIframe } from './connect-iframe';
 import { useGetDeployed } from '@/hooks/useGetDeployed';
 import { ContentSkeleton } from '@/components/content-skeletion';
 import { AlertCircle } from 'lucide-react';
+import useGenerateAction from '@/hooks/useGenerateAction';
+import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export const GenerateAction = ({
   timeLockContractAddress,
@@ -21,6 +24,7 @@ export const GenerateAction = ({
   const [activeTab, setActiveTab] = useState<'wallet' | 'iframe'>('wallet');
   const [targetAccount, setTargetAccount] = useState('');
   const [value, setValue] = useState('');
+  const { latestTransaction } = useImpersonatorIframe();
 
   const {
     data: deployedXAccounts,
@@ -31,6 +35,20 @@ export const GenerateAction = ({
     fromChainId: sourceChainId ? BigInt(sourceChainId) : BigInt(0),
     targetChainId: Number(targetChainId),
     owner: timeLockContractAddress as `0x${string}`
+  });
+
+  const moduleAddress = useMemo(() => {
+    if (!deployedXAccounts || deployedXAccounts.length < 2) return '';
+    const [xAccounts, modules] = deployedXAccounts;
+    const index = xAccounts.findIndex((account) => account === targetAccount);
+    return index !== -1 ? modules[index] : '';
+  }, [deployedXAccounts, targetAccount]);
+
+  const { generateAction, sourcePort, actionState, reset, isLoading } = useGenerateAction({
+    timeLockContractAddress: timeLockContractAddress as `0x${string}`,
+    moduleAddress: moduleAddress as `0x${string}`,
+    sourceChainId: Number(sourceChainId),
+    targetChainId: Number(targetChainId)
   });
 
   const handleTabChange = useCallback((tab: 'wallet' | 'iframe') => {
@@ -53,12 +71,44 @@ export const GenerateAction = ({
     refetch();
   }, [refetch]);
 
+  useEffect(() => {
+    if (!targetAccount) {
+      reset();
+      return;
+    }
+    if (activeTab === 'wallet') {
+    } else {
+      if (latestTransaction) {
+        generateAction({
+          transactionInfo: latestTransaction
+        });
+      }
+    }
+    return () => {
+      reset();
+    };
+  }, [latestTransaction, targetAccount, activeTab, generateAction, reset]);
+
   if (isDeployedXAccountsLoading || isRefetchingDeployedXAccounts) {
     return <ContentSkeleton />;
   }
 
   return (
     <div className="flex flex-col gap-[20px]">
+      <button
+        onClick={() => {
+          generateAction({
+            transactionInfo: {
+              to: '0x0000000000000000000000000000000000000402',
+              data: '0x095ea7b3000000000000000000000000b633ad1142941ca2eb9c350579cf88bbe266660d00000000000000000000000000000000000000000000000000038d7ea4c68000',
+              from: '0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5',
+              value: '0'
+            }
+          });
+        }}
+      >
+        测试一下transtion
+      </button>
       <div className="space-y-2">
         <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
           Corresponding XAccounts
@@ -91,16 +141,75 @@ export const GenerateAction = ({
         <>
           <ConnectTabs activeTab={activeTab} onTabChange={handleTabChange}>
             {activeTab === 'wallet' && (
-              <ConnectURI targetAccount={targetAccount} value={value} onValueChange={setValue} />
+              <ConnectURI
+                // targetAccount={targetAccount}
+                targetAccount="0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5"
+                targetChainId={targetChainId}
+                value={value}
+                onValueChange={setValue}
+              />
             )}
             {activeTab === 'iframe' && (
-              <ConnectIframe targetAccount={targetAccount} value={value} onValueChange={setValue} />
+              <ConnectIframe
+                targetAccount={targetAccount}
+                targetChainId={targetChainId}
+                value={value}
+                onValueChange={setValue}
+              />
             )}
           </ConnectTabs>
         </>
       }
 
-      <ActionPreview />
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="rounded-[8px] border border-neutral-800 bg-neutral-900/50 p-6"
+          >
+            <div className="flex w-full flex-col gap-[12px] rounded-[8px] bg-[#1A1A1A] p-[22px]">
+              <header className="flex items-center justify-between">
+                <div className="h-4 w-32 animate-pulse rounded bg-neutral-800" />
+                <div className="h-[18px] w-[18px] animate-pulse rounded bg-neutral-800" />
+              </header>
+              <div className="space-y-3">
+                {[...Array(6)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-4 w-full animate-pulse rounded bg-neutral-800"
+                    style={{ width: `${Math.random() * 40 + 60}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          sourcePort &&
+          actionState?.params &&
+          actionState?.fee &&
+          actionState?.message &&
+          moduleAddress &&
+          targetChainId && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <ActionPreview
+                sourcePort={sourcePort}
+                targetChainId={Number(targetChainId)}
+                moduleAddress={moduleAddress}
+                message={actionState?.message}
+                params={actionState?.params}
+                fee={actionState?.fee}
+              />
+            </motion.div>
+          )
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { WalletConnectManager } from '@/lib/walletConnect';
 import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
+import { getRpcUrl } from '@/config/rpc-url';
 
 const WC_CONFIG = {
   projectId: process.env.NEXT_PUBLIC_PROJECT_ID!,
@@ -18,11 +20,13 @@ const WC_CONFIG = {
 
 export const ConnectURI = ({
   targetAccount,
+  targetChainId,
   value,
   onValueChange,
   disabled
 }: {
   targetAccount: string;
+  targetChainId: string;
   value: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
@@ -39,13 +43,25 @@ export const ConnectURI = ({
 
   // Initialize WalletConnect
   useEffect(() => {
+    console.log('Effect triggered with targetChainId:', targetChainId);
+
     const initWalletConnect = async () => {
+      if (!targetChainId) return;
       try {
         const manager = new WalletConnectManager(
           WC_CONFIG,
-          `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_TOKEN}`
+          // `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_TOKEN}`
+          getRpcUrl(Number(targetChainId))
         );
         await manager.initializeWallet();
+
+        // Set up connection status callback
+        manager.onConnectionStatusChange((info) => {
+          if (info.isConnected && info.dappInfo) {
+            setConnectionInfo(info.dappInfo);
+            setIsConnecting(false);
+          }
+        });
 
         // Set up transaction callback
         manager.setTransactionCallback((transaction) => {
@@ -60,49 +76,53 @@ export const ConnectURI = ({
     };
 
     initWalletConnect();
+  }, [targetChainId]);
 
-    // Cleanup on unmount
-    return () => {
-      walletConnect?.destroy().catch(console.error);
-    };
-  }, [walletConnect]);
-
-  // Add this effect to update the address when target account changes
+  // Update this effect to use updateSession when target account changes
   useEffect(() => {
     if (walletConnect && targetAccount) {
       walletConnect.setAddress(targetAccount).catch(console.error);
+      // Add updateSession call for connected sessions
+      if (walletConnect.getConnectionInfo().isConnected) {
+        walletConnect.updateSession({ address: targetAccount }).catch(console.error);
+      }
     }
   }, [walletConnect, targetAccount]);
 
+  // Add new effect to handle chain ID changes
   useEffect(() => {
-    if (walletConnect) {
-      const checkConnection = () => {
-        const info = walletConnect.getConnectionInfo();
-        console.log('Connection info:', info);
-        if (info.isConnected && info.dappInfo) {
-          setConnectionInfo(info.dappInfo);
-          setIsConnecting(false);
-        }
-      };
-
-      checkConnection();
-
-      const interval = setInterval(checkConnection, 1000);
-
-      return () => clearInterval(interval);
+    if (walletConnect && walletConnect.getConnectionInfo().isConnected) {
+      walletConnect.updateSession({ chainId: `eip155:${targetChainId}` }).catch(console.error);
     }
-  }, [walletConnect]);
+  }, [walletConnect, targetChainId]);
 
   const handleConnect = async () => {
     if (!walletConnect || isConnecting) return;
+    if (!value) {
+      toast.error('Invalid URI');
+      return;
+    }
+    if (!targetAccount) {
+      toast.error('Address is not an ENS or Ethereum address');
+      return;
+    }
 
     try {
       setError('');
       setIsConnecting(true);
-      if (value) {
-        await walletConnect.pair(value);
-        await walletConnect.setAddress(targetAccount);
-      }
+
+      // 首先建立配对连接
+      await walletConnect.pair(value);
+
+      // 等待连接完成后再更新地址
+      // 添加短暂延迟以确保连接已完全建立
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // 更新会话信息
+      await walletConnect.updateSession({
+        address: targetAccount,
+        chainId: `eip155:${targetChainId}`
+      });
     } catch (error) {
       console.error('Connection failed:', error);
       if (error instanceof Error && error.message.includes('Pairing already exists')) {
@@ -130,6 +150,9 @@ export const ConnectURI = ({
       setIsConnecting(false);
     }
   };
+  console.log('walletConnect', walletConnect);
+  console.log('isConnecting', isConnecting);
+  console.log('value', value);
 
   return (
     <div className="space-y-2">

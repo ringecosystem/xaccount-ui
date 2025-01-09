@@ -1,30 +1,38 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { ImpersonatorIframe } from '@/components/ImpersonatorIframe';
-import { isValidUrl } from '@/utils';
+import { getChainById, isValidUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { useCallback, useState } from 'react';
+import { toast } from 'react-toastify';
 
 export const ConnectIframe = ({
   targetAccount,
+  targetChainId,
   value,
   onValueChange
 }: {
   targetAccount: string;
+  targetChainId: string;
   value: string;
   onValueChange: (value: string) => void;
 }) => {
-  const { latestTransaction } = useImpersonatorIframe();
   const [uri, setUri] = useState('');
-
+  const targetChain = getChainById(Number(targetChainId));
   const handleConnect = useCallback(() => {
     if (!value || !isValidUrl(value)) {
+      toast.error('Invalid URL');
       return;
     }
+
+    if (!targetAccount) {
+      toast.error('Address is not an ENS or Ethereum address');
+      return;
+    }
+
     setUri(value);
-  }, [value]);
+  }, [value, targetAccount]);
 
   return (
     <div className="space-y-[20px]">
@@ -65,7 +73,7 @@ export const ConnectIframe = ({
           Connect
         </Button>
       </div>
-      {uri && (
+      {uri && targetAccount && targetChain?.rpcUrls?.default?.http?.[0] && (
         <div className="relative flex h-[500px] justify-center">
           <div className="absolute left-1/2 -translate-x-1/2">
             <ImpersonatorIframe
@@ -73,15 +81,11 @@ export const ConnectIframe = ({
               height={'500px'}
               src={uri}
               address={targetAccount}
-              rpcUrl="https://eth.llamarpc.com"
+              rpcUrl={targetChain?.rpcUrls?.default?.http?.[0]}
             />
           </div>
         </div>
       )}
-      <div>
-        <h1>Latest transaction</h1>
-        <pre>{JSON.stringify(latestTransaction, null, 2)}</pre>
-      </div>
     </div>
   );
 };

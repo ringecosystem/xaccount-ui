@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { JsonRpcProvider } from 'ethers';
-import { useAccount } from 'wagmi';
 import { useSafeAddress } from '@/providers/address-provider';
+import { useDebounceEffect } from './use-debounce-effect';
 
 interface UseRemoteAddressExistenceProps {
   xAccount: readonly [`0x${string}`, `0x${string}`] | undefined;
@@ -16,13 +16,13 @@ export function useRemoteAddressExistence({
   xAccount,
   provider
 }: UseRemoteAddressExistenceProps): UseRemoteAddressExistenceReturn {
-  const { address } = useAccount();
   const { setSafeAddress } = useSafeAddress();
   const [isLoading, setIsLoading] = useState(false);
+  const newSafeAddress = xAccount?.[0];
 
-  useEffect(() => {
+  useDebounceEffect(() => {
     async function checkAddress() {
-      if (!xAccount || !provider) {
+      if (!newSafeAddress || !provider) {
         setIsLoading(false);
         setSafeAddress(undefined);
         return;
@@ -30,7 +30,6 @@ export function useRemoteAddressExistence({
       setIsLoading(true);
 
       try {
-        const [newSafeAddress] = xAccount;
         const code = await provider.getCode(newSafeAddress);
         const exists = code !== '0x';
 
@@ -48,7 +47,7 @@ export function useRemoteAddressExistence({
       setIsLoading(false);
       setSafeAddress(undefined);
     };
-  }, [address, xAccount, provider, setSafeAddress]);
+  }, [newSafeAddress, provider, setSafeAddress]);
 
   return { isLoading };
 }
