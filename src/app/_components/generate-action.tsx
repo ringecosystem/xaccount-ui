@@ -12,6 +12,7 @@ import useGenerateAction from '@/hooks/useGenerateAction';
 import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export const GenerateAction = ({
   timeLockContractAddress,
@@ -22,7 +23,9 @@ export const GenerateAction = ({
   sourceChainId: string;
   targetChainId: string;
 }) => {
-  const [activeTab, setActiveTab] = useState<'wallet' | 'iframe'>('iframe');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = (searchParams.get('connectType') as 'wallet' | 'iframe') || 'iframe';
   const [targetAccount, setTargetAccount] = useState('');
   const [isIframeLoading, setIsIframeLoading] = useState(false);
   const [walletConnectUri, setWalletConnectUri] = useState<string>('');
@@ -68,9 +71,14 @@ export const GenerateAction = ({
     }
   }, [iframeRef]);
 
-  const handleTabChange = useCallback((tab: 'wallet' | 'iframe') => {
-    setActiveTab(tab);
-  }, []);
+  const handleTabChange = useCallback(
+    (tab: 'wallet' | 'iframe') => {
+      const params = new URLSearchParams(searchParams);
+      params.set('connectType', tab);
+      router.push(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   useEffect(() => {
     if (deployedXAccounts && deployedXAccounts.length > 0) {
