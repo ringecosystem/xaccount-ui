@@ -13,7 +13,7 @@ interface PortSelectProps {
 }
 export const PortSelect = ({ value, onValueChange }: PortSelectProps) => {
   return (
-    <SelectPrimitive value={value} onValueChange={onValueChange}>
+    <SelectPrimitive value={value} onValueChange={onValueChange} disabled>
       <SelectTrigger className="h-[62px] w-full rounded-[8px] bg-[#262626] p-[10px]">
         <SelectValue
           placeholder={

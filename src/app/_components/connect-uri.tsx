@@ -111,18 +111,19 @@ export const ConnectURI = ({
       setError('');
       setIsConnecting(true);
 
-      // 首先建立配对连接
+      await walletConnect.setAddress(targetAccount);
+
       await walletConnect.pair(value);
 
-      // 等待连接完成后再更新地址
-      // 添加短暂延迟以确保连接已完全建立
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // 更新会话信息
-      await walletConnect.updateSession({
-        address: targetAccount,
-        chainId: `eip155:${targetChainId}`
-      });
+      const connectionInfo = walletConnect.getConnectionInfo();
+      if (connectionInfo.isConnected) {
+        await walletConnect.updateSession({
+          address: targetAccount,
+          chainId: `eip155:${targetChainId}`
+        });
+      }
     } catch (error) {
       console.error('Connection failed:', error);
       if (error instanceof Error && error.message.includes('Pairing already exists')) {
@@ -150,9 +151,6 @@ export const ConnectURI = ({
       setIsConnecting(false);
     }
   };
-  console.log('walletConnect', walletConnect);
-  console.log('isConnecting', isConnecting);
-  console.log('value', value);
 
   return (
     <div className="space-y-2">
@@ -189,6 +187,7 @@ export const ConnectURI = ({
         <div className="flex items-center justify-center">
           <Button
             variant="secondary"
+            isLoading={isConnecting}
             className="h-[50px] w-full max-w-[226px] rounded-[8px] bg-[#7838FF] text-sm font-medium leading-[150%] text-[#F6F1E8] hover:bg-[#7838FF]/80"
             disabled={!walletConnect || isConnecting || !value}
             onClick={handleConnect}
@@ -223,13 +222,10 @@ export const ConnectURI = ({
               <span className="line-clamp-3 text-[14px] font-semibold leading-[150%] text-[#F6F1E8]/70">
                 {connectionInfo?.description}
               </span>
-              <a
-                href={connectionInfo?.url || ''}
-                // target={connectionInfo?.url || ''}
-                className="text-[14px] font-semibold leading-[150%] text-[#F6F1E8]/70 hover:text-[#F6F1E8] hover:underline"
-              >
-                {connectionInfo?.url}
-              </a>
+
+              <span className="text-[14px] font-semibold leading-[150%] text-[#F6F1E8]/70">
+                Go back to the dapp to make your call
+              </span>
             </div>
           )}
           <button
@@ -238,31 +234,6 @@ export const ConnectURI = ({
           >
             Disconnect
           </button>
-        </div>
-      )}
-      {isConnecting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-sm rounded-lg bg-[#1C1C1C] p-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#7838FF]" />
-              <p className="text-[#F6F1E8]">
-                {walletConnect?.getConnectionInfo().isConnected
-                  ? 'Disconnecting...'
-                  : 'Connecting to wallet...'}
-              </p>
-              <button
-                onClick={() => {
-                  setIsConnecting(false);
-                  if (!walletConnect?.getConnectionInfo().isConnected) {
-                    walletConnect?.disconnect();
-                  }
-                }}
-                className="rounded bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
-              >
-                Cancel {walletConnect?.getConnectionInfo().isConnected ? 'Disconnect' : 'Connect'}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

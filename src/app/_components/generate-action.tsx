@@ -11,6 +11,7 @@ import { AlertCircle } from 'lucide-react';
 import useGenerateAction from '@/hooks/useGenerateAction';
 import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
 export const GenerateAction = ({
   timeLockContractAddress,
@@ -23,8 +24,13 @@ export const GenerateAction = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'wallet' | 'iframe'>('iframe');
   const [targetAccount, setTargetAccount] = useState('');
-  const [value, setValue] = useState('');
-  const { latestTransaction } = useImpersonatorIframe();
+  const [isIframeLoading, setIsIframeLoading] = useState(false);
+  const [walletConnectUri, setWalletConnectUri] = useState<string>('');
+  const [iframeConnectUri, setIframeConnectUri] = useLocalStorageState<string>(
+    'iframeConnectUri',
+    ''
+  );
+  const { latestTransaction, iframeRef } = useImpersonatorIframe();
 
   const {
     data: deployedXAccounts,
@@ -51,8 +57,18 @@ export const GenerateAction = ({
     targetChainId: Number(targetChainId)
   });
 
+  const handleIframeLoad = useCallback(() => {
+    if (iframeRef.current) {
+      const yOffset =
+        iframeRef.current.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2;
+      window.scrollTo({
+        top: yOffset,
+        behavior: 'smooth'
+      });
+    }
+  }, [iframeRef]);
+
   const handleTabChange = useCallback((tab: 'wallet' | 'iframe') => {
-    setValue('');
     setActiveTab(tab);
   }, []);
 
@@ -78,6 +94,9 @@ export const GenerateAction = ({
     }
     if (activeTab === 'wallet') {
     } else {
+      console.log('latestTransaction', latestTransaction);
+      console.log('targetAccount', targetAccount);
+
       if (latestTransaction) {
         generateAction({
           transactionInfo: latestTransaction
@@ -128,19 +147,21 @@ export const GenerateAction = ({
           <ConnectTabs activeTab={activeTab} onTabChange={handleTabChange}>
             {activeTab === 'wallet' && (
               <ConnectURI
-                // targetAccount={targetAccount}
-                targetAccount="0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5"
+                targetAccount={targetAccount}
                 targetChainId={targetChainId}
-                value={value}
-                onValueChange={setValue}
+                value={walletConnectUri}
+                onValueChange={setWalletConnectUri}
               />
             )}
             {activeTab === 'iframe' && (
               <ConnectIframe
                 targetAccount={targetAccount}
                 targetChainId={targetChainId}
-                value={value}
-                onValueChange={setValue}
+                value={iframeConnectUri}
+                onValueChange={setIframeConnectUri}
+                onIframeLoad={handleIframeLoad}
+                isIframeLoading={isIframeLoading}
+                setIsIframeLoading={setIsIframeLoading}
               />
             )}
           </ConnectTabs>

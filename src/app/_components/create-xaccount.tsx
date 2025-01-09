@@ -16,7 +16,8 @@ import { useRemoteAddressExistence } from '@/hooks/useRemoteAddressExistence';
 import { JsonRpcProvider } from 'ethers';
 import { useXAccountOf } from '@/hooks/usexAccountOf';
 import { useSafeAddress } from '@/providers/address-provider';
-import { ContentSkeleton } from '@/components/content-skeletion';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export const CreateXAccount = ({
   timeLockContractAddress,
@@ -47,7 +48,6 @@ export const CreateXAccount = ({
     return chain ? new JsonRpcProvider(chain.rpcUrls.default.http[0]) : undefined;
   }, [targetChainId]);
 
-  // provider 一直在变导致loading时间不正确
   const { isLoading: isRemoteAddressLoading } = useRemoteAddressExistence({
     xAccount,
     provider
@@ -94,8 +94,29 @@ export const CreateXAccount = ({
 
   return (
     <>
-      <div className="flex flex-col gap-[20px]">
-        <div className="flex w-full items-center gap-[12px] rounded-[8px] bg-[#262626] p-[20px]">
+      <div className="relative flex flex-col gap-[20px]">
+        {isRemoteAddressLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[8px] bg-[#1A1A1A]/60 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-[#7838FF]" />
+                <span className="text-[16px] font-medium text-[#F6F1E8]">
+                  Checking XAccount status...
+                </span>
+              </div>
+              <p className="text-[14px] text-[#F6F1E8]/70">
+                Verifying address existence on target chain
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={cn(
+            'flex w-full items-center gap-[12px] rounded-[8px] bg-[#262626] p-[20px]',
+            isRemoteAddressLoading && 'opacity-50'
+          )}
+        >
           <span className="inline-block h-[9px] w-[9px] flex-shrink-0 rounded-full bg-[#00C739]"></span>
           {address && <Avatar address={address} className="flex-shrink-0" />}
           <span className="break-all text-[18px] font-medium leading-[20px] text-[#F6F1E8]">
@@ -110,9 +131,7 @@ export const CreateXAccount = ({
             Disconnect
           </Button>
         </div>
-        {isRemoteAddressLoading ? (
-          <ContentSkeleton />
-        ) : safeAddress ? (
+        {safeAddress ? (
           <div className="flex w-full flex-col items-center justify-center gap-[20px] rounded-[8px] bg-[#1A1A1A] p-[20px]">
             <div className="flex w-full flex-col items-center justify-center">
               <span className="text-[18px] font-extrabold leading-[130%] text-[#F6F1E8] underline">

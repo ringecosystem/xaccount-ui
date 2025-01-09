@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
@@ -12,12 +12,21 @@ import { AddressInput } from '@/components/address-input';
 import { WalletGuard } from './wallet-guard';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSwitchChain } from 'wagmi';
+import { useLocalStorageState } from '@/hooks/useLocalStorageState';
+import { isAddress } from 'viem';
 
 interface DaoPanelProps {
   className?: string;
 }
 
 const chains = getChains();
+
+const chainOptions = chains.map((chain) => ({
+  value: chain.id.toString(),
+  label: chain.name,
+  asset: chain.iconUrl as string
+}));
+
 export function DaoPanel({ className }: DaoPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,12 +34,25 @@ export function DaoPanel({ className }: DaoPanelProps) {
   const [activeTab, setActiveTab] = useState<'create' | 'generate'>(
     () => (searchParams.get('tab') as 'create' | 'generate') || 'create'
   );
-  const [sourceChainId, setSourceChainId] = useState(chains[0].id.toString());
-  const [targetChainId, setTargetChainId] = useState(chains[1].id.toString());
-  const [timeLockContractAddress, setTimeLockContractAddress] = useState<`0x${string}` | ''>('');
-  const [timeLockContractAddressValid, setTimeLockContractAddressValid] = useState(false);
+
+  const [timeLockContractAddress, setTimeLockContractAddress] = useLocalStorageState<
+    `0x${string}` | ''
+  >('timeLockContractAddress', '');
+
+  const [sourceChainId, setSourceChainId] = useLocalStorageState(
+    'sourceChainId',
+    chains[0].id.toString()
+  );
+  const [targetChainId, setTargetChainId] = useLocalStorageState(
+    'targetChainId',
+    chains[1].id.toString()
+  );
 
   const { switchChain } = useSwitchChain();
+
+  const timeLockContractAddressValid = useMemo(() => {
+    return !!timeLockContractAddress && isAddress(timeLockContractAddress);
+  }, [timeLockContractAddress]);
 
   const handleSourceChainChange = (value: string) => {
     setSourceChainId(value);
@@ -51,12 +73,6 @@ export function DaoPanel({ className }: DaoPanelProps) {
       }
     }
   };
-
-  const chainOptions = chains.map((chain) => ({
-    value: chain.id.toString(),
-    label: chain.name,
-    asset: chain.iconUrl as string
-  }));
 
   const handleTabChange = (tab: 'create' | 'generate') => {
     const params = new URLSearchParams(searchParams);
@@ -98,12 +114,16 @@ export function DaoPanel({ className }: DaoPanelProps) {
       </header>
 
       <div className="flex flex-col gap-[20px]">
-        <AddressInput
-          value={timeLockContractAddress}
-          onChange={setTimeLockContractAddress}
-          placeholder="Input contract address"
-          onValidationChange={setTimeLockContractAddressValid}
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
+            Source Chain DAO TimeLock Contract
+          </label>
+          <AddressInput
+            value={timeLockContractAddress}
+            onChange={setTimeLockContractAddress}
+            placeholder="Input contract address"
+          />
+        </div>
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">

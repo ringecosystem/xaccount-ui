@@ -284,19 +284,25 @@ export class WalletConnectManager {
    */
   public async updateSession(params: { address?: string; chainId?: string }) {
     try {
-      if (!this.web3wallet || !this.currentSession) {
-        throw new Error('WalletConnect not initialized');
+      // Initialize wallet if not already initialized
+      if (!this.web3wallet) {
+        await this.initializeWallet();
+      }
+
+      // Check if we have an active session after initialization
+      if (!this.currentSession) {
+        throw new Error('No active session found');
       }
 
       const namespace = 'eip155';
       const accounts = params.address
-        ? [params.address]
+        ? [`${this.currentSession?.namespaces[namespace]?.chains?.[0] || '1'}:${params.address}`]
         : this.currentSession.namespaces[namespace].accounts;
       const chains = params.chainId
         ? [params.chainId]
         : this.currentSession.namespaces[namespace].chains;
 
-      await this.web3wallet.updateSession({
+      await this.web3wallet!.updateSession({
         topic: this.currentSession.topic,
         namespaces: {
           [namespace]: {
@@ -343,38 +349,58 @@ export class WalletConnectManager {
    * Set current address
    */
   public async setAddress(address: string): Promise<void> {
-    const { isValid, resolvedAddress } = await this.validateAddress(address);
-    if (!isValid) {
-      throw new Error('Invalid address');
-    }
-    this.currentAddress = resolvedAddress;
+    try {
+      const isValid = await this.validateAddress(address);
+      if (!isValid) {
+        throw new Error('Invalid address');
+      }
 
-    // If connected, notify dApp of address change
-    if (this.isConnected) {
-      await this.updateSession({ address: resolvedAddress });
+      // 如果是 ENS 名称，尝试解析
+      if (!isAddress(address)) {
+        try {
+          const resolvedAddress = await this.provider.resolveName(address);
+          if (resolvedAddress) {
+            address = resolvedAddress;
+          }
+        } catch (error) {
+          // 如果网络不支持 ENS，继续使用原始地址
+          if (!(error instanceof Error && error.message.includes('network does not support ENS'))) {
+            throw error;
+          }
+        }
+      }
+
+      this.currentAddress = address;
+    } catch (error) {
+      console.error('Failed to set address:', error);
+      throw error;
     }
   }
 
   /**
    * Validate and resolve address
    */
-  private async validateAddress(address: string): Promise<{
-    isValid: boolean;
-    resolvedAddress: string;
-  }> {
+  private async validateAddress(address: string): Promise<boolean> {
     try {
-      // Try to resolve ENS name
-      const resolvedAddress = await this.provider.resolveName(address);
-      if (resolvedAddress) {
-        return { isValid: true, resolvedAddress };
+      // 首先检查是否为有效的以太坊地址
+      if (isAddress(address)) {
+        return true;
       }
 
-      // Validate if it's a valid Ethereum address
-      const isValid = isAddress(address);
-      return { isValid, resolvedAddress: address };
+      // 如果不是有效的以太坊地址，尝试 ENS 解析
+      try {
+        const resolvedAddress = await this.provider.resolveName(address);
+        return resolvedAddress !== null;
+      } catch (error) {
+        // 如果网络不支持 ENS，只验证是否为有效的以太坊地址
+        if (error instanceof Error && error.message.includes('network does not support ENS')) {
+          return isAddress(address);
+        }
+        throw error;
+      }
     } catch (error) {
       console.error('Address validation failed:', error);
-      return { isValid: false, resolvedAddress: '' };
+      return false;
     }
   }
 

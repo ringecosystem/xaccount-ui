@@ -11,15 +11,22 @@ export const ConnectIframe = ({
   targetAccount,
   targetChainId,
   value,
-  onValueChange
+  onValueChange,
+  onIframeLoad,
+  isIframeLoading,
+  setIsIframeLoading
 }: {
   targetAccount: string;
   targetChainId: string;
   value: string;
   onValueChange: (value: string) => void;
+  onIframeLoad: () => void;
+  isIframeLoading: boolean;
+  setIsIframeLoading: (value: boolean) => void;
 }) => {
   const [uri, setUri] = useState('');
   const targetChain = getChainById(Number(targetChainId));
+
   const handleConnect = useCallback(() => {
     if (!value || !isValidUrl(value)) {
       toast.error('Invalid URL');
@@ -31,8 +38,17 @@ export const ConnectIframe = ({
       return;
     }
 
-    setUri(value);
-  }, [value, targetAccount]);
+    setUri('');
+    setTimeout(() => {
+      setUri(value);
+    }, 100);
+    setIsIframeLoading(true);
+  }, [value, targetAccount, setIsIframeLoading]);
+
+  const handleIframeLoad = useCallback(() => {
+    setIsIframeLoading(false);
+    onIframeLoad();
+  }, [setIsIframeLoading, onIframeLoad]);
 
   const rpc = targetChain?.rpcUrls?.default?.http?.[0];
 
@@ -58,16 +74,19 @@ export const ConnectIframe = ({
           </TooltipContent>
         </Tooltip>
       </label>
-      <Input
-        type="text"
-        placeholder="https://app.uniswap.org/"
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        className="h-[62px] rounded-[8px] bg-[#262626] p-[20px] !text-[18px] font-medium leading-[130%] text-[#F6F1E8] placeholder:text-[18px] placeholder:text-[#666]"
-      />
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="https://app.uniswap.org/"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          className="h-[62px] rounded-[8px] bg-[#262626] p-[20px] pr-[50px] !text-[18px] font-medium leading-[130%] text-[#F6F1E8] placeholder:text-[18px] placeholder:text-[#666]"
+        />
+      </div>
       <div className="flex items-center justify-center">
         <Button
           variant="secondary"
+          isLoading={isIframeLoading}
           className="h-[50px] w-full max-w-[226px] rounded-[8px] bg-[#7838FF] text-sm font-medium leading-[150%] text-[#F6F1E8] hover:bg-[#7838FF]/80"
           disabled={!value || !isValidUrl(value)}
           onClick={handleConnect}
@@ -76,14 +95,15 @@ export const ConnectIframe = ({
         </Button>
       </div>
       {uri && targetAccount && rpc && (
-        <div className="relative flex h-[500px] justify-center">
+        <div className="relative flex h-[510px] justify-center">
           <div className="absolute left-1/2 -translate-x-1/2">
             <ImpersonatorIframe
               key={uri}
               targetChainId={targetChainId}
               width={'1000px'}
-              height={'500px'}
+              height={'510px'}
               src={uri}
+              onLoad={handleIframeLoad}
               address={targetAccount}
               rpcUrl={rpc}
             />
