@@ -131,8 +131,8 @@ export function DaoPanel({ className }: DaoPanelProps) {
       </div>
 
       <Tabs activeTab={activeTab} setActiveTab={handleTabChange}>
-        <WalletGuard>
-          {activeTab === 'create' ? (
+        {activeTab === 'create' ? (
+          <WalletGuard>
             <CreateXAccount
               timeLockContractAddress={
                 timeLockContractAddressValid && timeLockContractAddress
@@ -142,18 +142,16 @@ export function DaoPanel({ className }: DaoPanelProps) {
               sourceChainId={sourceChainId}
               targetChainId={targetChainId}
             />
-          ) : (
-            <GenerateAction
-              timeLockContractAddress={
-                timeLockContractAddressValid && timeLockContractAddress
-                  ? timeLockContractAddress
-                  : ''
-              }
-              sourceChainId={sourceChainId}
-              targetChainId={targetChainId}
-            />
-          )}
-        </WalletGuard>
+          </WalletGuard>
+        ) : (
+          <GenerateAction
+            timeLockContractAddress={
+              timeLockContractAddressValid && timeLockContractAddress ? timeLockContractAddress : ''
+            }
+            sourceChainId={sourceChainId}
+            targetChainId={targetChainId}
+          />
+        )}
       </Tabs>
     </div>
   );

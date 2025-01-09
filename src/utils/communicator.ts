@@ -11,7 +11,6 @@ import {
 export const getSDKVersion = () => {
   return '7.6.0'; // IMPORTANT: needs to be >= 1.0.0
 };
-
 type MessageHandler = (
   msg: SDKMessageEvent
 ) =>
@@ -32,6 +31,7 @@ class AppCommunicator {
 
   constructor(iframeRef: RefObject<HTMLIFrameElement | null>) {
     this.iframeRef = iframeRef;
+
     window.addEventListener('message', this.handleIncomingMessage);
   }
 
@@ -40,7 +40,7 @@ class AppCommunicator {
   };
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
-    if (Object.prototype.hasOwnProperty.call(msg.data, 'isCookieEnabled')) {
+    if (msg.data.hasOwnProperty('isCookieEnabled')) {
       return true;
     }
 
@@ -60,6 +60,7 @@ class AppCommunicator {
       ? MessageFormatter.makeErrorResponse(requestId, data as string, sdkVersion)
       : MessageFormatter.makeResponse(requestId, data, sdkVersion);
     // console.log("send", { msg });
+
     this.iframeRef.current?.contentWindow?.postMessage(msg, '*');
   };
 
@@ -68,26 +69,17 @@ class AppCommunicator {
     const hasHandler = this.canHandleMessage(msg);
 
     if (validMessage && hasHandler) {
-      if (
-        !(
-          msg.data.method === 'rpcCall' &&
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (msg.data.params as any).call === 'eth_getBlockByNumber'
-        )
-      ) {
-        console.log('*', msg.data);
-      }
+      // console.log("incoming", { msg: msg.data });
 
       const handler = this.handlers.get(msg.data.method);
       try {
         // @ts-expect-error Handler existence is checked in this.canHandleMessage
         const response = await handler(msg);
 
-        // If response is not returned, it means the response will be send somewhere else
+        // If response is not returned, it means the response will be sent somewhere else
         if (typeof response !== 'undefined') {
           this.send(response, msg.data.id);
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         this.send(err.message, msg.data.id, true);
       }
@@ -105,12 +97,12 @@ const useAppCommunicator = (
   const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined);
   useEffect(() => {
     let communicatorInstance: AppCommunicator;
-    const initCommunicator = (iframeRef: RefObject<HTMLIFrameElement | null>) => {
+    const initCommunicator = (iframeRef: RefObject<HTMLIFrameElement>) => {
       communicatorInstance = new AppCommunicator(iframeRef);
       setCommunicator(communicatorInstance);
     };
 
-    initCommunicator(iframeRef);
+    initCommunicator(iframeRef as RefObject<HTMLIFrameElement>);
 
     return () => {
       communicatorInstance?.clear();

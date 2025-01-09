@@ -17,7 +17,8 @@ export function DAppProvider({ children }: PropsWithChildren<unknown>) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000
+            staleTime: 5_000,
+            refetchOnWindowFocus: false
           }
         }
       })

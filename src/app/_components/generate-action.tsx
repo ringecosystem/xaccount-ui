@@ -21,7 +21,7 @@ export const GenerateAction = ({
   sourceChainId: string;
   targetChainId: string;
 }) => {
-  const [activeTab, setActiveTab] = useState<'wallet' | 'iframe'>('wallet');
+  const [activeTab, setActiveTab] = useState<'wallet' | 'iframe'>('iframe');
   const [targetAccount, setTargetAccount] = useState('');
   const [value, setValue] = useState('');
   const { latestTransaction } = useImpersonatorIframe();
@@ -95,20 +95,6 @@ export const GenerateAction = ({
 
   return (
     <div className="flex flex-col gap-[20px]">
-      <button
-        onClick={() => {
-          generateAction({
-            transactionInfo: {
-              to: '0x0000000000000000000000000000000000000402',
-              data: '0x095ea7b3000000000000000000000000b633ad1142941ca2eb9c350579cf88bbe266660d00000000000000000000000000000000000000000000000000038d7ea4c68000',
-              from: '0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5',
-              value: '0'
-            }
-          });
-        }}
-      >
-        测试一下transtion
-      </button>
       <div className="space-y-2">
         <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
           Corresponding XAccounts

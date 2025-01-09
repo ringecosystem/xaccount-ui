@@ -34,6 +34,8 @@ export const ConnectIframe = ({
     setUri(value);
   }, [value, targetAccount]);
 
+  const rpc = targetChain?.rpcUrls?.default?.http?.[0];
+
   return (
     <div className="space-y-[20px]">
       <label className="flex items-center gap-[5px] text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
@@ -73,15 +75,17 @@ export const ConnectIframe = ({
           Connect
         </Button>
       </div>
-      {uri && targetAccount && targetChain?.rpcUrls?.default?.http?.[0] && (
+      {uri && targetAccount && rpc && (
         <div className="relative flex h-[500px] justify-center">
           <div className="absolute left-1/2 -translate-x-1/2">
             <ImpersonatorIframe
+              key={uri}
+              targetChainId={targetChainId}
               width={'1000px'}
               height={'500px'}
               src={uri}
               address={targetAccount}
-              rpcUrl={targetChain?.rpcUrls?.default?.http?.[0]}
+              rpcUrl={rpc}
             />
           </div>
         </div>

@@ -48,17 +48,19 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${urbanist.className} antialiased`}>
         <DAppProvider>
-          <ImpersonatorIframeProvider>
+          <>
             <TooltipProvider delayDuration={0}>
               <SafeAddressProvider>
                 <div className="flex min-h-screen flex-col">
-                  <main className="flex-1 py-[50px]">{children}</main>
+                  <main className="flex-1 py-[50px]">
+                    <ImpersonatorIframeProvider>{children}</ImpersonatorIframeProvider>
+                  </main>
                   <Footer />
                 </div>
               </SafeAddressProvider>
               <ToastContainer theme="dark" className="w-auto text-[14px] md:w-[380px]" />
             </TooltipProvider>
-          </ImpersonatorIframeProvider>
+          </>
         </DAppProvider>
       </body>
     </html>

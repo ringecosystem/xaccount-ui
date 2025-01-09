@@ -38,6 +38,8 @@ type SafeInjectContextType = {
   setAddress: React.Dispatch<React.SetStateAction<string | undefined>>;
   setAppUrl: React.Dispatch<React.SetStateAction<string | undefined>>;
   setRpcUrl: React.Dispatch<React.SetStateAction<string | undefined>>;
+  targetChainId: string | undefined;
+  setTargetChainId: React.Dispatch<React.SetStateAction<string | undefined>>;
   sendMessageToIFrame: <T extends InterfaceMessageIds>(
     message: InterfaceMessageProps<T>,
     requestId?: RequestId
@@ -53,9 +55,11 @@ export const ImpersonatorIframeContext = createContext<SafeInjectContextType>({
   rpcUrl: undefined,
   iframeRef: { current: null } as RefObject<HTMLIFrameElement | null>,
   latestTransaction: undefined,
+  targetChainId: undefined,
   setAddress: () => {},
   setAppUrl: () => {},
   setRpcUrl: () => {},
+  setTargetChainId: () => {},
   sendMessageToIFrame: () => {},
   onUserTxConfirm: () => {},
   onTxReject: () => {},
@@ -70,6 +74,7 @@ export const ImpersonatorIframeProvider: React.FunctionComponent<FCProps> = ({ c
   const [address, setAddress] = useState<string>();
   const [appUrl, setAppUrl] = useState<string>();
   const [rpcUrl, setRpcUrl] = useState<string>();
+  const [targetChainId, setTargetChainId] = useState<string>();
   const [provider, setProvider] = useState<JsonRpcProvider>();
   const [latestTransaction, setLatestTransaction] = useState<TransactionWithId>();
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -134,13 +139,16 @@ export const ImpersonatorIframeProvider: React.FunctionComponent<FCProps> = ({ c
   useEffect(() => {
     if (!provider) return;
 
-    communicator?.on(Methods.getSafeInfo, async () => ({
-      safeAddress: address,
-      chainId: Number((await provider.getNetwork()).chainId),
-      owners: [],
-      threshold: 1,
-      isReadOnly: false
-    }));
+    communicator?.on(Methods.getSafeInfo, async () => {
+      return {
+        safeAddress: address,
+        chainId: targetChainId,
+        owners: [],
+        threshold: 1,
+        isReadOnly: false,
+        network: targetChainId
+      };
+    });
 
     communicator?.on(Methods.getEnvironmentInfo, async () => ({
       origin: document.location.origin
@@ -222,7 +230,7 @@ export const ImpersonatorIframeProvider: React.FunctionComponent<FCProps> = ({ c
     });
 
     setIsReady(true);
-  }, [communicator, address, provider]);
+  }, [communicator, address, provider, targetChainId]);
 
   return (
     <ImpersonatorIframeContext.Provider
@@ -232,6 +240,8 @@ export const ImpersonatorIframeProvider: React.FunctionComponent<FCProps> = ({ c
         rpcUrl,
         iframeRef,
         latestTransaction,
+        targetChainId,
+        setTargetChainId,
         setAddress,
         setAppUrl,
         setRpcUrl,
