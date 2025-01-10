@@ -162,8 +162,8 @@ export const GenerateAction = ({
             )}
             {activeTab === 'iframe' && (
               <ConnectIframe
-                targetAccount={'0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5'}
-                targetChainId={'1'}
+                targetAccount={targetAccount}
+                targetChainId={targetChainId}
                 value={iframeConnectUri}
                 onValueChange={setIframeConnectUri}
                 onIframeLoad={handleIframeLoad}
