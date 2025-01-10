@@ -8,41 +8,27 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/checkout@v2
-        with:
-          repository: darwinia-network/devops
-          path: .github
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v3
         with:
           version: 8
 
-      - uses: ./.github/actions/smart-vercel
-        name: Deploy to Vercel (mainnet)
+      - uses: darwinia-network/devops/actions/smart-vercel@main
+        name: Deploy to Vercel
         with:
+          node_version: 22
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           vercel_group: itering
+          script_install: pnpm install
+          script_build: pnpm build
           preview_output: true
-          script_run: false
-          dist_path: .
+          dist_path: out
           project_name: xaccount-ui
+          alias_domain: "xaccount-dev"
           enable_cache: true
           enable_notify_comment: true
           enable_notify_slack: true
           slack_channel: public-ringdao-apps
           slack_webhook: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
 
-      - uses: ./.github/actions/smart-vercel
-        name: Deploy to Vercel (testnet)
-        with:
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          vercel_group: itering
-          preview_output: true
-          script_run: false
-          dist_path: .
-          project_name: xaccount-ui-testnet
-          enable_cache: true
-          enable_notify_comment: true
-          enable_notify_slack: false
