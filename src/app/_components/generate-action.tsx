@@ -1,3 +1,6 @@
+'use client';
+
+import { Suspense } from 'react';
 import { Select } from '@/components/select';
 import { blo } from 'blo';
 import { useCallback, useEffect, useState, useMemo } from 'react';
@@ -13,7 +16,7 @@ import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ActionPreview } from '@/components/action-preview';
 
-export const GenerateAction = ({
+function GenerateActionContent({
   timeLockContractAddress,
   sourceChainId,
   targetChainId
@@ -21,7 +24,7 @@ export const GenerateAction = ({
   timeLockContractAddress: string;
   sourceChainId: string;
   targetChainId: string;
-}) => {
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get('connectType') as 'wallet' | 'iframe') || 'iframe';
@@ -74,7 +77,7 @@ export const GenerateAction = ({
     (tab: 'wallet' | 'iframe') => {
       const params = new URLSearchParams(searchParams);
       params.set('connectType', tab);
-      router.push(`?${params.toString()}`, { scroll: false });
+      router.push(`?${params.toString()}`);
     },
     [router, searchParams]
   );
@@ -101,9 +104,6 @@ export const GenerateAction = ({
     }
     if (activeTab === 'wallet') {
     } else {
-      console.log('latestTransaction', latestTransaction);
-      console.log('targetAccount', targetAccount);
-
       if (latestTransaction) {
         generateAction({
           transactionInfo: latestTransaction
@@ -149,31 +149,27 @@ export const GenerateAction = ({
         />
       </div>
 
-      {
-        <>
-          <ConnectTabs activeTab={activeTab} onTabChange={handleTabChange}>
-            {activeTab === 'wallet' && (
-              <ConnectURI
-                targetAccount={targetAccount}
-                targetChainId={targetChainId}
-                value={walletConnectUri}
-                onValueChange={setWalletConnectUri}
-              />
-            )}
-            {activeTab === 'iframe' && (
-              <ConnectIframe
-                targetAccount={targetAccount}
-                targetChainId={targetChainId}
-                value={iframeConnectUri}
-                onValueChange={setIframeConnectUri}
-                onIframeLoad={handleIframeLoad}
-                isIframeLoading={isIframeLoading}
-                setIsIframeLoading={setIsIframeLoading}
-              />
-            )}
-          </ConnectTabs>
-        </>
-      }
+      <ConnectTabs activeTab={activeTab} onTabChange={handleTabChange}>
+        {activeTab === 'wallet' && (
+          <ConnectURI
+            targetAccount={targetAccount}
+            targetChainId={targetChainId}
+            value={walletConnectUri}
+            onValueChange={setWalletConnectUri}
+          />
+        )}
+        {activeTab === 'iframe' && (
+          <ConnectIframe
+            targetAccount={targetAccount}
+            targetChainId={targetChainId}
+            value={iframeConnectUri}
+            onValueChange={setIframeConnectUri}
+            onIframeLoad={handleIframeLoad}
+            isIframeLoading={isIframeLoading}
+            setIsIframeLoading={setIsIframeLoading}
+          />
+        )}
+      </ConnectTabs>
 
       <ActionPreview
         isLoading={isLoading}
@@ -186,4 +182,24 @@ export const GenerateAction = ({
       />
     </div>
   );
-};
+}
+
+export function GenerateAction({
+  timeLockContractAddress,
+  sourceChainId,
+  targetChainId
+}: {
+  timeLockContractAddress: string;
+  sourceChainId: string;
+  targetChainId: string;
+}) {
+  return (
+    <Suspense fallback={<ContentSkeleton />}>
+      <GenerateActionContent
+        timeLockContractAddress={timeLockContractAddress}
+        sourceChainId={sourceChainId}
+        targetChainId={targetChainId}
+      />
+    </Suspense>
+  );
+}
