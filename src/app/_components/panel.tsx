@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
@@ -27,7 +27,7 @@ const chainOptions = chains.map((chain) => ({
   asset: chain.iconUrl as string
 }));
 
-export function DaoPanel({ className }: DaoPanelProps) {
+function DaoPanelContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -88,31 +88,9 @@ export function DaoPanel({ className }: DaoPanelProps) {
       }, 1000);
     }
   }, [targetChainId, switchChain]);
-  return (
-    <div
-      className={cn(
-        'relative flex w-full max-w-[540px] flex-col gap-[20px] rounded-[12px] border border-[#262626] p-[20px]',
-        className
-      )}
-    >
-      <header className="flex flex-col gap-[20px]">
-        <div className="flex w-full items-center justify-end">
-          <Image
-            src="/images/common/logo.svg"
-            alt="XAccount Logo"
-            width={114.773}
-            height={22}
-            className=""
-          />
-        </div>
-        <div className="flex flex-col">
-          <h1 className="text-[24px] font-semibold leading-[120%] text-[#F6F1E8]">DAO TOOL</h1>
-          <h2 className="text-[34px] font-semibold leading-[120%] text-[#F6F1E8]">
-            Generating Cross-chain Action
-          </h2>
-        </div>
-      </header>
 
+  return (
+    <>
       <div className="flex flex-col gap-[20px]">
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
@@ -173,6 +151,47 @@ export function DaoPanel({ className }: DaoPanelProps) {
           />
         )}
       </Tabs>
+    </>
+  );
+}
+
+export function DaoPanel({ className }: DaoPanelProps) {
+  return (
+    <div
+      className={cn(
+        'relative flex w-full max-w-[540px] flex-col gap-[20px] rounded-[12px] border border-[#262626] p-[20px]',
+        className
+      )}
+    >
+      <header className="flex flex-col gap-[20px]">
+        <div className="flex w-full items-center justify-end">
+          <Image
+            src="/images/common/logo.svg"
+            alt="XAccount Logo"
+            width={114.773}
+            height={22}
+            className=""
+          />
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-[24px] font-semibold leading-[120%] text-[#F6F1E8]">DAO TOOL</h1>
+          <h2 className="text-[34px] font-semibold leading-[120%] text-[#F6F1E8]">
+            Generating Cross-chain Action
+          </h2>
+        </div>
+      </header>
+
+      <Suspense
+        fallback={
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 rounded bg-neutral-800" />
+            <div className="h-10 rounded bg-neutral-800" />
+            <div className="h-10 rounded bg-neutral-800" />
+          </div>
+        }
+      >
+        <DaoPanelContent />
+      </Suspense>
     </div>
   );
 }
