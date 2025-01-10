@@ -177,7 +177,6 @@ export class WalletConnectManager {
         throw new Error('Unsupported WalletConnect version');
       }
 
-      // 直接尝试配对，让 WalletConnect 处理错误
       await this.web3wallet.core.pairing.pair({ uri });
     } catch (error) {
       console.error('Pairing failed:', error);
@@ -355,7 +354,6 @@ export class WalletConnectManager {
         throw new Error('Invalid address');
       }
 
-      // 如果是 ENS 名称，尝试解析
       if (!isAddress(address)) {
         try {
           const resolvedAddress = await this.provider.resolveName(address);
@@ -363,7 +361,6 @@ export class WalletConnectManager {
             address = resolvedAddress;
           }
         } catch (error) {
-          // 如果网络不支持 ENS，继续使用原始地址
           if (!(error instanceof Error && error.message.includes('network does not support ENS'))) {
             throw error;
           }
@@ -382,17 +379,14 @@ export class WalletConnectManager {
    */
   private async validateAddress(address: string): Promise<boolean> {
     try {
-      // 首先检查是否为有效的以太坊地址
       if (isAddress(address)) {
         return true;
       }
 
-      // 如果不是有效的以太坊地址，尝试 ENS 解析
       try {
         const resolvedAddress = await this.provider.resolveName(address);
         return resolvedAddress !== null;
       } catch (error) {
-        // 如果网络不支持 ENS，只验证是否为有效的以太坊地址
         if (error instanceof Error && error.message.includes('network does not support ENS')) {
           return isAddress(address);
         }
@@ -443,19 +437,16 @@ export class WalletConnectManager {
    */
   public async destroy(): Promise<void> {
     try {
-      // 断开当前会话
       if (this.currentSession) {
         await this.disconnect();
       }
 
-      // 移除所有事件监听器
       if (this.web3wallet) {
         this.web3wallet.removeListener('session_proposal', this.boundHandleSessionProposal);
         this.web3wallet.removeListener('session_request', this.boundHandleSessionRequest);
         this.web3wallet.removeListener('session_delete', this.boundHandleSessionDelete);
       }
 
-      // 清理状态
       this.web3wallet = null;
       this.currentSession = null;
       this.currentAddress = '';
