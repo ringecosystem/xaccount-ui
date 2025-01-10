@@ -1,7 +1,7 @@
 'use client';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useAccount } from 'wagmi';
+import { useAccount, useSwitchChain } from 'wagmi';
 import { toast } from 'react-toastify';
 import Avatar from '@/components/avatar';
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,8 @@ export const CreateXAccount = ({
   const [recoveryAccount, setRecoveryAccount] = useState<`0x${string}` | ''>('');
   const [recoveryAccountValid, setRecoveryAccountValid] = useState(false);
   const { disconnectWallet } = useDisconnectWallet();
-
   const { safeAddress } = useSafeAddress();
+  const { switchChain } = useSwitchChain();
 
   const { data: xAccount } = useXAccountOf({
     deployer: address as `0x${string}`,
@@ -87,6 +87,14 @@ export const CreateXAccount = ({
       });
     }
   }, [sourceChainId, createXAccount, recoveryAccount, timeLockContractAddress, port]);
+
+  useEffect(() => {
+    if (targetChainId) {
+      setTimeout(() => {
+        switchChain({ chainId: Number(targetChainId) });
+      }, 1000);
+    }
+  }, [targetChainId, switchChain]);
 
   const handleDisconnect = useCallback(() => {
     disconnectWallet(address);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Tabs } from './tabs';
@@ -11,7 +11,6 @@ import { GenerateAction } from './generate-action';
 import { AddressInput } from '@/components/address-input';
 import { WalletGuard } from './wallet-guard';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useSwitchChain } from 'wagmi';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { isAddress } from 'viem';
 
@@ -48,8 +47,6 @@ function DaoPanelContent() {
     chains[1].id.toString()
   );
 
-  const { switchChain } = useSwitchChain();
-
   const timeLockContractAddressValid = useMemo(() => {
     return !!timeLockContractAddress && isAddress(timeLockContractAddress);
   }, [timeLockContractAddress]);
@@ -80,14 +77,6 @@ function DaoPanelContent() {
     router.push(`?${params.toString()}`);
     setActiveTab(tab);
   };
-
-  useEffect(() => {
-    if (targetChainId) {
-      setTimeout(() => {
-        switchChain({ chainId: Number(targetChainId) });
-      }, 1000);
-    }
-  }, [targetChainId, switchChain]);
 
   return (
     <>

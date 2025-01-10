@@ -94,8 +94,10 @@ function GenerateActionContent({
   }, [deployedXAccounts]);
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    if (sourceChainId && timeLockContractAddress) {
+      refetch();
+    }
+  }, [refetch, sourceChainId, timeLockContractAddress]);
 
   useEffect(() => {
     if (!targetAccount) {
