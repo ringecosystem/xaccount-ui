@@ -1,7 +1,6 @@
 import { Select } from '@/components/select';
 import { blo } from 'blo';
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { ActionPreview } from './action-preview';
 import ConnectTabs from './connect-tabs';
 import { ConnectURI } from './connect-uri';
 import { ConnectIframe } from './connect-iframe';
@@ -10,9 +9,9 @@ import { ContentSkeleton } from '@/components/content-skeletion';
 import { AlertCircle } from 'lucide-react';
 import useGenerateAction from '@/hooks/useGenerateAction';
 import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ActionPreview } from '@/components/action-preview';
 
 export const GenerateAction = ({
   timeLockContractAddress,
@@ -163,8 +162,8 @@ export const GenerateAction = ({
             )}
             {activeTab === 'iframe' && (
               <ConnectIframe
-                targetAccount={targetAccount}
-                targetChainId={targetChainId}
+                targetAccount={'0x3d6d656c1bf92f7028Ce4C352563E1C363C58ED5'}
+                targetChainId={'1'}
                 value={iframeConnectUri}
                 onValueChange={setIframeConnectUri}
                 onIframeLoad={handleIframeLoad}
@@ -176,55 +175,15 @@ export const GenerateAction = ({
         </>
       }
 
-      <AnimatePresence mode="wait">
-        {isLoading ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="rounded-[8px] border border-neutral-800 bg-neutral-900/50 p-6"
-          >
-            <div className="flex w-full flex-col gap-[12px] rounded-[8px] bg-[#1A1A1A] p-[22px]">
-              <header className="flex items-center justify-between">
-                <div className="h-4 w-32 animate-pulse rounded bg-neutral-800" />
-                <div className="h-[18px] w-[18px] animate-pulse rounded bg-neutral-800" />
-              </header>
-              <div className="space-y-3">
-                {[...Array(6)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-4 w-full animate-pulse rounded bg-neutral-800"
-                    style={{ width: `${Math.random() * 40 + 60}%` }}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        ) : (
-          sourcePort &&
-          actionState?.params &&
-          actionState?.fee &&
-          actionState?.message &&
-          moduleAddress &&
-          targetChainId && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
-              <ActionPreview
-                sourcePort={sourcePort}
-                targetChainId={Number(targetChainId)}
-                moduleAddress={moduleAddress}
-                message={actionState?.message}
-                params={actionState?.params}
-                fee={actionState?.fee}
-              />
-            </motion.div>
-          )
-        )}
-      </AnimatePresence>
+      <ActionPreview
+        isLoading={isLoading}
+        sourcePort={sourcePort}
+        targetChainId={Number(targetChainId)}
+        moduleAddress={moduleAddress}
+        message={actionState?.message}
+        params={actionState?.params}
+        fee={actionState?.fee}
+      />
     </div>
   );
 };

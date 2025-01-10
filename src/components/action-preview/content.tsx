@@ -51,7 +51,7 @@ const customStyle = {
   }
 };
 
-export const ActionPreview = ({
+export const Content = ({
   sourcePort,
   targetChainId,
   moduleAddress,

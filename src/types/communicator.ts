@@ -505,7 +505,6 @@ export declare type TypedMessageTypes = {
 export declare type EIP712TypedData = {
   domain: TypedDataDomain;
   types: TypedMessageTypes;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   message: Record<string, any>;
 };
 export declare type SignTypedMessageParams = {

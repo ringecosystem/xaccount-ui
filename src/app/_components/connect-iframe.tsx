@@ -26,6 +26,7 @@ export const ConnectIframe = ({
 }) => {
   const [uri, setUri] = useState('');
   const targetChain = getChainById(Number(targetChainId));
+  const rpc = targetChain?.rpcUrls?.default?.http?.[0];
 
   const handleConnect = useCallback(() => {
     if (!value || !isValidUrl(value)) {
@@ -38,19 +39,22 @@ export const ConnectIframe = ({
       return;
     }
 
+    if (!rpc) {
+      toast.error('RPC is not available');
+      return;
+    }
+
     setUri('');
     setTimeout(() => {
       setUri(value);
     }, 100);
     setIsIframeLoading(true);
-  }, [value, targetAccount, setIsIframeLoading]);
+  }, [value, targetAccount, setIsIframeLoading, rpc]);
 
   const handleIframeLoad = useCallback(() => {
     setIsIframeLoading(false);
     onIframeLoad();
   }, [setIsIframeLoading, onIframeLoad]);
-
-  const rpc = targetChain?.rpcUrls?.default?.http?.[0];
 
   return (
     <div className="space-y-[20px]">
