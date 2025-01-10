@@ -13,6 +13,7 @@ import { WalletGuard } from './wallet-guard';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { isAddress } from 'viem';
+import { motion } from 'framer-motion';
 
 interface DaoPanelProps {
   className?: string;
@@ -146,7 +147,10 @@ function DaoPanelContent() {
 
 export function DaoPanel({ className }: DaoPanelProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
       className={cn(
         'relative flex w-full max-w-[540px] flex-col gap-[20px] rounded-[12px] border border-[#262626] p-[20px]',
         className
@@ -181,6 +185,6 @@ export function DaoPanel({ className }: DaoPanelProps) {
       >
         <DaoPanelContent />
       </Suspense>
-    </div>
+    </motion.div>
   );
 }

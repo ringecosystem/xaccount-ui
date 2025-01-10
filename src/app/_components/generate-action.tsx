@@ -15,6 +15,7 @@ import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ActionPreview } from '@/components/action-preview';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function GenerateActionContent({
   timeLockContractAddress,
@@ -152,25 +153,42 @@ function GenerateActionContent({
       </div>
 
       <ConnectTabs activeTab={activeTab} onTabChange={handleTabChange}>
-        {activeTab === 'wallet' && (
-          <ConnectURI
-            targetAccount={targetAccount}
-            targetChainId={targetChainId}
-            value={walletConnectUri}
-            onValueChange={setWalletConnectUri}
-          />
-        )}
-        {activeTab === 'iframe' && (
-          <ConnectIframe
-            targetAccount={targetAccount}
-            targetChainId={targetChainId}
-            value={iframeConnectUri}
-            onValueChange={setIframeConnectUri}
-            onIframeLoad={handleIframeLoad}
-            isIframeLoading={isIframeLoading}
-            setIsIframeLoading={setIsIframeLoading}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          {activeTab === 'wallet' ? (
+            <motion.div
+              key="wallet"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ConnectURI
+                targetAccount={targetAccount}
+                targetChainId={targetChainId}
+                value={walletConnectUri}
+                onValueChange={setWalletConnectUri}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="iframe"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ConnectIframe
+                targetAccount={targetAccount}
+                targetChainId={targetChainId}
+                value={iframeConnectUri}
+                onValueChange={setIframeConnectUri}
+                onIframeLoad={handleIframeLoad}
+                isIframeLoading={isIframeLoading}
+                setIsIframeLoading={setIsIframeLoading}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </ConnectTabs>
 
       <ActionPreview
