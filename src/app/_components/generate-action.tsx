@@ -28,7 +28,7 @@ function GenerateActionContent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const activeTab = (searchParams.get('connectType') as 'wallet' | 'iframe') || 'iframe';
+  const activeTab = (searchParams.get('connectType') as 'wallet' | 'iframe') || 'wallet';
   const [targetAccount, setTargetAccount] = useState('');
   const [isIframeLoading, setIsIframeLoading] = useState(false);
   const [walletConnectUri, setWalletConnectUri] = useState<string>('');
