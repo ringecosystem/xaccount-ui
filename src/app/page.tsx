@@ -1,7 +1,9 @@
-import * as React from 'react';
-
-import Dashboard from '@/components/dashboard';
+import { DaoPanel } from '@/app/_components/panel';
 
 export default function Home() {
-  return <Dashboard />;
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <DaoPanel />
+    </div>
+  );
 }

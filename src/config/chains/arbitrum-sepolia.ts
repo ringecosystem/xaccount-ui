@@ -1,5 +1,3 @@
-// ethereum-sepolia
-
 import { arbitrumSepolia as arbitrumSepoliaBase } from 'wagmi/chains';
 
 import { ChainId, type ChainConfig } from '@/types/chains';
@@ -8,8 +6,6 @@ import { getRpcUrl } from '../rpc-url';
 
 export const arbitrumSepolia: ChainConfig = {
   ...arbitrumSepoliaBase,
-  iconUrl: '/images/chains/arbitrum.svg',
-  shortName: 'arb-sep',
   blockExplorers: {
     default: {
       name: 'Arbitrum Sepolia Testnet Explorer',
@@ -20,5 +16,7 @@ export const arbitrumSepolia: ChainConfig = {
     default: {
       http: [getRpcUrl(ChainId.ARBITRUM_SEPOLIA)]
     }
-  }
+  },
+  iconUrl: '/images/chains/arbitrum.svg',
+  shortName: 'arb-sep'
 } as const satisfies ChainConfig;
