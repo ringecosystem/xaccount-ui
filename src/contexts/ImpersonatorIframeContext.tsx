@@ -25,7 +25,7 @@ import {
   TransactionStatus
 } from '../types/communicator';
 
-interface TransactionWithId extends Transaction {
+export interface TransactionWithId extends Transaction {
   id: number | string;
 }
 

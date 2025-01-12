@@ -78,6 +78,8 @@ export class WalletConnectManager {
     };
 
     this.boundHandleSessionRequest = async (event) => {
+      console.log('session_request event', event);
+
       const { topic, params, id } = event;
       const { request } = params;
 
@@ -195,13 +197,16 @@ export class WalletConnectManager {
 
       const { requiredNamespaces, optionalNamespaces } = proposal;
       const namespaceKey = 'eip155';
-      const requiredNamespace = requiredNamespaces[namespaceKey];
-      const optionalNamespace = optionalNamespaces?.[namespaceKey];
 
-      let chains: string[] = requiredNamespace?.chains || [];
-      if (optionalNamespace?.chains) {
-        chains = Array.from(new Set([...chains, ...optionalNamespace.chains]));
+      const namespace = requiredNamespaces[namespaceKey] || optionalNamespaces?.[namespaceKey];
+
+      if (!namespace) {
+        throw new Error('No namespace configuration found');
       }
+
+      const chains = namespace.chains || [];
+      const methods = namespace.methods || [];
+      const events = namespace.events || [];
 
       if (!this.currentAddress) {
         throw new Error('No address set');
@@ -209,7 +214,12 @@ export class WalletConnectManager {
 
       const accounts: string[] = chains.map((chain: string) => `${chain}:${this.currentAddress}`);
 
-      console.log('Approving session with accounts:', accounts);
+      console.log('Approving session with configuration:', {
+        chains,
+        accounts,
+        methods,
+        events
+      });
 
       const session = await this.web3wallet.approveSession({
         id: proposal.id,
@@ -217,8 +227,8 @@ export class WalletConnectManager {
           [namespaceKey]: {
             accounts,
             chains,
-            methods: requiredNamespace?.methods || [],
-            events: requiredNamespace?.events || []
+            methods,
+            events
           }
         }
       });

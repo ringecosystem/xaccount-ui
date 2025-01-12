@@ -6,7 +6,7 @@ import { WalletConnectManager } from '@/lib/walletConnect';
 import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
-import { getRpcUrl } from '@/config/rpc-url';
+import type { TransactionWithId } from '@/contexts/ImpersonatorIframeContext';
 
 const WC_CONFIG = {
   projectId: process.env.NEXT_PUBLIC_PROJECT_ID!,
@@ -23,12 +23,16 @@ export const ConnectURI = ({
   targetChainId,
   value,
   onValueChange,
+  onChangeTransaction,
+  moduleAddress,
   disabled
 }: {
   targetAccount: string;
   targetChainId: string;
   value: string;
   onValueChange: (value: string) => void;
+  onChangeTransaction: (transaction: TransactionWithId) => void;
+  moduleAddress?: string;
   disabled?: boolean;
 }) => {
   const [walletConnect, setWalletConnect] = useState<WalletConnectManager | null>(null);
@@ -40,7 +44,6 @@ export const ConnectURI = ({
     description?: string;
   }>({});
   const [error, setError] = useState<string>('');
-
   // Initialize WalletConnect
   useEffect(() => {
     console.log('Effect triggered with targetChainId:', targetChainId);
@@ -50,8 +53,7 @@ export const ConnectURI = ({
       try {
         const manager = new WalletConnectManager(
           WC_CONFIG,
-          // `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_TOKEN}`
-          getRpcUrl(Number(targetChainId))
+          `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_TOKEN}`
         );
         await manager.initializeWallet();
 
@@ -65,7 +67,10 @@ export const ConnectURI = ({
 
         // Set up transaction callback
         manager.setTransactionCallback((transaction) => {
-          console.log('New transaction:', transaction);
+          console.log('New transaction:', transaction, moduleAddress);
+          if (transaction && moduleAddress) {
+            onChangeTransaction?.(transaction);
+          }
           // Handle transaction UI updates here
         });
 
@@ -76,7 +81,7 @@ export const ConnectURI = ({
     };
 
     initWalletConnect();
-  }, [targetChainId]);
+  }, [targetChainId, onChangeTransaction, moduleAddress]);
 
   // Update this effect to use updateSession when target account changes
   useEffect(() => {
@@ -228,12 +233,14 @@ export const ConnectURI = ({
               </span>
             </div>
           )}
-          <button
+          <Button
             onClick={handleDisconnect}
-            className="h-[49px] max-w-[108px] rounded-[8px] bg-[#7838FF] px-[20px] hover:bg-[#7838FF]/80"
+            variant="secondary"
+            isLoading={isConnecting}
+            className="h-[49px] rounded-[8px] bg-[#7838FF] p-[20px] hover:bg-[#7838FF]/80"
           >
-            Disconnect
-          </button>
+            {isConnecting ? 'Disconnecting...' : 'Disconnect'}
+          </Button>
         </div>
       )}
     </div>

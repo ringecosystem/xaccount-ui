@@ -11,7 +11,7 @@ import { useGetDeployed } from '@/hooks/useGetDeployed';
 import { ContentSkeleton } from '@/components/content-skeletion';
 import { AlertCircle } from 'lucide-react';
 import useGenerateAction from '@/hooks/useGenerateAction';
-import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
+import { TransactionWithId, useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ActionPreview } from '@/components/action-preview';
@@ -83,6 +83,20 @@ function GenerateActionContent({
     [router, searchParams]
   );
 
+  const handleNewWalletTransaction = useCallback(
+    (transaction: TransactionWithId) => {
+      console.log('New transaction received, current moduleAddress:', moduleAddress);
+      if (!moduleAddress) {
+        console.warn('No module address available');
+        return;
+      }
+      generateAction({
+        transactionInfo: transaction
+      });
+    },
+    [moduleAddress, generateAction]
+  );
+
   useEffect(() => {
     if (deployedXAccounts && deployedXAccounts.length > 0) {
       setTargetAccount(deployedXAccounts[0][0]);
@@ -101,7 +115,7 @@ function GenerateActionContent({
   }, [refetch, sourceChainId, timeLockContractAddress]);
 
   useEffect(() => {
-    if (!targetAccount) {
+    if (!targetAccount || !walletConnectUri || !iframeConnectUri) {
       reset();
       return;
     }
@@ -116,7 +130,15 @@ function GenerateActionContent({
     return () => {
       reset();
     };
-  }, [latestTransaction, targetAccount, activeTab, generateAction, reset]);
+  }, [
+    walletConnectUri,
+    iframeConnectUri,
+    latestTransaction,
+    targetAccount,
+    activeTab,
+    generateAction,
+    reset
+  ]);
 
   if (isDeployedXAccountsLoading || isRefetchingDeployedXAccounts) {
     return <ContentSkeleton />;
@@ -167,6 +189,8 @@ function GenerateActionContent({
                 targetChainId={targetChainId}
                 value={walletConnectUri}
                 onValueChange={setWalletConnectUri}
+                onChangeTransaction={handleNewWalletTransaction}
+                moduleAddress={moduleAddress}
               />
             </motion.div>
           ) : (
