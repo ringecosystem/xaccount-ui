@@ -1,8 +1,6 @@
 import { arbitrumSepolia as arbitrumSepoliaBase } from 'wagmi/chains';
 
-import { ChainId, type ChainConfig } from '@/types/chains';
-
-import { getRpcUrl } from '../rpc-url';
+import { type ChainConfig } from '@/types/chains';
 
 export const arbitrumSepolia: ChainConfig = {
   ...arbitrumSepoliaBase,
@@ -10,11 +8,6 @@ export const arbitrumSepolia: ChainConfig = {
     default: {
       name: 'Arbitrum Sepolia Testnet Explorer',
       url: 'https://sepolia.arbiscan.io/'
-    }
-  },
-  rpcUrls: {
-    default: {
-      http: [getRpcUrl(ChainId.ARBITRUM_SEPOLIA)]
     }
   },
   iconUrl: '/images/chains/arbitrum.svg',
