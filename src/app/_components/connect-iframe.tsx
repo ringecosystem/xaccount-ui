@@ -4,32 +4,39 @@ import Image from 'next/image';
 import { ImpersonatorIframe } from '@/components/ImpersonatorIframe';
 import { getChainById, isValidUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { ActionPreview } from '@/components/action-preview';
+import useGenerateAction from '@/hooks/useGenerateAction';
+import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
+import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 
 export const ConnectIframe = ({
+  timeLockContractAddress,
+  moduleAddress,
+  sourceChainId,
   targetAccount,
-  targetChainId,
-  value,
-  onValueChange,
-  onIframeLoad,
-  isIframeLoading,
-  setIsIframeLoading
+  targetChainId
 }: {
+  timeLockContractAddress: string;
+  moduleAddress: string;
+  sourceChainId: string;
   targetAccount: string;
   targetChainId: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  onIframeLoad: () => void;
-  isIframeLoading: boolean;
-  setIsIframeLoading: (value: boolean) => void;
 }) => {
+  const [iframeConnectUri, setIframeConnectUri] = useLocalStorageState<string>(
+    'iframeConnectUri',
+    ''
+  );
   const [uri, setUri] = useState('');
+  const [isIframeLoading, setIsIframeLoading] = useState(false);
   const targetChain = getChainById(Number(targetChainId));
   const rpc = targetChain?.rpcUrls?.default?.http?.[0];
+  // const rpc = 'https://eth.llamarpc.com';
+  const { latestTransaction, iframeRef } = useImpersonatorIframe();
 
   const handleConnect = useCallback(() => {
-    if (!value || !isValidUrl(value)) {
+    if (!iframeConnectUri || !isValidUrl(iframeConnectUri)) {
       toast.error('Invalid URL');
       return;
     }
@@ -46,15 +53,44 @@ export const ConnectIframe = ({
 
     setUri('');
     setTimeout(() => {
-      setUri(value);
+      setUri(iframeConnectUri);
     }, 100);
     setIsIframeLoading(true);
-  }, [value, targetAccount, setIsIframeLoading, rpc]);
+  }, [iframeConnectUri, targetAccount, setIsIframeLoading, rpc]);
 
   const handleIframeLoad = useCallback(() => {
     setIsIframeLoading(false);
-    onIframeLoad();
-  }, [setIsIframeLoading, onIframeLoad]);
+    if (iframeRef.current) {
+      const yOffset =
+        iframeRef.current.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2;
+      window.scrollTo({
+        top: yOffset,
+        behavior: 'smooth'
+      });
+    }
+  }, [setIsIframeLoading, iframeRef]);
+
+  const { generateAction, sourcePort, actionState, reset, isLoading } = useGenerateAction({
+    timeLockContractAddress: timeLockContractAddress as `0x${string}`,
+    moduleAddress: moduleAddress as `0x${string}`,
+    sourceChainId: Number(sourceChainId),
+    targetChainId: Number(targetChainId)
+  });
+
+  useEffect(() => {
+    if (!targetAccount || !iframeConnectUri) {
+      reset();
+      return;
+    }
+    if (latestTransaction) {
+      generateAction({
+        transactionInfo: latestTransaction
+      });
+    }
+    return () => {
+      reset();
+    };
+  }, [latestTransaction, iframeConnectUri, targetAccount, generateAction, reset]);
 
   return (
     <div className="space-y-[20px]">
@@ -82,8 +118,8 @@ export const ConnectIframe = ({
         <Input
           type="text"
           placeholder="https://app.uniswap.org/"
-          value={value}
-          onChange={(e) => onValueChange(e.target.value)}
+          value={iframeConnectUri}
+          onChange={(e) => setIframeConnectUri(e.target.value)}
           className="h-[62px] rounded-[8px] bg-[#262626] p-[20px] pr-[50px] !text-[18px] font-medium leading-[130%] text-[#F6F1E8] placeholder:text-[18px] placeholder:text-[#666]"
         />
       </div>
@@ -92,7 +128,7 @@ export const ConnectIframe = ({
           variant="secondary"
           isLoading={isIframeLoading}
           className="h-[50px] w-full max-w-[226px] rounded-[8px] bg-[#7838FF] text-sm font-medium leading-[150%] text-[#F6F1E8] hover:bg-[#7838FF]/80"
-          disabled={!value || !isValidUrl(value)}
+          disabled={!iframeConnectUri || !isValidUrl(iframeConnectUri)}
           onClick={handleConnect}
         >
           Connect
@@ -114,6 +150,25 @@ export const ConnectIframe = ({
           </div>
         </div>
       )}
+      <ActionPreview
+        isLoading={isLoading}
+        sourcePort={sourcePort}
+        transaction={
+          latestTransaction
+            ? {
+                from: latestTransaction?.from,
+                to: latestTransaction?.to,
+                value: latestTransaction?.value,
+                calldata: latestTransaction?.data
+              }
+            : undefined
+        }
+        targetChainId={Number(targetChainId)}
+        moduleAddress={moduleAddress}
+        message={actionState?.message}
+        params={actionState?.params}
+        fee={actionState?.fee}
+      />
     </div>
   );
 };

@@ -10,11 +10,7 @@ import { ConnectIframe } from './connect-iframe';
 import { useGetDeployed } from '@/hooks/useGetDeployed';
 import { ContentSkeleton } from '@/components/content-skeletion';
 import { AlertCircle } from 'lucide-react';
-import useGenerateAction from '@/hooks/useGenerateAction';
-import { TransactionWithId, useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
-import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ActionPreview } from '@/components/action-preview';
 import { AnimatePresence, motion } from 'framer-motion';
 
 function GenerateActionContent({
@@ -30,13 +26,6 @@ function GenerateActionContent({
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get('connectType') as 'wallet' | 'iframe') || 'wallet';
   const [targetAccount, setTargetAccount] = useState('');
-  const [isIframeLoading, setIsIframeLoading] = useState(false);
-  const [walletConnectUri, setWalletConnectUri] = useState<string>('');
-  const [iframeConnectUri, setIframeConnectUri] = useLocalStorageState<string>(
-    'iframeConnectUri',
-    ''
-  );
-  const { latestTransaction, iframeRef } = useImpersonatorIframe();
 
   const {
     data: deployedXAccounts,
@@ -56,24 +45,6 @@ function GenerateActionContent({
     return index !== -1 ? modules[index] : '';
   }, [deployedXAccounts, targetAccount]);
 
-  const { generateAction, sourcePort, actionState, reset, isLoading } = useGenerateAction({
-    timeLockContractAddress: timeLockContractAddress as `0x${string}`,
-    moduleAddress: moduleAddress as `0x${string}`,
-    sourceChainId: Number(sourceChainId),
-    targetChainId: Number(targetChainId)
-  });
-
-  const handleIframeLoad = useCallback(() => {
-    if (iframeRef.current) {
-      const yOffset =
-        iframeRef.current.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2;
-      window.scrollTo({
-        top: yOffset,
-        behavior: 'smooth'
-      });
-    }
-  }, [iframeRef]);
-
   const handleTabChange = useCallback(
     (tab: 'wallet' | 'iframe') => {
       const params = new URLSearchParams(searchParams);
@@ -81,20 +52,6 @@ function GenerateActionContent({
       router.push(`?${params.toString()}`);
     },
     [router, searchParams]
-  );
-
-  const handleNewWalletTransaction = useCallback(
-    (transaction: TransactionWithId) => {
-      console.log('New transaction received, current moduleAddress:', moduleAddress);
-      if (!moduleAddress) {
-        console.warn('No module address available');
-        return;
-      }
-      generateAction({
-        transactionInfo: transaction
-      });
-    },
-    [moduleAddress, generateAction]
   );
 
   useEffect(() => {
@@ -113,32 +70,6 @@ function GenerateActionContent({
       refetch();
     }
   }, [refetch, sourceChainId, timeLockContractAddress]);
-
-  useEffect(() => {
-    if (!targetAccount || !walletConnectUri || !iframeConnectUri) {
-      reset();
-      return;
-    }
-    if (activeTab === 'wallet') {
-    } else {
-      if (latestTransaction) {
-        generateAction({
-          transactionInfo: latestTransaction
-        });
-      }
-    }
-    return () => {
-      reset();
-    };
-  }, [
-    walletConnectUri,
-    iframeConnectUri,
-    latestTransaction,
-    targetAccount,
-    activeTab,
-    generateAction,
-    reset
-  ]);
 
   if (isDeployedXAccountsLoading || isRefetchingDeployedXAccounts) {
     return <ContentSkeleton />;
@@ -185,11 +116,10 @@ function GenerateActionContent({
               transition={{ duration: 0.2 }}
             >
               <ConnectURI
+                timeLockContractAddress={timeLockContractAddress as `0x${string}`}
                 targetAccount={targetAccount}
                 targetChainId={targetChainId}
-                value={walletConnectUri}
-                onValueChange={setWalletConnectUri}
-                onChangeTransaction={handleNewWalletTransaction}
+                sourceChainId={sourceChainId}
                 moduleAddress={moduleAddress}
               />
             </motion.div>
@@ -202,28 +132,16 @@ function GenerateActionContent({
               transition={{ duration: 0.2 }}
             >
               <ConnectIframe
+                timeLockContractAddress={timeLockContractAddress as `0x${string}`}
+                moduleAddress={moduleAddress}
+                sourceChainId={sourceChainId}
                 targetAccount={targetAccount}
                 targetChainId={targetChainId}
-                value={iframeConnectUri}
-                onValueChange={setIframeConnectUri}
-                onIframeLoad={handleIframeLoad}
-                isIframeLoading={isIframeLoading}
-                setIsIframeLoading={setIsIframeLoading}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </ConnectTabs>
-
-      <ActionPreview
-        isLoading={isLoading}
-        sourcePort={sourcePort}
-        targetChainId={Number(targetChainId)}
-        moduleAddress={moduleAddress}
-        message={actionState?.message}
-        params={actionState?.params}
-        fee={actionState?.fee}
-      />
     </div>
   );
 }

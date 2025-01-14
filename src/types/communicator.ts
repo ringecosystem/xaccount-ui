@@ -514,4 +514,5 @@ export interface Transaction {
   to: string;
   value: string;
   data: string;
+  from: string;
 }

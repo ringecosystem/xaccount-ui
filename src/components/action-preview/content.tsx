@@ -4,16 +4,26 @@ import ClipboardIconButton from '@/components/clipboard-icon-button';
 
 SyntaxHighlighter.registerLanguage('json', json);
 
+export interface Transaction {
+  from?: string;
+  to?: string;
+  value?: string;
+  calldata?: string;
+}
+
 interface GeneratedAction {
-  'Target Contract Address': string;
-  'Contract Method': string;
-  CallDatas: {
-    toChainId: string;
-    toDapp: string;
-    message: string;
-    params: string;
+  transaction: Transaction;
+  crossChainCall: {
+    port: string;
+    value: string;
+    function: string;
+    params: {
+      toChainId: string;
+      toDapp: string;
+      message: string;
+      params: string;
+    };
   };
-  Value: string;
 }
 
 const customStyle = {
@@ -52,6 +62,7 @@ const customStyle = {
 };
 
 export const Content = ({
+  transaction,
   sourcePort,
   targetChainId,
   moduleAddress,
@@ -59,6 +70,7 @@ export const Content = ({
   params,
   fee
 }: {
+  transaction: Transaction;
   sourcePort: string;
   targetChainId: number;
   moduleAddress: string;
@@ -67,16 +79,19 @@ export const Content = ({
   fee: string;
 }) => {
   const generatedAction: GeneratedAction = {
-    'Target Contract Address': sourcePort,
-    'Contract Method':
-      'function send(uint256 toChainId, address message, bytes calldata.params) external payable',
-    CallDatas: {
-      toChainId: targetChainId.toString(),
-      toDapp: moduleAddress,
-      message: message,
-      params: params
-    },
-    Value: fee
+    transaction: transaction,
+    crossChainCall: {
+      port: sourcePort,
+      value: fee,
+      function:
+        'send(uint256 toChainId, address toDapp, bytes calldata message, bytes calldata params) external payable',
+      params: {
+        toChainId: targetChainId.toString(),
+        toDapp: moduleAddress,
+        message: message,
+        params: params
+      }
+    }
   };
 
   return (

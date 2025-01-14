@@ -198,7 +198,11 @@ export class WalletConnectManager {
       const { requiredNamespaces, optionalNamespaces } = proposal;
       const namespaceKey = 'eip155';
 
-      const namespace = requiredNamespaces[namespaceKey] || optionalNamespaces?.[namespaceKey];
+      // const namespace = requiredNamespaces[namespaceKey] || optionalNamespaces?.[namespaceKey];
+      const namespace =
+        Object.keys(requiredNamespaces).length > 0
+          ? requiredNamespaces[namespaceKey]
+          : optionalNamespaces?.[namespaceKey];
 
       if (!namespace) {
         throw new Error('No namespace configuration found');

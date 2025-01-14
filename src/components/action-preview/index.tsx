@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Content } from './content';
+import { Content, Transaction } from './content';
 
 interface ActionPreviewProps {
   isLoading?: boolean;
+  transaction?: Transaction;
   sourcePort?: string;
   targetChainId?: number;
   moduleAddress?: string;
@@ -13,6 +14,7 @@ interface ActionPreviewProps {
 
 export function ActionPreview({
   isLoading,
+  transaction,
   sourcePort,
   targetChainId,
   moduleAddress,
@@ -20,7 +22,9 @@ export function ActionPreview({
   params,
   fee
 }: ActionPreviewProps) {
-  const show = Boolean(sourcePort && params && fee && message && moduleAddress && targetChainId);
+  const show = Boolean(
+    sourcePort && params && fee && message && moduleAddress && targetChainId && transaction
+  );
 
   if (!show && !isLoading) return null;
 
@@ -40,7 +44,7 @@ export function ActionPreview({
               <div className="h-[18px] w-[18px] animate-pulse rounded bg-neutral-800" />
             </header>
             <div className="space-y-3">
-              {[...Array(6)].map((_, index) => (
+              {[...Array(10)].map((_, index) => (
                 <div
                   key={index}
                   className="h-4 w-full animate-pulse rounded bg-neutral-800"
@@ -58,6 +62,7 @@ export function ActionPreview({
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <Content
+            transaction={transaction!}
             sourcePort={sourcePort!}
             targetChainId={targetChainId!}
             moduleAddress={moduleAddress!}
