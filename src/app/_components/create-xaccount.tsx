@@ -18,6 +18,7 @@ import { useXAccountOf } from '@/hooks/usexAccountOf';
 import { useSafeAddress } from '@/providers/address-provider';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export const CreateXAccount = ({
   timeLockContractAddress,
@@ -90,6 +91,9 @@ export const CreateXAccount = ({
     }
   }, [sourceChainId, createXAccount, recoveryAccount, timeLockContractAddress, port]);
 
+  const sourceChain = getChainById(Number(sourceChainId));
+  const targetChain = getChainById(Number(targetChainId));
+
   useEffect(() => {
     if (targetChainId) {
       setTimeout(() => {
@@ -144,15 +148,25 @@ export const CreateXAccount = ({
         {safeAddress ? (
           <div className="flex w-full flex-col items-center justify-center gap-[20px] rounded-[8px] bg-[#1A1A1A] p-[20px]">
             <div className="flex w-full flex-col items-center justify-center">
-              <span className="text-[18px] font-extrabold leading-[130%] text-[#F6F1E8] underline">
+              <Link
+                className="text-[18px] font-extrabold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
+                href={`${sourceChain?.blockExplorers?.default.url}/address/${timeLockContractAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {timeLockContractAddress}
-              </span>
+              </Link>
               <span className="text-[18px] font-medium leading-[130%] text-[#F6F1E8]">
                 has created an XAccount
               </span>
-              <span className="text-[18px] font-bold leading-[130%] text-[#F6F1E8] underline">
+              <Link
+                className="text-[18px] font-bold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
+                href={`${targetChain?.blockExplorers?.default.url}/address/${safeAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {safeAddress}
-              </span>
+              </Link>
             </div>
 
             <div className="flex w-full flex-col items-center justify-center">
