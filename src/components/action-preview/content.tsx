@@ -70,29 +70,32 @@ export const Content = ({
   params,
   fee
 }: {
-  transaction: Transaction;
-  sourcePort: string;
-  targetChainId: number;
-  moduleAddress: string;
-  message: string;
-  params: string;
-  fee: string;
+  transaction?: Transaction;
+  sourcePort?: string;
+  targetChainId?: number;
+  moduleAddress?: string;
+  message?: string;
+  params?: string;
+  fee?: string;
 }) => {
-  const generatedAction: GeneratedAction = {
-    transaction: transaction,
-    crossChainCall: {
-      port: sourcePort,
-      value: fee,
-      function:
-        'send(uint256 toChainId, address toDapp, bytes calldata message, bytes calldata params) external payable',
-      params: {
-        toChainId: targetChainId.toString(),
-        toDapp: moduleAddress,
-        message: message,
-        params: params
-      }
-    }
-  };
+  const generatedAction: GeneratedAction | object =
+    transaction && sourcePort && fee && moduleAddress && targetChainId && message && params
+      ? {
+          transaction: transaction,
+          crossChainCall: {
+            port: sourcePort,
+            value: fee,
+            function:
+              'send(uint256 toChainId, address toDapp, bytes calldata message, bytes calldata params) external payable',
+            params: {
+              toChainId: targetChainId.toString(),
+              toDapp: moduleAddress,
+              message: message,
+              params: params
+            }
+          }
+        }
+      : {};
 
   return (
     <div className="flex w-full flex-col gap-[12px] rounded-[8px] bg-[#1A1A1A] p-[22px]">
@@ -100,7 +103,9 @@ export const Content = ({
         <span className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
           Generated Action
         </span>
-        <ClipboardIconButton text={JSON.stringify(generatedAction, null, 2)} size={18} />
+        {generatedAction && Object.keys(generatedAction).length > 0 && (
+          <ClipboardIconButton text={JSON.stringify(generatedAction, null, 2)} size={18} />
+        )}
       </header>
       <div className="scrollWrapper">
         <SyntaxHighlighter

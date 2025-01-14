@@ -22,12 +22,6 @@ export function ActionPreview({
   params,
   fee
 }: ActionPreviewProps) {
-  const show = Boolean(
-    sourcePort && params && fee && message && moduleAddress && targetChainId && transaction
-  );
-
-  if (!show && !isLoading) return null;
-
   return (
     <AnimatePresence mode="wait">
       {isLoading ? (

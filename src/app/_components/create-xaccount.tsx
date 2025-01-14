@@ -30,7 +30,9 @@ export const CreateXAccount = ({
 }) => {
   const { address, chainId } = useAccount();
   const [port, setPort] = useState<string>(Object.values(CROSS_CHAIN_ENDPOINTS)[0]);
-  const [recoveryAccount, setRecoveryAccount] = useState<`0x${string}` | ''>('');
+  const [recoveryAccount, setRecoveryAccount] = useState<`0x${string}` | ''>(
+    '0x0000000000000000000000000000000000000000'
+  );
   const [recoveryAccountValid, setRecoveryAccountValid] = useState(false);
   const { disconnectWallet } = useDisconnectWallet();
   const { safeAddress } = useSafeAddress();
