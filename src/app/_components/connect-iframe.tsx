@@ -10,6 +10,7 @@ import { ActionPreview } from '@/components/action-preview';
 import useGenerateAction from '@/hooks/useGenerateAction';
 import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
+import { SupportDapps } from '@/components/support-dapps';
 
 export const ConnectIframe = ({
   timeLockContractAddress,
@@ -29,6 +30,7 @@ export const ConnectIframe = ({
     ''
   );
   const [uri, setUri] = useState('');
+  const [isSupportDappsOpen, setIsSupportDappsOpen] = useState(false);
   const [isIframeLoading, setIsIframeLoading] = useState(false);
   const targetChain = getChainById(Number(targetChainId));
   const rpc = targetChain?.rpcUrls?.default?.http?.[0];
@@ -94,26 +96,38 @@ export const ConnectIframe = ({
 
   return (
     <div className="space-y-[20px]">
-      <label className="flex items-center gap-[5px] text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
-        Dapp URL
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Image
-              src="/images/common/info.svg"
-              alt="info"
-              width={16}
-              height={16}
-              className="inline-block cursor-pointer"
-            />
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[280px] bg-[#1A1A1A]">
-            <p className="text-[12px] font-normal leading-normal text-[#F6F1E8]">
-              Paste the URL of the DApp you wish to connect to. If that DApp is not supported,
-              please use WalletConnect.
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </label>
+      <header className="flex items-center justify-between">
+        <label className="flex items-center gap-[5px] text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
+          Dapp URL
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Image
+                src="/images/common/info.svg"
+                alt="info"
+                width={16}
+                height={16}
+                className="inline-block cursor-pointer"
+              />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[280px] bg-[#1A1A1A]">
+              <p className="text-[12px] font-normal leading-normal text-[#F6F1E8]">
+                Paste the URL of the DApp you wish to connect to. If that DApp is not supported,
+                please use WalletConnect.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </label>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          className="0 rounded-[8px] text-sm font-medium leading-[150%] text-[#F6F1E8]"
+          onClick={() => setIsSupportDappsOpen(true)}
+        >
+          Supported Dapps
+        </Button>
+      </header>
+
       <div className="relative">
         <Input
           type="text"
@@ -168,6 +182,11 @@ export const ConnectIframe = ({
         message={actionState?.message}
         params={actionState?.params}
         fee={actionState?.fee}
+      />
+      <SupportDapps
+        networkId={Number(targetChainId)}
+        open={isSupportDappsOpen}
+        onOpenChange={setIsSupportDappsOpen}
       />
     </div>
   );
