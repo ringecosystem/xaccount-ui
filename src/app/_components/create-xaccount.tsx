@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useAccount, useSwitchChain } from 'wagmi';
 import { toast } from 'react-toastify';
-import Avatar from '@/components/avatar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PortSelect } from '@/app/_components/port-select';
@@ -132,7 +131,7 @@ export const CreateXAccount = ({
           )}
         >
           <span className="inline-block h-[9px] w-[9px] flex-shrink-0 rounded-full bg-[#00C739]"></span>
-          {address && <Avatar address={address} className="flex-shrink-0" />}
+          {/* {address && <Avatar address={address} className="flex-shrink-0" />} */}
           <span className="break-all text-[18px] font-medium leading-[20px] text-[#F6F1E8]">
             {address}
           </span>
@@ -185,7 +184,7 @@ export const CreateXAccount = ({
                 placeholder="Input Recovery Account"
                 label={
                   <>
-                    Recovery Account
+                    Recovery Account(Optional)
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Image
@@ -215,7 +214,28 @@ export const CreateXAccount = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">Port</label>
+              <label className="text-sm font-semibold leading-[150%] text-[#F6F1E8]/70">
+                <span className="flex items-center gap-[5px]">
+                  Port
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Image
+                        src="/images/common/info.svg"
+                        alt="info"
+                        width={16}
+                        height={16}
+                        className="inline-block cursor-pointer"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[280px] bg-[#1A1A1A]">
+                      <p className="text-[12px] font-normal leading-normal text-[#F6F1E8]">
+                        The port denotes the cross-chain message protocols that will facilitate the
+                        exchange of information between chains.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </span>
+              </label>
               <PortSelect
                 value={port}
                 onValueChange={(value: string) =>
