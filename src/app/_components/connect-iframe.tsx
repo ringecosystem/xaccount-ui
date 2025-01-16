@@ -11,6 +11,7 @@ import useGenerateAction from '@/hooks/useGenerateAction';
 import { useImpersonatorIframe } from '@/contexts/ImpersonatorIframeContext';
 import { useLocalStorageState } from '@/hooks/useLocalStorageState';
 import { SupportDapps } from '@/components/support-dapps';
+import { SafeDappInfo } from '@/types/communicator';
 
 export const ConnectIframe = ({
   timeLockContractAddress,
@@ -37,28 +38,47 @@ export const ConnectIframe = ({
   // const rpc = 'https://eth.llamarpc.com';
   const { latestTransaction, iframeRef } = useImpersonatorIframe();
 
+  const connectToUrl = useCallback(
+    (url: string) => {
+      if (!url || !isValidUrl(url)) {
+        toast.error('Invalid URL');
+        return false;
+      }
+
+      if (!targetAccount) {
+        toast.error('Address is not an ENS or Ethereum address');
+        return false;
+      }
+
+      if (!rpc) {
+        toast.error('RPC is not available');
+        return false;
+      }
+
+      setUri('');
+      setTimeout(() => {
+        setUri(url);
+      }, 100);
+      setIsIframeLoading(true);
+      return true;
+    },
+    [targetAccount, rpc, setUri, setIsIframeLoading]
+  );
+
   const handleConnect = useCallback(() => {
-    if (!iframeConnectUri || !isValidUrl(iframeConnectUri)) {
-      toast.error('Invalid URL');
-      return;
-    }
+    connectToUrl(iframeConnectUri);
+  }, [iframeConnectUri, connectToUrl]);
 
-    if (!targetAccount) {
-      toast.error('Address is not an ENS or Ethereum address');
-      return;
-    }
-
-    if (!rpc) {
-      toast.error('RPC is not available');
-      return;
-    }
-
-    setUri('');
-    setTimeout(() => {
-      setUri(iframeConnectUri);
-    }, 100);
-    setIsIframeLoading(true);
-  }, [iframeConnectUri, targetAccount, setIsIframeLoading, rpc]);
+  const handleSelectDapp = useCallback(
+    (dapp: SafeDappInfo) => {
+      const url = dapp.url;
+      setIframeConnectUri(url);
+      if (connectToUrl(url)) {
+        setIsSupportDappsOpen(false);
+      }
+    },
+    [setIframeConnectUri, connectToUrl, setIsSupportDappsOpen]
+  );
 
   const handleIframeLoad = useCallback(() => {
     setIsIframeLoading(false);
@@ -71,6 +91,11 @@ export const ConnectIframe = ({
       });
     }
   }, [setIsIframeLoading, iframeRef]);
+
+  const handleIframeError = useCallback(() => {
+    toast.error('Failed to load iframe');
+    setIsIframeLoading(false);
+  }, [setIsIframeLoading]);
 
   const { generateAction, sourcePort, actionState, reset, isLoading } = useGenerateAction({
     timeLockContractAddress: timeLockContractAddress as `0x${string}`,
@@ -158,6 +183,7 @@ export const ConnectIframe = ({
               height={'510px'}
               src={uri}
               onLoad={handleIframeLoad}
+              onError={handleIframeError}
               address={targetAccount}
               rpcUrl={rpc}
             />
@@ -187,6 +213,7 @@ export const ConnectIframe = ({
         networkId={Number(targetChainId)}
         open={isSupportDappsOpen}
         onOpenChange={setIsSupportDappsOpen}
+        onSelect={handleSelectDapp}
       />
     </div>
   );

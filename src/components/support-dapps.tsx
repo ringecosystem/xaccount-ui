@@ -8,11 +8,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface DappCardProps {
   dapp: SafeDappInfo;
+  onSelect: (dapp: SafeDappInfo) => void;
 }
 
-const DappCard = ({ dapp }: DappCardProps) => {
+const DappCard = ({ dapp, onSelect }: DappCardProps) => {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center space-y-2 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:opacity-80">
+    <div
+      className="flex h-full w-full cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:opacity-80"
+      onClick={() => onSelect(dapp)}
+    >
       <Image
         src={dapp.iconUrl}
         alt={`${dapp.name} logo`}
@@ -37,11 +41,13 @@ const DappCardSkeleton = () => {
 export function SupportDapps({
   networkId,
   open,
-  onOpenChange
+  onOpenChange,
+  onSelect
 }: {
   networkId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSelect: (dapp: SafeDappInfo) => void;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [safeDapps, setSafeDapps] = useState<Record<number, SafeDappInfo[]>>({});
@@ -104,7 +110,9 @@ export function SupportDapps({
                   .fill(0)
                   .map((_, i) => <DappCardSkeleton key={i} />)
               ) : filteredDapps.length > 0 ? (
-                filteredDapps.map((dapp) => <DappCard key={dapp.id} dapp={dapp} />)
+                filteredDapps.map((dapp) => (
+                  <DappCard key={dapp.id} dapp={dapp} onSelect={onSelect} />
+                ))
               ) : (
                 <div className="col-span-full mt-8 text-center text-gray-500">No dapps found</div>
               )}

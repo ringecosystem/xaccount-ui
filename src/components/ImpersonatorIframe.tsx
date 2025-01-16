@@ -11,6 +11,7 @@ interface Props {
   address: string;
   rpcUrl: string;
   onLoad?: () => void;
+  onError?: () => void;
 }
 
 export const ImpersonatorIframe = ({
@@ -20,6 +21,7 @@ export const ImpersonatorIframe = ({
   address,
   rpcUrl,
   onLoad,
+  onError,
   targetChainId
 }: Props) => {
   const { iframeRef, setAddress, setAppUrl, setRpcUrl, setTargetChainId, isReady } =
@@ -42,6 +44,7 @@ export const ImpersonatorIframe = ({
       id={`iframe-${src}`}
       className="rounded-[10px] border border-[#666] bg-[#141414]"
       onLoad={onLoad}
+      onError={onError}
       src={src}
       sandbox={IFRAME_SANDBOX_ALLOWED_FEATURES}
     />

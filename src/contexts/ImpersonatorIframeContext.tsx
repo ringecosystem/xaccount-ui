@@ -142,11 +142,11 @@ export const ImpersonatorIframeProvider: React.FunctionComponent<FCProps> = ({ c
     communicator?.on(Methods.getSafeInfo, async () => {
       return {
         safeAddress: address,
-        chainId: targetChainId,
+        chainId: Number(targetChainId),
         owners: [],
         threshold: 1,
         isReadOnly: false,
-        network: targetChainId
+        network: Number(targetChainId)
       };
     });
 
