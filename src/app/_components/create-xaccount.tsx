@@ -18,6 +18,7 @@ import { useSafeAddress } from '@/providers/address-provider';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Avatar from '@/components/avatar';
 
 export const CreateXAccount = ({
   timeLockContractAddress,
@@ -131,8 +132,8 @@ export const CreateXAccount = ({
           )}
         >
           <span className="inline-block h-[9px] w-[9px] flex-shrink-0 rounded-full bg-[#00C739]"></span>
-          {/* {address && <Avatar address={address} className="flex-shrink-0" />} */}
-          <span className="break-all text-[18px] font-medium leading-[20px] text-[#F6F1E8]">
+          {address && <Avatar address={address} className="flex-shrink-0" />}
+          <span className="break-all font-mono text-[18px] font-medium leading-[20px] text-[#F6F1E8]">
             {address}
           </span>
           <Button
@@ -148,7 +149,7 @@ export const CreateXAccount = ({
           <div className="flex w-full flex-col items-center justify-center gap-[20px] rounded-[8px] bg-[#1A1A1A] p-[20px]">
             <div className="flex w-full flex-col items-center justify-center">
               <Link
-                className="text-[18px] font-extrabold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
+                className="font-mono text-[18px] font-extrabold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
                 href={`${sourceChain?.blockExplorers?.default.url}/address/${timeLockContractAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -159,7 +160,7 @@ export const CreateXAccount = ({
                 has created an XAccount
               </span>
               <Link
-                className="text-[18px] font-bold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
+                className="font-mono text-[18px] font-bold leading-[130%] text-[#F6F1E8] underline hover:text-[#F6F1E8]/80"
                 href={`${targetChain?.blockExplorers?.default.url}/address/${safeAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"

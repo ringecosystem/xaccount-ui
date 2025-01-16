@@ -60,7 +60,7 @@ export const Select = ({
                       className="rounded-full"
                     />
                   )}
-                  <span className="truncate">{option.label}</span>
+                  <span className="truncate font-mono">{option.label}</span>
                 </div>
               </SelectItem>
             ))}

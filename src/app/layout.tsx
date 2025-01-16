@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Urbanist } from 'next/font/google';
+import { Urbanist, JetBrains_Mono } from 'next/font/google';
 import { APP_DESCRIPTION, APP_NAME } from '@/config/site';
 import { DAppProvider } from '@/providers/dapp-provider';
 import { Footer } from '@/components/footer';
@@ -39,6 +39,11 @@ const urbanist = Urbanist({
   variable: '--font-urbanist'
 });
 
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono'
+});
+
 export default function RootLayout({
   children
 }: Readonly<{
@@ -46,7 +51,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.className} antialiased`}>
+      <body className={`${urbanist.className} ${jetBrainsMono.variable} antialiased`}>
         <DAppProvider>
           <>
             <TooltipProvider delayDuration={0}>

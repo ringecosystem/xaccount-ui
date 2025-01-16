@@ -2,7 +2,6 @@
 
 import { Suspense } from 'react';
 import { Select } from '@/components/select';
-import { blo } from 'blo';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import ConnectTabs from './connect-tabs';
 import { ConnectURI } from './connect-uri';
@@ -89,8 +88,7 @@ function GenerateActionContent({
                   .filter(([xAccount]) => xAccount)
                   .map((xAccount) => ({
                     value: xAccount,
-                    label: xAccount,
-                    asset: xAccount ? blo(xAccount) : undefined
+                    label: xAccount
                   }))
               : []
           }

@@ -64,7 +64,7 @@ export const AddressInput = ({
         placeholder={placeholder}
         disabled={disabled}
         className={cn(
-          'h-[62px] rounded-[8px] bg-[#262626] p-[20px] !text-[18px] font-medium leading-[130%] text-[#F6F1E8] placeholder:text-[18px] placeholder:text-[#666]',
+          'h-[62px] rounded-[8px] bg-[#262626] p-[20px] font-mono !text-[18px] font-medium leading-[130%] text-[#F6F1E8] placeholder:text-[18px] placeholder:text-[#666]',
           'disabled:cursor-not-allowed disabled:bg-[#262626] disabled:text-[#F6F1E8]/70',
           error &&
             'border-[#FF0000]/20 bg-[#FF0000]/20 text-[#FF0000] placeholder:text-[#FF0000]/50',
