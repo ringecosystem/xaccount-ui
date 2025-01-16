@@ -1,32 +1,16 @@
+import { RefObject, useEffect, useState } from 'react';
+import { MessageFormatter } from './messageFormatter';
 import {
   SDKMessageEvent,
   MethodToResponse,
-  getSDKVersion,
-  MessageFormatter
-} from '@safe-global/safe-apps-sdk';
+  Methods,
+  ErrorResponse,
+  RequestId
+} from '../types/communicator';
 
-import { ErrorResponse, Methods, RequestId } from '@/types/communicator';
-
-import { asError } from './as-error';
-
-import type { MutableRefObject } from 'react';
-
-const dec2hex = (dec: number): string => dec.toString(16).padStart(2, '0');
-
-const generateId = (len: number): string => {
-  const arr = new Uint8Array((len || 40) / 2);
-  window.crypto.getRandomValues(arr);
-  return Array.from(arr, dec2hex).join('');
+export const getSDKVersion = () => {
+  return '7.6.0'; // IMPORTANT: needs to be >= 1.0.0
 };
-
-export const generateRequestId = (): string => {
-  if (typeof window !== 'undefined') {
-    return generateId(10);
-  }
-
-  return new Date().getTime().toString(36);
-};
-
 type MessageHandler = (
   msg: SDKMessageEvent
 ) =>
@@ -35,32 +19,27 @@ type MessageHandler = (
   | ErrorResponse
   | Promise<MethodToResponse[Methods] | ErrorResponse | void>;
 
-type AppCommunicatorConfig = {
-  onMessage?: (msg: SDKMessageEvent) => void;
-  onError?: (error: Error, data: any) => void;
-};
+export enum LegacyMethods {
+  getEnvInfo = 'getEnvInfo'
+}
+
+type SDKMethods = Methods | LegacyMethods;
 
 class AppCommunicator {
-  private iframeRef: MutableRefObject<HTMLIFrameElement | null>;
-  private handlers = new Map<Methods, MessageHandler>();
-  private config: AppCommunicatorConfig;
+  private iframeRef: RefObject<HTMLIFrameElement | null>;
+  private handlers = new Map<SDKMethods, MessageHandler>();
 
-  constructor(
-    iframeRef: MutableRefObject<HTMLIFrameElement | null>,
-    config?: AppCommunicatorConfig
-  ) {
+  constructor(iframeRef: RefObject<HTMLIFrameElement | null>) {
     this.iframeRef = iframeRef;
-    this.config = config || {};
 
     window.addEventListener('message', this.handleIncomingMessage);
   }
 
-  on = (method: Methods, handler: MessageHandler): void => {
+  on = (method: SDKMethods, handler: MessageHandler): void => {
     this.handlers.set(method, handler);
   };
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
-    if (!msg.data) return false;
     if (msg.data.hasOwnProperty('isCookieEnabled')) {
       return true;
     }
@@ -72,7 +51,6 @@ class AppCommunicator {
   };
 
   private canHandleMessage = (msg: SDKMessageEvent): boolean => {
-    if (!msg.data) return false;
     return Boolean(this.handlers.get(msg.data.method));
   };
 
@@ -81,6 +59,8 @@ class AppCommunicator {
     const msg = error
       ? MessageFormatter.makeErrorResponse(requestId, data as string, sdkVersion)
       : MessageFormatter.makeResponse(requestId, data, sdkVersion);
+    // console.log("send", { msg });
+
     this.iframeRef.current?.contentWindow?.postMessage(msg, '*');
   };
 
@@ -89,31 +69,47 @@ class AppCommunicator {
     const hasHandler = this.canHandleMessage(msg);
 
     if (validMessage && hasHandler) {
+      // console.log("incoming", { msg: msg.data });
+
       const handler = this.handlers.get(msg.data.method);
-
-      this.config?.onMessage?.(msg);
-
       try {
         // @ts-expect-error Handler existence is checked in this.canHandleMessage
         const response = await handler(msg);
 
-        // If response is not returned, it means the response will be send somewhere else
+        // If response is not returned, it means the response will be sent somewhere else
         if (typeof response !== 'undefined') {
           this.send(response, msg.data.id);
         }
-      } catch (e) {
-        const error = asError(e);
-
-        this.send(error.message, msg.data.id, true);
-        this.config?.onError?.(error, msg.data);
+      } catch (err: any) {
+        this.send(err.message, msg.data.id, true);
       }
     }
   };
 
   clear = (): void => {
     window.removeEventListener('message', this.handleIncomingMessage);
-    this.handlers.clear();
   };
 }
 
-export default AppCommunicator;
+const useAppCommunicator = (
+  iframeRef: RefObject<HTMLIFrameElement | null>
+): AppCommunicator | undefined => {
+  const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined);
+  useEffect(() => {
+    let communicatorInstance: AppCommunicator;
+    const initCommunicator = (iframeRef: RefObject<HTMLIFrameElement>) => {
+      communicatorInstance = new AppCommunicator(iframeRef);
+      setCommunicator(communicatorInstance);
+    };
+
+    initCommunicator(iframeRef as RefObject<HTMLIFrameElement>);
+
+    return () => {
+      communicatorInstance?.clear();
+    };
+  }, [iframeRef]);
+
+  return communicator;
+};
+
+export { useAppCommunicator };

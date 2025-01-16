@@ -1,5 +1,3 @@
-// ethereum-sepolia
-
 import { sepolia } from 'wagmi/chains';
 
 import { ChainId, type ChainConfig } from '@/types/chains';
