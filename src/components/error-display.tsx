@@ -10,7 +10,7 @@ interface Props {
   action: () => void;
 }
 
-const ErrorDisplay = ({ buttonText, action, title, message }: Props) => {
+export const ErrorDisplay = ({ buttonText, action, title, message }: Props) => {
   return (
     <div className="flex flex-col items-center justify-center gap-[3.12rem] md:flex-row">
       <Image
@@ -25,7 +25,7 @@ const ErrorDisplay = ({ buttonText, action, title, message }: Props) => {
         <h5 className="w-full text-center text-[3.125rem] font-bold capitalize text-white md:w-auto md:text-left">
           {title}
         </h5>
-        <span className="text-center text-sm font-bold  text-white md:text-left">{message}</span>
+        <span className="text-center text-sm font-bold text-white md:text-left">{message}</span>
         {buttonText && action && (
           <Button onClick={action} aria-label={buttonText}>
             {buttonText}
@@ -35,5 +35,3 @@ const ErrorDisplay = ({ buttonText, action, title, message }: Props) => {
     </div>
   );
 };
-
-export default ErrorDisplay;

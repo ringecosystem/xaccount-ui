@@ -1,31 +1,41 @@
-import GithubIcon from '@/components/icons/github';
-import TwitterIcon from '@/components/icons/twitter';
-import MediumIcon from '@/components/icons/medium';
-import TelegramIcon from '@/components/icons/telegram';
-import DiscordIcon from '@/components/icons/discord';
-import ElementIcon from '@/components/icons/element';
-import EmailIcon from '@/components/icons/email';
-
-type SocialConfig = { name: string; url: string; SvgComponent: () => JSX.Element };
+type SocialConfig = {
+  name: string;
+  url: string;
+  assetPath: string;
+  size: { x: number; y: number };
+};
 
 function createSocialConfig(
   name: string,
   url: string,
-  SvgComponent: () => JSX.Element
+  assetPath: string,
+  size: { x: number; y: number }
 ): SocialConfig {
   return {
     name,
     url,
-    SvgComponent
+    assetPath,
+    size
   };
 }
 
 export const socialConfig: SocialConfig[] = [
-  createSocialConfig('Github', 'https://github.com/darwinia-network', GithubIcon),
-  createSocialConfig('Twitter', 'https://twitter.com/DarwiniaNetwork', TwitterIcon),
-  createSocialConfig('Medium', 'https://medium.com/darwinianetwork', MediumIcon),
-  createSocialConfig('Telegram', 'https://t.me/DarwiniaNetwork', TelegramIcon),
-  createSocialConfig('Discord', 'https://discord.com/invite/VcYFYETrw5', DiscordIcon),
-  createSocialConfig('Element', 'https://app.element.io/#/room/#darwinia:matrix.org', ElementIcon),
-  createSocialConfig('Email', 'mailto:hello@darwinia.network', EmailIcon)
+  createSocialConfig('X', 'https://x.com/ringecosystem', '/images/socials/x.svg', { x: 16, y: 16 }),
+  createSocialConfig('Telegram', 'https://t.me/ringecosystem', '/images/socials/telegram.svg', {
+    x: 19.2,
+    y: 16
+  }),
+  createSocialConfig(
+    'Github',
+    'https://github.com/ringecosystem/XAccount',
+    '/images/socials/github.svg',
+    {
+      x: 13.3,
+      y: 16
+    }
+  ),
+  createSocialConfig('Discord', 'https://discord.gg/BhNbKWWfGV', '/images/socials/discord.svg', {
+    x: 19.2,
+    y: 14.4
+  })
 ];

@@ -1,14 +1,16 @@
 import { useCallback } from 'react';
 import { useDisconnect } from 'wagmi';
 
-import useReturnDashboard from './useReturnDashboard';
-
 export const useDisconnectWallet = () => {
   const { disconnect } = useDisconnect();
-  const returnDashboard = useReturnDashboard();
 
   const disconnectWallet = useCallback(
-    async (address: `0x${string}`) => {
+    async (address?: `0x${string}`) => {
+      if (!address) {
+        disconnect();
+        return;
+      }
+
       if (typeof window !== 'undefined' && window?.ethereum?.request) {
         try {
           await window.ethereum.request({
@@ -22,9 +24,8 @@ export const useDisconnectWallet = () => {
       }
 
       disconnect();
-      returnDashboard();
     },
-    [disconnect, returnDashboard]
+    [disconnect]
   );
   return { disconnectWallet };
 };

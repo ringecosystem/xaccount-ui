@@ -6,39 +6,37 @@ import { abi as MultiPortAbi } from '@/config/abi/MultiPort';
 import { config } from '@/config/wagmi';
 
 interface UsePortAddressProps {
-  fromChainId?: number;
-  toChainId?: number;
-  toModuleAddress?: `0x${string}`;
+  sourceChainId?: number;
+  targetChainId?: number;
+  moduleAddress?: `0x${string}`;
 }
 
-const usePortAddress = ({ toModuleAddress, toChainId, fromChainId }: UsePortAddressProps) => {
+const usePortAddress = ({ moduleAddress, sourceChainId, targetChainId }: UsePortAddressProps) => {
   const [srcPortAddress, setSrcPortAddress] = useState<`0x${string}`>('0x');
 
   useEffect(() => {
     const fetchPortAddress = async () => {
-      if (!toModuleAddress || !toChainId || !fromChainId) {
+      if (!moduleAddress || !targetChainId || !sourceChainId) {
         return;
       }
       const portResult = await readContract(config as unknown as Config, {
         abi: safeMsgportModuleAbi,
-        address: toModuleAddress,
-        chainId: toChainId,
+        address: moduleAddress,
+        chainId: targetChainId,
         functionName: 'port'
       });
-
       const portLookupResult = await readContract(config as unknown as Config, {
         abi: MultiPortAbi,
         address: portResult,
-        chainId: toChainId,
+        chainId: targetChainId,
         functionName: 'peerOf',
-        args: [BigInt(fromChainId)]
+        args: [BigInt(sourceChainId)]
       });
-
       setSrcPortAddress(portLookupResult);
     };
 
     fetchPortAddress();
-  }, [toChainId, toModuleAddress, fromChainId]);
+  }, [moduleAddress, sourceChainId, targetChainId]);
 
   return srcPortAddress;
 };
